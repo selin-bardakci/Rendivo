@@ -210,7 +210,7 @@ export default function AppointmentsPage() {
                 <h1 className={styles.pageTitle}>My Appointments</h1>
                 <p className={styles.pageSubtitle}>Manage and view your upcoming bookings</p>
               </div>
-              <Link href="/book-appointment" style={{ textDecoration: 'none' }}>
+              <Link href="/discover" style={{ textDecoration: 'none' }}>
                 <button className={styles.bookButton}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="12" y1="5" x2="12" y2="19" />
