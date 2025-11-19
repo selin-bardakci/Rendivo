@@ -8,6 +8,13 @@
   align-items: center;
   padding: 0;
   margin-bottom: 32px;
+  margin-top: 70px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
 }
 .heroImageWrapper {
   position: absolute;
@@ -32,6 +39,18 @@
   color: #fff;
   padding: 64px 28px;
   border-radius: 12px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .hero h1 {
   /* fallback: keep existing hero h1 values but prefer the .heroTitle class for exact Tailwind-like mapping */
@@ -94,6 +113,14 @@
   border-radius: 999px;
   text-decoration: none;
   font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(223, 132, 220, 0.4);
+  display: inline-block;
+}
+.ctaPrimary:hover {
+  background: #d66dd9;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(223, 132, 220, 0.5);
 }
 .ctaSecondary {
   background: rgba(255,255,255,0.85);
@@ -126,6 +153,13 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(223, 132, 220, 0.15);
+  border-color: var(--color-primary);
 }
 .featureCard h3 { 
   margin: 0;
@@ -140,6 +174,10 @@
   justify-content: center;
   width: 28px;
   height: 28px;
+  transition: transform 0.3s ease;
+}
+.featureCard:hover .icon {
+  transform: scale(1.1) rotate(5deg);
 }
 .icon img,
 .icon svg {
@@ -196,6 +234,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 32px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(223, 132, 220, 0.3);
+}
+.ctaBannerInner:hover {
+  background: rgba(223, 132, 220, 0.25);
+  border-color: rgba(223, 132, 220, 0.5);
+  box-shadow: 0 4px 20px rgba(223, 132, 220, 0.2);
 }
 .ctaBannerText {
   text-align: center;
@@ -230,8 +275,17 @@
   line-height: 1.5;
   letter-spacing: 0.015em;
   border: none;
-  transition: opacity 0.2s ease;
+  transition: all 0.3s ease;
   text-decoration: none;
+  box-shadow: 0 4px 15px rgba(223, 132, 220, 0.4);
+}
+.ctaBannerButton:hover {
+  background: #d66dd9;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(223, 132, 220, 0.5);
+}
+.ctaBannerButton:active {
+  transform: translateY(0) scale(0.98);
 }
 .ctaBannerButton:hover {
   opacity: 0.9;

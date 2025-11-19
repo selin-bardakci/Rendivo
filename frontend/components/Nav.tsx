@@ -7,17 +7,26 @@ const Nav: React.FC = () => {
     e.preventDefault()
     const featuresSection = document.getElementById('features')
     if (featuresSection) {
-      featuresSection.scrollIntoView({ behavior: 'smooth' })
+      const headerHeight = 100 // Approximate header height
+      const elementPosition = featuresSection.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
     }
   }
 
   return (
     <header className="top-header">
-      <div className="brand">
-        <div style={{width:85,height:85,display:'flex',alignItems:'center',justifyContent:'center',position:'relative',margin:'-10px 0'}}>
-          <Image src="/logo.svg" alt="Rendivo Logo" width={85} height={85} style={{objectFit:'contain'}} />
-        </div>
-      </div>
+      <Link href="/" legacyBehavior>
+        <a className="brand" style={{textDecoration:'none'}}>
+          <div style={{width:85,height:85,display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
+            <Image src="/logo.svg" alt="Rendivo Logo" width={85} height={85} style={{objectFit:'contain'}} />
+          </div>
+        </a>
+      </Link>
 
       <div style={{display:'flex',alignItems:'center',gap:24}}>
         <nav className="nav-links">
