@@ -1,21 +1,27 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import React from 'react'
 
 const Nav: React.FC = () => {
+  const scrollToFeatures = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    const featuresSection = document.getElementById('features')
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <header className="top-header">
       <div className="brand">
-        <div style={{width:36,height:36,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:6,background:'var(--color-primary)',color:'#fff'}}>
-          <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" fill="currentColor"/></svg>
+        <div style={{width:80,height:80,display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
+          <Image src="/logo.svg" alt="Rendivo Logo" width={80} height={80} style={{objectFit:'contain'}} />
         </div>
-        <span>Rendivo</span>
       </div>
 
       <div style={{display:'flex',alignItems:'center',gap:24}}>
         <nav className="nav-links">
-          <a href="#">How It Works</a>
-          <a href="#">For Businesses</a>
-          <a href="#">Pricing</a>
+          <a href="#features" onClick={scrollToFeatures}>How It Works</a>
         </nav>
         <div className="actions">
           <button className="btn-primary">Sign Up</button>

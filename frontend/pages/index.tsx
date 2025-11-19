@@ -24,7 +24,7 @@ export default function Home() {
         </div>
       </div>
 
-      <section className={styles.featuresSection}>
+      <section id="features" className={styles.featuresSection}>
         <div className="container">
           <div className={styles.featuresHeader}>
             <h2>Everything you need, nothing you don't</h2>
@@ -33,7 +33,9 @@ export default function Home() {
 
           <div className={styles.featuresGrid}>
             <div className={styles.featureCard}>
-              <div className={styles.icon}>📅</div>
+              <div className={styles.icon}>
+                <Image src="/ikonlar/calendar.svg" alt="Calendar icon" width={28} height={28} />
+              </div>
               <div>
                 <h3>Effortless Booking</h3>
                 <p>Allow clients to book appointments 24/7 through your personalized booking page.</p>
@@ -41,7 +43,9 @@ export default function Home() {
             </div>
 
             <div className={styles.featureCard}>
-              <div className={styles.icon}>🔔</div>
+              <div className={styles.icon}>
+                <Image src="/ikonlar/ring.svg" alt="Notification icon" width={28} height={28} />
+              </div>
               <div>
                 <h3>Automated Reminders</h3>
                 <p>Reduce no-shows with automatic email and SMS reminders for upcoming appointments.</p>
@@ -49,7 +53,9 @@ export default function Home() {
             </div>
 
             <div className={styles.featureCard}>
-              <div className={styles.icon}>👥</div>
+              <div className={styles.icon}>
+                <Image src="/ikonlar/people.svg" alt="People icon" width={28} height={28} />
+              </div>
               <div>
                 <h3>Client Management</h3>
                 <p>Keep track of client history, preferences, and notes all in one secure place.</p>
@@ -61,14 +67,16 @@ export default function Home() {
 
       <section className={styles.ctaBanner}>
         <div className="container">
-          <div className={styles.ctaInner}>
-            <div>
-              <h3>Ready to Simplify Your Schedule?</h3>
+          <div className={styles.ctaBannerInner}>
+            <div className={styles.ctaBannerText}>
+              <h2>Ready to Simplify Your Schedule?</h2>
               <p>Join Rendivo today and transform how you manage appointments.</p>
             </div>
-            <div>
-              <Link href="/signup" legacyBehavior><a className={styles.ctaPrimary}>Sign Up Now</a></Link>
-            </div>
+            <Link href="/signup" legacyBehavior>
+              <a className={styles.ctaBannerButton}>
+                <span>Sign Up Now</span>
+              </a>
+            </Link>
           </div>
         </div>
       </section>
