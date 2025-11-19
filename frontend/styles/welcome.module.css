@@ -103,14 +103,14 @@
   text-decoration: none;
 }
 .featuresSection {
-  padding: 64px 16px;
+  padding: 40px 16px 32px 16px;
 }
 .sub {
   color: #181117;
   margin: 0;
   font-size: 16px;
   line-height: 1.5;
-  max-width: 720px;
+  max-width: 100%;
 }
 .featuresGrid {
   display: grid;
@@ -135,8 +135,17 @@
   color: #181117;
 }
 .icon { 
-  font-size: 28px;
-  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+.icon img,
+.icon svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .featureCard p { 
   color: #886385;
@@ -176,15 +185,69 @@
   .featuresHeader h2 { font-size: 36px }
 }
 .ctaBanner {
-  background: #fff0f8;
-  padding: 28px 0;
-  margin-top: 28px;
+  padding: 0px 16px 40px 16px;
 }
-.ctaInner {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 12px;
+.ctaBannerInner {
+  background: rgba(223, 132, 220, 0.2);
+  border-radius: 8px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.ctaBannerText {
+  text-align: center;
+}
+.ctaBannerText h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 8px 0;
+}
+.ctaBannerText p {
+  font-size: 16px;
+  color: rgba(24, 17, 23, 0.8);
+  margin: 0;
+}
+.ctaBannerButton {
+  flex-shrink: 0;
+  display: flex;
+  min-width: 120px;
+  max-width: 480px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  height: 48px;
+  padding: 0 24px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.015em;
+  border: none;
+  transition: opacity 0.2s ease;
+  text-decoration: none;
+}
+.ctaBannerButton:hover {
+  opacity: 0.9;
+}
+
+@media (min-width: 768px) {
+  .ctaBannerInner {
+    flex-direction: row;
+    align-items: center;
+  }
+  .ctaBannerText {
+    text-align: left;
+  }
+  .ctaBannerText h2 {
+    font-size: 30px;
+  }
 }
 .footer {
   padding: 40px 0;
