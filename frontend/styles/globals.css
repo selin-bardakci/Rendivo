@@ -34,7 +34,11 @@ body {
   align-items:center;
   justify-content:space-between;
   border-bottom: 1px solid #f4f0f4;
-  padding: 8px 40px;
+  padding: 0px 40px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-light);
+  z-index: 100;
 }
 .top-header .brand{
   display:flex;align-items:center;gap:12px;color:var(--text-900);font-weight:700;font-size:18px;
@@ -47,6 +51,9 @@ body {
 
 @media(min-width:768px){
   .top-header .nav-links{display:flex}
+}
+@media(max-width:768px){
+  .top-header{padding: 0px 16px;}
 }
 .container {
   max-width: 960px;

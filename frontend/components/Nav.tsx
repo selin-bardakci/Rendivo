@@ -14,8 +14,8 @@ const Nav: React.FC = () => {
   return (
     <header className="top-header">
       <div className="brand">
-        <div style={{width:80,height:80,display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
-          <Image src="/logo.svg" alt="Rendivo Logo" width={80} height={80} style={{objectFit:'contain'}} />
+        <div style={{width:85,height:85,display:'flex',alignItems:'center',justifyContent:'center',position:'relative',margin:'-10px 0'}}>
+          <Image src="/logo.svg" alt="Rendivo Logo" width={85} height={85} style={{objectFit:'contain'}} />
         </div>
       </div>
 
