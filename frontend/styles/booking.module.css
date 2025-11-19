@@ -1,0 +1,621 @@
+.container {
+  min-height: calc(100vh - 200px);
+  padding: 40px 24px;
+  background: var(--bg-light);
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 8px 0;
+}
+
+.businessName {
+  font-size: 18px;
+  color: #886385;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Progress Steps */
+.progressSteps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 48px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepNumber {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f4f0f4;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 900;
+  transition: all 0.3s ease;
+}
+
+.stepActive .stepNumber {
+  background: var(--color-primary);
+  color: white;
+}
+
+.stepLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
+  transition: color 0.3s ease;
+}
+
+.stepActive .stepLabel {
+  color: #181117;
+}
+
+.stepLine {
+  width: 80px;
+  height: 2px;
+  background: #e5dce4;
+  margin: 0 16px;
+}
+
+/* Step Content */
+.stepContent {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stepTitle {
+  font-size: 28px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 8px 0;
+}
+
+.stepDescription {
+  font-size: 16px;
+  color: #886385;
+  margin: 0 0 32px 0;
+}
+
+/* Services Grid */
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.serviceCard {
+  padding: 20px;
+  border: 2px solid #e5dce4;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.serviceCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.2);
+}
+
+.serviceCardSelected {
+  border-color: var(--color-primary);
+  background: rgba(223, 132, 220, 0.05);
+}
+
+.serviceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.serviceName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0;
+  flex: 1;
+}
+
+.serviceCheckbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5dce4;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.serviceCardSelected .serviceCheckbox {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+.serviceDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.serviceDuration {
+  font-size: 14px;
+  color: #886385;
+}
+
+.servicePrice {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Summary */
+.summary {
+  padding: 20px;
+  background: #f8f6f8;
+  border-radius: 12px;
+  border: 2px solid var(--color-primary);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  color: #181117;
+  margin-bottom: 12px;
+}
+
+.summaryRow:last-child {
+  margin-bottom: 0;
+  padding-top: 12px;
+  border-top: 2px solid #e5dce4;
+}
+
+/* Section */
+.section {
+  margin-bottom: 32px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 16px 0;
+}
+
+/* Staff Grid */
+.staffGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.staffCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 2px solid #e5dce4;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.staffCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.2);
+}
+
+.staffCardSelected {
+  border-color: var(--color-primary);
+  background: rgba(223, 132, 220, 0.05);
+}
+
+.staffAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), #d66dd9);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.staffInfo {
+  flex: 1;
+}
+
+.staffName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.staffSpecialty {
+  font-size: 14px;
+  color: #886385;
+  margin: 0 0 4px 0;
+}
+
+.staffRating {
+  font-size: 14px;
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.staffCheckbox {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #e5dce4;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.staffCardSelected .staffCheckbox {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Calendar */
+.calendarContainer {
+  background: #f8f6f8;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.monthTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0;
+}
+
+.monthButton {
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #886385;
+}
+
+.monthButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendarDayHeader {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #886385;
+  padding: 8px;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendarDayButton {
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #181117;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.calendarDayButton:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.selectedDay {
+  border-color: var(--color-primary) !important;
+  background: var(--color-primary) !important;
+  color: white !important;
+}
+
+.pastDay {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Times Grid */
+.timesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.timeButton {
+  padding: 14px 20px;
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #181117;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.timeButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.timeButtonSelected {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Confirmation Card */
+.confirmationCard {
+  background: #f8f6f8;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.confirmSection {
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5dce4;
+}
+
+.confirmSection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.confirmSectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #886385;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.confirmText {
+  font-size: 18px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.confirmSubtext {
+  font-size: 15px;
+  color: #666;
+  margin: 0 0 4px 0;
+}
+
+.confirmServiceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  font-size: 15px;
+  color: #181117;
+}
+
+.confirmTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 2px solid #e5dce4;
+  font-size: 20px;
+  color: var(--color-primary);
+}
+
+/* Navigation */
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.backButton,
+.continueButton,
+.confirmButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  border: none;
+}
+
+.backButton {
+  background: white;
+  color: #886385;
+  border: 2px solid #e5dce4;
+}
+
+.backButton:hover {
+  border-color: #886385;
+  color: #181117;
+}
+
+.continueButton {
+  background: var(--color-primary);
+  color: white;
+}
+
+.continueButton:hover:not(:disabled) {
+  background: #d66dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.4);
+}
+
+.continueButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirmButton {
+  background: #16a34a;
+  color: white;
+  flex: 1;
+  justify-content: center;
+}
+
+.confirmButton:hover {
+  background: #15803d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 16px;
+  }
+
+  .stepContent {
+    padding: 24px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .servicesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .progressSteps {
+    padding: 16px;
+  }
+
+  .stepNumber {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .stepLine {
+    width: 40px;
+    margin: 0 8px;
+  }
+
+  .stepLabel {
+    font-size: 12px;
+  }
+
+  .timesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .confirmationCard {
+    padding: 20px;
+  }
+
+  .navigation {
+    flex-direction: column;
+  }
+
+  .backButton {
+    order: 2;
+  }
+
+  .continueButton,
+  .confirmButton {
+    order: 1;
+  }
+}
