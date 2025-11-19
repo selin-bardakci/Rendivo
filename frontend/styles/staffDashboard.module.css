@@ -1,0 +1,495 @@
+.container {
+  min-height: calc(100vh - 200px);
+  padding: 24px 40px;
+  background: var(--bg-light);
+  max-width: 100% !important;
+  margin: 0 !important;
+  width: 100%;
+}
+
+.content {
+  max-width: 1500px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr 340px;
+  gap: 24px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sidebar - Staff Profile */
+.sidebar {
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+}
+
+.profileCard {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profilePicture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), #d66dd9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.profileInitials {
+  font-size: 36px;
+  font-weight: 900;
+  color: white;
+}
+
+.staffName {
+  font-size: 20px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.staffRole {
+  font-size: 14px;
+  color: #886385;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 24px;
+  background: transparent;
+  border: 2px solid #e5dce4;
+  border-radius: 10px;
+  color: #886385;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.logoutButton:hover {
+  border-color: #dc3545;
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.05);
+}
+
+/* Main Content */
+.mainContent {
+  min-height: 600px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.pageSubtitle {
+  font-size: 16px;
+  color: #886385;
+  margin: 0;
+}
+
+/* Calendar */
+.calendarCard {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.monthTitle {
+  font-size: 24px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0;
+}
+
+.monthButton {
+  background: transparent;
+  border: 2px solid #e5dce4;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #886385;
+}
+
+.monthButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(223, 132, 220, 0.05);
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendarDayHeader {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #886385;
+  padding: 12px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 12px;
+}
+
+.calendarDayButton {
+  background: #f8f6f8;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  gap: 4px;
+}
+
+.dayNumber {
+  font-size: 16px;
+  font-weight: 600;
+  color: #181117;
+}
+
+.appointmentCount {
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  background: var(--color-primary);
+  border-radius: 10px;
+  padding: 2px 8px;
+  min-width: 20px;
+}
+
+.calendarDayButton:hover {
+  border-color: var(--color-primary);
+  background: white;
+  transform: scale(1.05);
+}
+
+.hasAppointment {
+  background: rgba(223, 132, 220, 0.1);
+}
+
+.today {
+  border-color: #fbbf24 !important;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.selectedDay {
+  border-color: var(--color-primary) !important;
+  background: var(--color-primary) !important;
+}
+
+.selectedDay .dayNumber {
+  color: white;
+}
+
+.selectedDay .appointmentCount {
+  background: white;
+  color: var(--color-primary);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f4f0f4;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #886385;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legendAppointment {
+  background: var(--color-primary);
+}
+
+.legendToday {
+  background: #fbbf24;
+}
+
+/* Right Sidebar - Schedule */
+.rightSidebar {
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+}
+
+.scheduleCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  max-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+}
+
+.scheduleTitle {
+  font-size: 20px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.scheduleDate {
+  font-size: 14px;
+  color: #886385;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f4f0f4;
+}
+
+.appointmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.appointmentItem {
+  padding: 16px;
+  background: #f8f6f8;
+  border-radius: 12px;
+  border-left: 4px solid var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.appointmentItem:hover {
+  background: rgba(223, 132, 220, 0.1);
+  transform: translateX(4px);
+}
+
+.appointmentTime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #886385;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.appointmentTime svg {
+  color: var(--color-primary);
+}
+
+.appointmentDetails {
+  margin-bottom: 8px;
+}
+
+.clientName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.serviceName {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 4px 0;
+}
+
+.duration {
+  font-size: 12px;
+  color: #886385;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: white;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusBadge.confirmed {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.statusBadge.pending {
+  background: rgba(251, 191, 36, 0.1);
+  color: #f59e0b;
+}
+
+.statusBadge.cancelled {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.noAppointments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.noAppointments svg {
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.noAppointments p {
+  font-size: 15px;
+  margin: 0;
+  color: #886385;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .content {
+    grid-template-columns: 240px 1fr 320px;
+    gap: 20px;
+  }
+
+  .calendarCard {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar,
+  .rightSidebar {
+    position: static;
+  }
+
+  .rightSidebar {
+    order: -1;
+  }
+
+  .scheduleCard {
+    max-height: none;
+  }
+
+  .appointmentsList {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .calendarCard {
+    padding: 20px;
+  }
+
+  .calendarGrid {
+    gap: 4px;
+  }
+
+  .calendarDayHeader {
+    font-size: 11px;
+    padding: 8px 4px;
+  }
+
+  .dayNumber {
+    font-size: 14px;
+  }
+
+  .appointmentCount {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .profileCard {
+    padding: 24px;
+  }
+
+  .scheduleCard {
+    padding: 20px;
+  }
+}
