@@ -5,7 +5,7 @@ import Image from 'next/image'
 
 export default function SignUp() {
   return (
-    <Layout>
+    <Layout noFooterMargin={true}>
       <div className={styles.container}>
         <div className={styles.content}>
           {/* Page Heading */}
