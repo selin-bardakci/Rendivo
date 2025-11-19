@@ -2,8 +2,32 @@ import Layout from '../components/Layout'
 import styles from '../styles/welcome.module.css'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 export default function Home() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Check if there's a hash in the URL (e.g., /#features)
+    if (router.asPath.includes('#features')) {
+      // Small delay to ensure the page has loaded
+      setTimeout(() => {
+        const featuresSection = document.getElementById('features')
+        if (featuresSection) {
+          const headerHeight = 100
+          const elementPosition = featuresSection.getBoundingClientRect().top
+          const offsetPosition = elementPosition + window.pageYOffset - headerHeight
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
+    }
+  }, [router.asPath])
+
   return (
     <Layout>
       <div className={styles.hero}>

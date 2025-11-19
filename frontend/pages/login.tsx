@@ -4,10 +4,12 @@ import Layout from '../components/Layout'
 import { login } from '../lib/auth'
 import styles from '../styles/login.module.css'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -50,14 +52,38 @@ export default function LoginPage() {
             
             <div className={styles.formGroup}>
               <label htmlFor="password">Password</label>
-              <input 
-                id="password"
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input 
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  style={{ paddingRight: '48px' }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    color: '#886385',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'color 0.2s ease'
+                  }}
+                >
+                  {showPassword ? <Image src="/ikonlar/openeye.svg" alt="Hide password" width={20} height={20} /> : <Image src="/ikonlar/closedeye.svg" alt="Show password" width={20} height={20} />}
+                </button>
+              </div>
             </div>
 
             {error && (

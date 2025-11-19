@@ -1,13 +1,24 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import React from 'react'
+import { useRouter } from 'next/router'
 
 const Nav: React.FC = () => {
+  const router = useRouter()
+
   const scrollToFeatures = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
+    
+    // If we're not on the homepage, navigate there first
+    if (router.pathname !== '/') {
+      router.push('/#features')
+      return
+    }
+    
+    // If we're already on homepage, just scroll
     const featuresSection = document.getElementById('features')
     if (featuresSection) {
-      const headerHeight = 100 // Approximate header height
+      const headerHeight = 100
       const elementPosition = featuresSection.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.pageYOffset - headerHeight
       
@@ -46,3 +57,4 @@ const Nav: React.FC = () => {
 }
 
 export default Nav
+
