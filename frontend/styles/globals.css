@@ -1,0 +1,67 @@
+.hero-bg { }
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap');
+
+:root{
+  --color-primary: #df84dc;
+  --bg-light: #f8f6f8;
+  --text-900: #181117;
+}
+
+/* FORCE Nunito site-wide to ensure the requested font is applied.
+   Exclude code/pre elements so monospace remains readable. */
+html, body, #__next, body *:not(code):not(pre):not(kbd):not(samp) {
+  font-family: 'Nunito', 'Spline Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+html, body, #__next {
+  height: 100%;
+}
+body {
+  margin: 0;
+  /* Use Nunito site-wide as requested */
+  font-family: 'Nunito', 'Spline Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-light);
+  color: var(--text-900);
+}
+
+/* Top header (matches Figma) */
+.top-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom: 1px solid #f4f0f4;
+  padding: 12px 40px;
+}
+.top-header .brand{
+  display:flex;align-items:center;gap:12px;color:var(--text-900);font-weight:700;font-size:18px;
+}
+.top-header .nav-links{display:none;gap:24px;align-items:center}
+.top-header .nav-links a{color:var(--text-900);text-decoration:none}
+.top-header .actions{display:flex;gap:8px;align-items:center}
+.btn-primary{background:var(--color-primary);color:#fff;border-radius:9999px;padding:8px 16px;font-weight:700;border:none}
+.btn-ghost{background:#f4f0f4;color:var(--text-900);border-radius:9999px;padding:8px 14px;border:none}
+
+@media(min-width:768px){
+  .top-header .nav-links{display:flex}
+}
+.container {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 20px;
+}
+.nav {
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
