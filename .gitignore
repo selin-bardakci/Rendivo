@@ -56,3 +56,4 @@ firestore-debug.log
 # PDF
 *.pdf
 .next/
+frontend/.next/
