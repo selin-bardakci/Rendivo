@@ -1,0 +1,562 @@
+.container {
+  min-height: calc(100vh - 200px);
+  padding: 40px 24px;
+  background: var(--bg-light);
+}
+
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #886385;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Search Bar */
+.searchBar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #886385;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #e5dce4;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #181117;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.1);
+}
+
+.searchInput::placeholder {
+  color: #999;
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #181117;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  white-space: nowrap;
+  position: relative;
+}
+
+.filterButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: #fff;
+}
+
+.filterBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Active Filters */
+.activeFilters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5dce4;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #886385;
+}
+
+.filterTag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(223, 132, 220, 0.1);
+  border: 1px solid var(--color-primary);
+  border-radius: 20px;
+  font-size: 14px;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.removeFilter {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.removeFilter:hover {
+  background: rgba(223, 132, 220, 0.2);
+}
+
+.clearFilters {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #886385;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #886385;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  margin-left: auto;
+}
+
+.clearFilters:hover {
+  background: #886385;
+  color: white;
+}
+
+/* Results Count */
+.resultsCount {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+/* Business Grid */
+.businessGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.businessCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e5dce4;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.businessCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 24px rgba(223, 132, 220, 0.2);
+  transform: translateY(-4px);
+}
+
+.cardContent {
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.businessName {
+  font-size: 22px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.businessLocation {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.locationIcon {
+  color: #886385;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.businessRating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stars {
+  color: #fbbf24;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+.ratingText {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.servicesTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.serviceTag {
+  padding: 6px 12px;
+  background: #f8f6f8;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #886385;
+  font-weight: 600;
+}
+
+.bookButton {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.bookButton:hover {
+  background: #d66dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.4);
+}
+
+/* No Results */
+.noResults {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.noResults svg {
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.noResults h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.noResults p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+  padding: 20px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e5dce4;
+}
+
+.modalTitle {
+  font-size: 24px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 32px;
+  line-height: 1;
+  color: #886385;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: #f4f0f4;
+  color: #181117;
+}
+
+.modalContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.modalDescription {
+  font-size: 15px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.6;
+}
+
+.servicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.serviceCheckbox {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8f6f8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.serviceCheckbox:hover {
+  background: rgba(223, 132, 220, 0.08);
+  border-color: rgba(223, 132, 220, 0.3);
+}
+
+.serviceCheckbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.checkboxLabel {
+  font-size: 15px;
+  color: #181117;
+  font-weight: 500;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #e5dce4;
+}
+
+.modalButtonSecondary,
+.modalButtonPrimary {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.modalButtonSecondary {
+  background: #f4f0f4;
+  color: #181117;
+}
+
+.modalButtonSecondary:hover {
+  background: #e5dce4;
+}
+
+.modalButtonPrimary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.modalButtonPrimary:hover {
+  background: #d66dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 16px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .businessGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .searchBar {
+    flex-wrap: wrap;
+  }
+
+  .searchInputWrapper {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .filterButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .modalButtonSecondary,
+  .modalButtonPrimary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1200px) and (min-width: 769px) {
+  .businessGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
