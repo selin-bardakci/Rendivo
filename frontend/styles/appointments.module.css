@@ -1,0 +1,537 @@
+.container {
+  min-height: calc(100vh - 100px);
+  padding: 40px 16px;
+  margin-top: 85px;
+  background: var(--bg-light);
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sidebar - User Profile */
+.sidebar {
+  position: sticky;
+  top: 120px;
+  height: fit-content;
+}
+
+.profileCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 20px rgba(136, 99, 133, 0.08);
+  border: 1px solid #f4f0f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.profilePicture {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #df84dc 0%, #d46ed1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+
+.profileInitials {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+}
+
+.userName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0;
+  text-align: center;
+  word-break: break-word;
+}
+
+.statsContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statCard {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #f4f0f4;
+}
+
+.statNumber {
+  font-size: 28px;
+  font-weight: 900;
+  color: #df84dc;
+  margin-bottom: 4px;
+  font-family: 'Nunito', sans-serif;
+}
+
+.statLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #886385;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.logoutButton {
+  width: 100%;
+  padding: 12px 20px;
+  background: #fff;
+  border: 1px solid #e5dce4;
+  border-radius: 8px;
+  color: #886385;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.logoutButton:hover {
+  background: #fafafa;
+  border-color: #df84dc;
+  color: #df84dc;
+}
+
+/* Main Content */
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 8px 0;
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.pageSubtitle {
+  font-size: 16px;
+  color: #886385;
+  margin: 0;
+}
+
+.bookButton {
+  padding: 12px 24px;
+  background: #df84dc;
+  border: none;
+  border-radius: 9999px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+  text-decoration: none;
+}
+
+.bookButton:hover {
+  background: #d46ed1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(223, 132, 220, 0.4);
+}
+
+.bookButton:active {
+  transform: translateY(0);
+}
+
+/* Calendar */
+.calendarCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(136, 99, 133, 0.08);
+  border: 1px solid #f4f0f4;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.monthTitle {
+  font-size: 24px;
+  font-weight: 900;
+  color: #181117;
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.monthButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fafafa;
+  border: 1px solid #e5dce4;
+  color: #886385;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monthButton:hover {
+  background: #fff;
+  border-color: #df84dc;
+  color: #df84dc;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendarDayHeader {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #886385;
+  padding: 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #181117;
+  transition: all 0.2s;
+}
+
+.calendarDayNumber {
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.calendarDayNumber:hover {
+  background: #f4f0f4;
+}
+
+.appointmentDay {
+  background: #df84dc !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(223, 132, 220, 0.3);
+  position: relative;
+}
+
+.appointmentDay::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.today {
+  border: 2px solid #df84dc;
+  font-weight: 900;
+}
+
+.legend {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f4f0f4;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #886385;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legendAppointment {
+  background: #df84dc;
+}
+
+.legendToday {
+  border: 2px solid #df84dc;
+  background: #fff;
+}
+
+/* Appointments List */
+.appointmentsList {
+  margin-top: 32px;
+}
+
+.appointmentsTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #181117;
+  margin-bottom: 20px;
+}
+
+.appointmentsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appointmentCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  transition: box-shadow 0.3s ease;
+}
+
+.appointmentCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.appointmentInfo {
+  flex: 1;
+}
+
+.serviceName {
+  font-size: 20px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.providerName {
+  font-size: 14px;
+  color: #886385;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+}
+
+.appointmentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  color: #886385;
+  flex-shrink: 0;
+}
+
+.appointmentActions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.actionButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.rescheduleButton {
+  background: transparent;
+  color: #886385;
+  border: 2px solid #886385;
+}
+
+.rescheduleButton:hover {
+  background: #886385;
+  color: white;
+}
+
+.cancelButton {
+  background: transparent;
+  color: #dc3545;
+  border: 2px solid #dc3545;
+}
+
+.cancelButton:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.noAppointments {
+  text-align: center;
+  padding: 48px 24px;
+  color: #999;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .sidebar {
+    position: static;
+  }
+
+  .profileCard {
+    flex-direction: row;
+    align-items: center;
+    padding: 24px;
+  }
+
+  .profilePicture {
+    width: 60px;
+    height: 60px;
+  }
+
+  .profileInitials {
+    font-size: 24px;
+  }
+
+  .statsContainer {
+    flex-direction: row;
+    flex: 1;
+  }
+
+  .logoutButton {
+    width: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 20px 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bookButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .calendarCard {
+    padding: 20px;
+  }
+
+  .calendarGrid {
+    gap: 4px;
+  }
+
+  .calendarDayHeader {
+    font-size: 11px;
+    padding: 8px 0;
+  }
+
+  .calendarDay {
+    font-size: 13px;
+  }
+
+  .profileCard {
+    flex-direction: column;
+  }
+
+  .statsContainer {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .logoutButton {
+    width: 100%;
+  }
+
+  .appointmentCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .appointmentActions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .actionButton {
+    width: 100%;
+  }
+}
