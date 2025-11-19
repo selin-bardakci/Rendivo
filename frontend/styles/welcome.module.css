@@ -1,0 +1,205 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  /* Make hero full-bleed like the Figma design */
+  border-radius: 12px;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 32px;
+}
+.heroImageWrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.heroImage {
+  object-fit: cover;
+}
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.25) 100%);
+  z-index: 1;
+}
+.heroInner {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  color: #fff;
+  padding: 64px 28px;
+  border-radius: 12px;
+}
+.hero h1 {
+  /* fallback: keep existing hero h1 values but prefer the .heroTitle class for exact Tailwind-like mapping */
+  font-size: 52px;
+  margin: 0 0 18px 0;
+  line-height: 1.02;
+  /* enforce Nunito at the more specific selector level to ensure hero uses Nunito */
+  font-family: 'Nunito', 'Poppins', 'Spline Sans', sans-serif !important;
+  /* set a heavy weight for the hero title */
+  font-weight: 900 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.03em;
+}
+
+/* Tailwind-like utility mapping for the hero title requested by the user:
+   text-white text-4xl font-black leading-tight tracking-[-0.033em]
+   @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]
+*/
+.heroTitle {
+  color: #fff;
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 900; /* heavy Nunito */
+  /* Use Nunito site-wide as requested; fall back to Poppins/Spline Sans */
+  font-family: 'Nunito';
+  letter-spacing: -0.033em; /* tracking */
+  margin: 0 0 18px 0;
+}
+
+@media (min-width: 480px) {
+  .heroTitle {
+    font-size: 3rem; /* text-5xl */
+    font-weight: 900;
+    line-height: 1.04; /* slightly tighter on larger screens */
+    letter-spacing: -0.033em;
+  }
+}
+.lead {
+  color: rgba(255,255,255,0.95);
+  margin-bottom: 20px;
+  /* increase spacing between lines so the <br/> doesn't feel too tight */
+  line-height: 1.6;
+}
+
+.lead br {
+  /* ensure an explicit small gap when a hard break is used */
+  display: block;
+  margin-top: 6px;
+}
+.ctaRow {
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-top: 12px;
+}
+.ctaPrimary {
+  background: #df84dc;
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.ctaSecondary {
+  background: rgba(255,255,255,0.85);
+  color: #333;
+  padding: 10px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+.featuresSection {
+  padding: 64px 16px;
+}
+.sub {
+  color: #181117;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 720px;
+}
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+.featureCard {
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e5dce4;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.featureCard h3 { 
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #181117;
+}
+.icon { 
+  font-size: 28px;
+  color: var(--color-primary);
+}
+.featureCard p { 
+  color: #886385;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.43;
+}
+
+/* Left-aligned large heading for the features hero */
+.featuresHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 0;
+}
+.featuresHeader h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: #181117;
+  max-width: 720px;
+}
+
+@media (min-width: 480px) {
+  .featuresHeader h2 {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.16;
+    letter-spacing: -0.033em;
+  }
+}
+
+@media (max-width: 960px) {
+  .featuresGrid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .featuresHeader h2 { font-size: 36px }
+}
+.ctaBanner {
+  background: #fff0f8;
+  padding: 28px 0;
+  margin-top: 28px;
+}
+.ctaInner {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+.footer {
+  padding: 40px 0;
+  margin-top: 40px;
+  color: #666;
+}
+.footerGrid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 720px) {
+  .heroInner { padding: 40px 18px }
+  .hero h1 { font-size: 32px }
+  .ctaInner { flex-direction: column; align-items: stretch }
+}
+
