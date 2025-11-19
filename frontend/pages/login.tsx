@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import { login } from '../lib/auth'
+import styles from '../styles/login.module.css'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -26,22 +28,57 @@ export default function LoginPage() {
 
   return (
     <Layout>
-      <div className="card">
-        <h2>Login</h2>
-        <form onSubmit={onSubmit}>
-          <div style={{ marginBottom: 10 }}>
-            <label>Email</label>
-            <br />
-            <input value={email} onChange={(e) => setEmail(e.target.value)} />
+      <div className={styles.loginContainer}>
+        <div className={styles.loginCard}>
+          <div className={styles.loginHeader}>
+            <h1>Welcome Back</h1>
+            <p>Sign in to continue to your account</p>
           </div>
-          <div style={{ marginBottom: 10 }}>
-            <label>Password</label>
-            <br />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          
+          <form onSubmit={onSubmit} className={styles.loginForm}>
+            <div className={styles.formGroup}>
+              <label htmlFor="email">Email Address</label>
+              <input 
+                id="email"
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label htmlFor="password">Password</label>
+              <input 
+                id="password"
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={loading}
+              className={styles.loginButton}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <div className={styles.loginFooter}>
+            <p>Don't have an account? <Link href="/signup">Sign up</Link></p>
           </div>
-          <button type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Sign in'}</button>
-        </form>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        </div>
       </div>
     </Layout>
   )
