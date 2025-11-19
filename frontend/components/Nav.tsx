@@ -33,8 +33,12 @@ const Nav: React.FC = () => {
           <a href="#features" onClick={scrollToFeatures}>How It Works</a>
         </nav>
         <div className="actions">
-          <button className="btn-primary">Sign Up</button>
-          <button className="btn-ghost">Log In</button>
+          <Link href="/signup">
+            <button className="btn-primary">Sign Up</button>
+          </Link>
+          <Link href="/login">
+            <button className="btn-ghost">Log In</button>
+          </Link>
         </div>
       </div>
     </header>

@@ -1,0 +1,153 @@
+.container {
+  display: flex;
+  min-height: calc(100vh - 85px);
+  width: 100%;
+  flex-direction: column;
+  background: var(--bg-light);
+  padding: 40px 16px;
+  margin-top: 85px;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  max-width: 960px;
+  width: 100%;
+  flex: 1;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page Heading */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: var(--text-900);
+  font-size: 2.25rem;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.033em;
+  margin: 0;
+}
+
+.subtitle {
+  color: #886385;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Role Selection Grid */
+.roleGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .roleGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.roleCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 32px 24px;
+  background: #fff;
+  border: 1px solid #e5dce4;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.roleCard:hover {
+  border-color: rgba(223, 132, 220, 0.5);
+  box-shadow: 0 8px 24px rgba(223, 132, 220, 0.2);
+  transform: translateY(-8px);
+}
+
+.icon {
+  color: var(--text-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  transition: transform 0.3s ease;
+}
+
+.roleCard:hover .icon {
+  transform: scale(1.15) rotate(-5deg);
+  color: var(--color-primary);
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardTitle {
+  color: var(--text-900);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.cardDescription {
+  color: #886385;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Footer */
+.footer {
+  color: #886385;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 24px 16px 16px;
+  text-align: center;
+  margin: 0;
+}
+
+.loginLink {
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.loginLink:hover {
+  color: #d66dd9;
+}
