@@ -1,9 +1,10 @@
 import React from 'react'
 import Nav from './Nav'
 import Image from 'next/image'
+import Link from 'next/link'
 import styles from '../styles/welcome.module.css'
 
-const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+const Layout: React.FC<{ children?: React.ReactNode; noFooterMargin?: boolean }> = ({ children, noFooterMargin = false }) => {
   return (
     <div>
       <header style={{ padding: 12, borderBottom: '1px solid #e6e6e6' }}>
@@ -12,7 +13,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <main className="container" style={{ paddingTop: 8 }}>
         {children}
       </main>
-      <footer className={styles.footer}>
+      <footer className={styles.footer} style={noFooterMargin ? { marginTop: 0 } : {}}>
         <div className="container">
           <div className={styles.footerGrid}>
             <div className={styles.footerBrand}>
@@ -39,13 +40,13 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
             <div>
               <h4>Legal</h4>
               <ul>
-                <li>Privacy Policy</li>
-                <li>Terms of Service</li>
+                <li><Link href="/privacy">Privacy Policy</Link></li>
+                <li><Link href="/terms">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
           <div className={styles.footerBottom}>
-            <p className={styles.copyright}>© 2024 Rendivo. All rights reserved.</p>
+            <p className={styles.copyright}>© 2025 Rendivo. All rights reserved.</p>
             <div className={styles.socialIcons}>
               <a href="#" aria-label="Facebook">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

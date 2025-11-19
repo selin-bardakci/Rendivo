@@ -4,10 +4,9 @@
   width: 100%;
   flex-direction: column;
   background: var(--bg-light);
-  padding: 40px 16px;
+  padding: 60px 16px 0;
   margin-top: 85px;
   align-items: center;
-  justify-content: center;
 }
 
 .content {
@@ -15,7 +14,6 @@
   flex-direction: column;
   max-width: 960px;
   width: 100%;
-  flex: 1;
   animation: fadeInUp 0.6s ease-out;
 }
 
@@ -38,7 +36,7 @@
   text-align: center;
   width: 100%;
   padding: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 40px;
 }
 
 .title {
@@ -136,7 +134,7 @@
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.5;
-  padding: 24px 16px 16px;
+  padding: 40px 16px 0;
   text-align: center;
   margin: 0;
 }
