@@ -11,6 +11,10 @@
   --text-900: #181117;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* FORCE Nunito site-wide to ensure the requested font is applied.
    Exclude code/pre elements so monospace remains readable. */
 html, body, #__next, body *:not(code):not(pre):not(kbd):not(samp) {
@@ -34,20 +38,85 @@ body {
   align-items:center;
   justify-content:space-between;
   border-bottom: 1px solid #f4f0f4;
-  padding: 0px 40px;
-  position: sticky;
+  padding: 4px 40px;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   background: var(--bg-light);
   z-index: 100;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  background: rgba(248, 246, 248, 0.95);
+}
+.top-header:hover{
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 .top-header .brand{
   display:flex;align-items:center;gap:12px;color:var(--text-900);font-weight:700;font-size:18px;
 }
+.top-header .brand:hover{
+  cursor: pointer;
+}
 .top-header .nav-links{display:none;gap:24px;align-items:center}
-.top-header .nav-links a{color:var(--text-900);text-decoration:none;font-weight:700}
+.top-header .nav-links a{
+  color:var(--text-900);
+  text-decoration:none;
+  font-weight:700;
+  position: relative;
+  padding-bottom: 2px;
+  transition: color 0.3s ease;
+}
+.top-header .nav-links a::after{
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+.top-header .nav-links a:hover{
+  color: var(--color-primary);
+}
+.top-header .nav-links a:hover::after{
+  width: 100%;
+}
 .top-header .actions{display:flex;gap:8px;align-items:center}
-.btn-primary{background:var(--color-primary);color:#fff;border-radius:9999px;padding:8px 16px;font-weight:700;border:none;cursor:pointer}
-.btn-ghost{background:#f4f0f4;color:var(--text-900);border-radius:9999px;padding:8px 14px;border:none;font-weight:700;cursor:pointer}
+.btn-primary{
+  background:var(--color-primary);
+  color:#fff;
+  border-radius:9999px;
+  padding:8px 16px;
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(223, 132, 220, 0.2);
+}
+.btn-primary:hover{
+  background: #d66dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+.btn-primary:active{
+  transform: translateY(0);
+}
+.btn-ghost{
+  background:#f4f0f4;
+  color:var(--text-900);
+  border-radius:9999px;
+  padding:8px 14px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+  transition: all 0.3s ease;
+}
+.btn-ghost:hover{
+  background: #e8e4e8;
+  transform: translateY(-1px);
+}
 
 @media(min-width:768px){
   .top-header .nav-links{display:flex}
