@@ -1,0 +1,423 @@
+/* Page Container */
+.pageContainer {
+  min-height: 100vh;
+  background: var(--bg-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Main Content */
+.mainContent {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 48px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page Header */
+.pageHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.pageHeader h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 8px 0;
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.pageHeader p {
+  font-size: 16px;
+  color: #886385;
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .pageHeader h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Form Card */
+.formCard {
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #f4f0f4;
+  box-shadow: 0 4px 20px rgba(136, 99, 133, 0.08);
+  padding: 32px;
+  animation: cardSlideIn 0.8s ease-out;
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (min-width: 640px) {
+  .formCard {
+    padding: 48px;
+  }
+}
+
+/* Progress Section */
+.progressSection {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progressText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #181117;
+  margin: 0;
+}
+
+.progressBarContainer {
+  height: 8px;
+  background: #f4f0f4;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: progressGrow 1s ease-out;
+}
+
+@keyframes progressGrow {
+  from {
+    width: 0 !important;
+  }
+}
+
+/* Form Content */
+.formContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #181117;
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: -0.015em;
+}
+
+/* Form */
+.form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: formFieldFadeIn 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.formGroup:nth-child(1) { animation-delay: 0.3s; }
+.formGroup:nth-child(2) { animation-delay: 0.4s; }
+.formGroup:nth-child(3) { animation-delay: 0.5s; }
+
+@keyframes formFieldFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #181117;
+}
+
+.formGroup input {
+  padding: 12px 16px;
+  border: 1px solid #e5dce4;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: 'Nunito', sans-serif;
+  color: #181117;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.formGroup input::placeholder {
+  color: #886385;
+  opacity: 0.5;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #df84dc;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.1);
+}
+
+/* Input Wrapper - for password with toggle */
+.inputWrapper {
+  position: relative;
+}
+
+.inputWrapper input {
+  padding-right: 48px;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #886385;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.passwordToggle:hover {
+  color: #df84dc;
+}
+
+/* Password Strength Indicator */
+.strengthIndicator {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: -12px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.strengthBars {
+  display: flex;
+  gap: 6px;
+  height: 6px;
+}
+
+.strengthBar {
+  flex: 1;
+  border-radius: 9999px;
+  background: #f4f0f4;
+  transition: background 0.3s ease;
+}
+
+.strengthIndicator p {
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Checkbox Group */
+.checkboxGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 8px;
+  animation: formFieldFadeIn 0.5s ease-out 0.6s;
+  animation-fill-mode: both;
+}
+
+.checkboxGroup input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border-radius: 4px;
+  border: 1px solid #e5dce4;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.checkboxGroup label {
+  font-size: 14px;
+  color: #886385;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.checkboxGroup a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.checkboxGroup a:hover {
+  color: #d46ed1;
+  text-decoration: underline;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  animation: formFieldFadeIn 0.5s ease-out 0.7s;
+  animation-fill-mode: both;
+}
+
+@media (min-width: 640px) {
+  .actionButtons {
+    flex-direction: row;
+  }
+}
+
+.backButton {
+  min-width: 84px;
+  padding: 14px 24px;
+  background: transparent;
+  color: #886385;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 9999px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+}
+
+.backButton:hover {
+  background: #f8f6f8;
+  color: #181117;
+}
+
+.nextButton {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+}
+
+.nextButton:hover {
+  background: #d46ed1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+
+.nextButton:active {
+  transform: translateY(0);
+}
+
+@media (min-width: 640px) {
+  .nextButton {
+    width: auto;
+    min-width: 120px;
+  }
+}
+
+/* Page Footer */
+.pageFooter {
+  margin-top: 32px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out 0.9s;
+  animation-fill-mode: both;
+}
+
+.pageFooter p {
+  font-size: 14px;
+  color: #886385;
+  margin: 0;
+}
+
+.pageFooter a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.pageFooter a:hover {
+  color: #d46ed1;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .mainContent {
+    padding-top: 24px;
+  }
+
+  .pageHeader h1 {
+    font-size: 1.875rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.25rem;
+  }
+}
