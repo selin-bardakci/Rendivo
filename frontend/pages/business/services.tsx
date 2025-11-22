@@ -44,6 +44,7 @@ export default function BusinessServices() {
     duration: '',
     price: ''
   })
+  const [showServiceDropdown, setShowServiceDropdown] = useState(false)
 
   const handleAddService = () => {
     if (newService.name && newService.duration && newService.price) {
@@ -171,19 +172,34 @@ export default function BusinessServices() {
             <div className={styles.modalBody}>
               <div className={styles.formGroup}>
                 <label htmlFor="serviceName">Service Name</label>
-                <select
-                  id="serviceName"
-                  className={styles.selectInput}
-                  value={newService.name}
-                  onChange={(e) => setNewService({ ...newService, name: e.target.value })}
-                >
-                  <option value="">Select a service...</option>
-                  {availableServices.map((service) => (
-                    <option key={service} value={service}>
-                      {service}
-                    </option>
-                  ))}
-                </select>
+                <div className={styles.customSelect}>
+                  <button
+                    type="button"
+                    className={styles.selectButton}
+                    onClick={() => setShowServiceDropdown(!showServiceDropdown)}
+                  >
+                    <span>{newService.name || 'Select a service...'}</span>
+                    <svg width="12" height="8" fill="none" viewBox="0 0 12 8">
+                      <path d="M1 1.5L6 6.5L11 1.5" stroke="#886385" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  {showServiceDropdown && (
+                    <div className={styles.dropdownMenu}>
+                      {availableServices.map((service) => (
+                        <div
+                          key={service}
+                          className={`${styles.dropdownItem} ${newService.name === service ? styles.dropdownItemActive : ''}`}
+                          onClick={() => {
+                            setNewService({ ...newService, name: service })
+                            setShowServiceDropdown(false)
+                          }}
+                        >
+                          {service}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className={styles.formRow}>

@@ -28,8 +28,8 @@ export default function BusinessSignupStep3() {
     // Clear session storage
     sessionStorage.removeItem('businessSignupStep1')
     sessionStorage.removeItem('businessSignupStep2')
-    // Redirect to dashboard (or show success and redirect to login for now)
-    router.push('/login')
+    // Redirect to business dashboard
+    router.push('/business/dashboard')
   }
 
   if (!step1Data || !step2Data) {
