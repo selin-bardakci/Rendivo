@@ -1,0 +1,297 @@
+/* Dashboard Container */
+.dashboardContainer {
+  min-height: calc(100vh - 400px);
+  background: var(--bg-light);
+  padding: 40px 16px;
+  font-family: 'Nunito', sans-serif;
+}
+
+.contentWrapper {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pageTitle {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.pageSubtitle {
+  font-size: 16px;
+  color: #886385;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.bookButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #df84dc;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+  min-height: 48px;
+}
+
+.bookButton:hover {
+  background: #d46ed1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+
+.bookIcon {
+  font-size: 20px;
+  font-weight: 400;
+}
+
+/* Section */
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 24px 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Appointments List */
+.appointmentsList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .appointmentsList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Appointment Card */
+.appointmentCard {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5dce4;
+  padding: 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appointmentCard:hover {
+  box-shadow: 0 4px 12px rgba(136, 99, 133, 0.1);
+  transform: translateY(-2px);
+}
+
+.pastCard {
+  opacity: 0.8;
+}
+
+/* Card Header */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.businessLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #df84dc 0%, #d46ed1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.cardHeaderInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.businessName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 4px 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.serviceName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #886385;
+  margin: 0;
+}
+
+/* Card Body */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoIcon {
+  font-size: 16px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.infoText {
+  font-size: 14px;
+  color: #181117;
+  line-height: 1.4;
+}
+
+/* Card Footer */
+.cardFooter {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f4f0f4;
+}
+
+.rescheduleBtn,
+.cancelBtn,
+.rebookBtn,
+.reviewBtn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+  border: 1px solid #e5dce4;
+}
+
+.rescheduleBtn,
+.rebookBtn {
+  background: white;
+  color: #df84dc;
+  border-color: #df84dc;
+}
+
+.rescheduleBtn:hover,
+.rebookBtn:hover {
+  background: #df84dc;
+  color: white;
+}
+
+.cancelBtn {
+  background: white;
+  color: #886385;
+}
+
+.cancelBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.reviewBtn {
+  background: white;
+  color: #181117;
+}
+
+.reviewBtn:hover {
+  background: #f8f6f8;
+  border-color: #df84dc;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5dce4;
+}
+
+.emptyState p {
+  font-size: 16px;
+  color: #886385;
+  margin: 0 0 20px 0;
+}
+
+.bookNowBtn {
+  padding: 12px 24px;
+  background: #df84dc;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+}
+
+.bookNowBtn:hover {
+  background: #d46ed1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pageTitle {
+    font-size: 1.75rem;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bookButton {
+    width: 100%;
+  }
+
+  .appointmentsList {
+    grid-template-columns: 1fr;
+  }
+}

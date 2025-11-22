@@ -1,0 +1,471 @@
+/* Page Container */
+.pageContainer {
+  min-height: 100vh;
+  background: var(--bg-light);
+  padding: 40px 16px;
+  font-family: 'Nunito', sans-serif;
+}
+
+.contentWrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page Header */
+.pageHeader {
+  margin-bottom: 40px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.pageSubtitle {
+  font-size: 16px;
+  color: #886385;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: #df84dc;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.25);
+}
+
+.addButton:hover {
+  background: #d46ed1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(223, 132, 220, 0.35);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+.addIcon {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* Services List */
+.servicesList {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: 1px solid #e5dce4;
+}
+
+.serviceItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f4f0f4;
+  transition: background 0.2s ease;
+}
+
+.serviceItem:last-child {
+  border-bottom: none;
+}
+
+.serviceItem:hover {
+  background: #f8f6f8;
+}
+
+.serviceLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.dragHandle {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #886385;
+  cursor: grab;
+  user-select: none;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.serviceInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.serviceName {
+  font-size: 16px;
+  font-weight: 500;
+  color: #181117;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.serviceDetails {
+  font-size: 14px;
+  font-weight: 400;
+  color: #886385;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.serviceActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.serviceItem:hover .serviceActions {
+  opacity: 1;
+}
+
+.editBtn,
+.deleteBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.editBtn {
+  background: transparent;
+  color: #886385;
+}
+
+.editBtn:hover {
+  background: #f4f0f4;
+}
+
+.deleteBtn {
+  background: transparent;
+  color: #dc2626;
+}
+
+.deleteBtn:hover {
+  background: #fee2e2;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(24, 17, 23, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid #f4f0f4;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #181117;
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #886385;
+  font-size: 20px;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: #f4f0f4;
+  color: #181117;
+}
+
+.modalBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #181117;
+}
+
+.formGroup input {
+  padding: 12px 12px;
+  border: 1px solid #e5dce4;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: 'Nunito', sans-serif;
+  color: #181117;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.formGroup input::placeholder {
+  color: #886385;
+  opacity: 0.5;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #df84dc;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.1);
+}
+
+.selectInput {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px;
+  border: 1px solid #e5dce4;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: 'Nunito', sans-serif;
+  color: #181117;
+  transition: all 0.2s;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23886385' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  line-height: 1.5;
+}
+
+.selectInput:focus {
+  outline: none;
+  border-color: #df84dc;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.1);
+}
+
+.selectInput option {
+  padding: 12px 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  color: #181117;
+  background: white;
+  line-height: 1.8;
+}
+
+.selectInput option:hover {
+  background: #f8f6f8;
+  color: #df84dc;
+}
+
+.selectInput option:checked {
+  background: linear-gradient(0deg, #f8f6f8 0%, #f8f6f8 100%);
+  color: #df84dc;
+  font-weight: 600;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #f4f0f4;
+}
+
+.cancelBtn {
+  padding: 12px 24px;
+  background: transparent;
+  color: #886385;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #e5dce4;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+}
+
+.cancelBtn:hover {
+  background: #f8f6f8;
+  border-color: #df84dc;
+}
+
+.saveBtn {
+  padding: 12px 24px;
+  background: #df84dc;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+}
+
+.saveBtn:hover {
+  background: #d46ed1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 24px 16px;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .addButton {
+    width: 100%;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pageTitle {
+    font-size: 1.75rem;
+  }
+
+  .serviceActions {
+    opacity: 1;
+  }
+  
+  .dragHandle {
+    display: none;
+  }
+}

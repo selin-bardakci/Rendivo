@@ -9,7 +9,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
   const [messages, setMessages] = useState<any>(null)
 
-  useEffect(() => {
+ /* useEffect(() => {
     const u = getCurrentUser()
     if (!u) {
       router.push('/login')
@@ -27,7 +27,7 @@ export default function DashboardPage() {
       unsubscribe && unsubscribe()
     }
   }, [])
-
+*/
   return (
     <Layout>
       <div className="card">
