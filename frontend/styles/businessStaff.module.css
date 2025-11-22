@@ -1,0 +1,757 @@
+/* Business Staff Management Page */
+
+.pageContainer {
+  min-height: 100vh;
+  background: var(--bg-light);
+  padding: 40px 16px;
+}
+
+.contentWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pageSubtitle {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #886385;
+  margin: 0;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #df84dc;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(223, 132, 220, 0.2);
+}
+
+.addButton:hover {
+  background: #d66dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+}
+
+/* Filter Section */
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .filterSection {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 320px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: #886385;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px 0 48px;
+  border: 1px solid #e5dce4;
+  border-radius: 12px;
+  background: white;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #181117;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #df84dc;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.1);
+}
+
+.searchInput::placeholder {
+  color: #886385;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+/* Custom Select Dropdown */
+.customSelect {
+  position: relative;
+}
+
+.selectButton {
+  height: 48px;
+  padding: 0 40px 0 16px;
+  border: 1px solid #e5dce4;
+  border-radius: 12px;
+  background: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #181117;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.selectButton:hover {
+  background-color: #f8f6f8;
+  border-color: #d1c6cf;
+}
+
+.selectButton:focus {
+  outline: none;
+  border-color: #df84dc;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.1);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5dce4;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #181117;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-bottom: 1px solid #f8f6f8;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: #f8f6f8;
+  color: #df84dc;
+}
+
+.dropdownItemActive {
+  background: linear-gradient(to right, rgba(223, 132, 220, 0.1), rgba(223, 132, 220, 0.05));
+  color: #df84dc;
+  font-weight: 700;
+}
+
+.dropdownItemActive:hover {
+  background: linear-gradient(to right, rgba(223, 132, 220, 0.15), rgba(223, 132, 220, 0.08));
+}
+
+/* Remove old filter select styles */
+.filterSelect {
+  display: none;
+}
+
+/* Table */
+.tableContainer {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e5dce4;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: white;
+}
+
+.table th {
+  padding: 16px 24px;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #886385;
+  border-bottom: 1px solid #e5dce4;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #e5dce4;
+  transition: background 0.2s;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #f8f6f8;
+}
+
+.table td {
+  padding: 16px 24px;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #181117;
+}
+
+.roleCell {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #886385;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.statusActive {
+  background: rgba(93, 155, 155, 0.15);
+  color: #5D9B9B;
+}
+
+.statusActive .statusDot {
+  background: #5D9B9B;
+}
+
+.statusInactive {
+  background: rgba(245, 166, 35, 0.15);
+  color: #F5A623;
+}
+
+.statusInactive .statusDot {
+  background: #F5A623;
+}
+
+.viewButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #886385;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewButton:hover {
+  background: rgba(223, 132, 220, 0.1);
+  color: #df84dc;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.deleteButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #886385;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+/* Business ID Section */
+.businessIdSection {
+  margin-top: 40px;
+}
+
+.businessIdCard {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e5dce4;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.businessIdHeader {
+  margin-bottom: 20px;
+}
+
+.businessIdTitle {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 8px 0;
+}
+
+.businessIdDescription {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #886385;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.businessIdDisplay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f6f8;
+  border-radius: 12px;
+  border: 1px dashed #e5dce4;
+}
+
+.businessIdCode {
+  flex: 1;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #df84dc;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+}
+
+.copyButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  background: white;
+  color: #886385;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e5dce4;
+}
+
+.copyButton:hover {
+  background: #df84dc;
+  color: white;
+  border-color: #df84dc;
+  transform: scale(1.05);
+}
+
+.copyButton:active {
+  transform: scale(0.95);
+}
+
+/* Business ID Modal Content */
+.businessIdModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.businessIdModalText {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #886385;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.businessIdModalText strong {
+  color: #181117;
+  font-weight: 700;
+}
+
+.copySuccessMessage {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #059669;
+  text-align: center;
+  margin: 0;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Delete Confirmation Modal */
+.confirmModal {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  text-align: center;
+}
+
+.confirmIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.confirmTitle {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 12px 0;
+}
+
+.confirmText {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #886385;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.cancelButton {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid #e5dce4;
+  background: white;
+  color: #181117;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton:hover {
+  background: #f8f6f8;
+}
+
+.confirmDeleteButton {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: #dc2626;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirmDeleteButton:hover {
+  background: #b91c1c;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e5dce4;
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0;
+}
+
+.closeButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #886385;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background: #f8f6f8;
+  color: #181117;
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.staffDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5dce4;
+}
+
+.modalAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.modalName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.modalRole {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #886385;
+  margin: 0;
+}
+
+.detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #886385;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #181117;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filterSection {
+    flex-direction: column;
+  }
+
+  .searchWrapper {
+    max-width: 100%;
+  }
+
+  .filters {
+    width: 100%;
+  }
+
+  .filterSelect {
+    flex: 1;
+  }
+
+  .tableContainer {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 600px;
+  }
+
+  .businessIdCode {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .pageContainer {
+    padding: 24px 16px;
+  }
+
+  .businessIdDisplay {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .businessIdCode {
+    text-align: center;
+  }
+
+  .copyButton {
+    width: 100%;
+  }
+}

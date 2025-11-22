@@ -351,6 +351,7 @@
   background-repeat: no-repeat;
   background-position: right 16px center;
   line-height: 1.5;
+  display: none;
 }
 
 .selectInput:focus {
@@ -377,6 +378,106 @@
   background: linear-gradient(0deg, #f8f6f8 0%, #f8f6f8 100%);
   color: #df84dc;
   font-weight: 600;
+}
+
+/* Custom Select Dropdown */
+.customSelect {
+  position: relative;
+  width: 100%;
+}
+
+.selectButton {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #e5dce4;
+  border-radius: 8px;
+  background: white;
+  font-size: 15px;
+  font-weight: 500;
+  color: #181117;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+
+.selectButton span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #181117;
+}
+
+.selectButton:hover {
+  background-color: #f8f6f8;
+  border-color: #d1c6cf;
+}
+
+.selectButton:focus {
+  outline: none;
+  border-color: #df84dc;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.1);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5dce4;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #181117;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-bottom: 1px solid #f8f6f8;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: #f8f6f8;
+  color: #df84dc;
+}
+
+.dropdownItemActive {
+  background: linear-gradient(to right, rgba(223, 132, 220, 0.1), rgba(223, 132, 220, 0.05));
+  color: #df84dc;
+  font-weight: 700;
+}
+
+.dropdownItemActive:hover {
+  background: linear-gradient(to right, rgba(223, 132, 220, 0.15), rgba(223, 132, 220, 0.08));
 }
 
 .formRow {
