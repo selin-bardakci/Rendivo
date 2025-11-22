@@ -21,6 +21,16 @@
   animation: fadeInUp 0.8s ease-out;
 }
 
+/* Step 2 - Wider Layout */
+.mainContent.wideLayout {
+  max-width: 720px;
+}
+
+/* Step 3 - Custom Layout for progress bar */
+.mainContent.step3Layout {
+  max-width: 490px;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -97,6 +107,22 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* Step 3 - Fixed width progress bar */
+.progressSectionStep3 {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 490px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.progressSectionStep3 .progressBarContainer {
+  max-width: 490px;
 }
 
 .progressHeader {
@@ -232,6 +258,86 @@
 
 .passwordToggle:hover {
   color: #df84dc;
+}
+
+/* Grid Layouts */
+.gridTwo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .gridTwo {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.gridThree {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .gridThree {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* Sections */
+.addressSection,
+.contactSection,
+.logoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.subsectionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #181117;
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.optionalText {
+  font-weight: 400;
+  color: #886385;
+}
+
+/* Upload Placeholder */
+.uploadPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 2px dashed #e5dce4;
+  border-radius: 8px;
+  background: #f8f6f8;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.uploadIcon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.uploadText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #181117;
+  margin: 0 0 4px 0;
+}
+
+.uploadSubtext {
+  font-size: 14px;
+  color: #886385;
+  margin: 0;
 }
 
 /* Password Strength Indicator */
@@ -420,4 +526,239 @@
   .sectionTitle {
     font-size: 1.25rem;
   }
+}
+
+/* Step 3 - Success Page Styles */
+.successIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 32px 0 24px;
+  animation: scaleIn 0.6s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.successHeader {
+  text-align: center;
+  margin-bottom: 32px;
+  max-width: 490px;
+  width: 100%;
+}
+
+.successHeader h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 12px 0;
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.successHeader p {
+  font-size: 16px;
+  color: #886385;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.summaryCard {
+  width: 100%;
+  max-width: 490px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5dce4;
+  padding: 24px;
+  margin-bottom: 32px;
+  animation: fadeIn 0.6s ease-out 0.2s;
+  animation-fill-mode: both;
+}
+
+.summaryTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #181117;
+  margin: 0 0 8px 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.summarySubtitle {
+  font-size: 14px;
+  color: #886385;
+  margin: 0 0 20px 0;
+}
+
+.summaryDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+@media (min-width: 640px) {
+  .summaryItem {
+    flex-direction: row;
+    gap: 8px;
+  }
+}
+
+.summaryLabel {
+  font-weight: 600;
+  color: #181117;
+  min-width: 140px;
+}
+
+.summaryValue {
+  color: #886385;
+}
+
+.nextStepsSection {
+  width: 100%;
+  max-width: 490px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.nextStepsTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #181117;
+  margin: 0 0 12px 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.nextStepsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  animation: fadeIn 0.6s ease-out 0.4s;
+  animation-fill-mode: both;
+}
+
+@media (min-width: 640px) {
+  .nextStepsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.optionButton,
+.nextStepButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #e5dce4;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+  min-height: 44px;
+}
+
+.optionButton:hover,
+.nextStepButton:hover {
+  background: #f8f6f8;
+  border-color: #df84dc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.15);
+}
+
+.optionButton:active,
+.nextStepButton:active {
+  transform: translateY(0);
+}
+
+.nextStepIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nextStepIcon img {
+  width: 28px;
+  height: 28px;
+}
+
+.nextStepText {
+  font-size: 16px;
+  font-weight: 700;
+  color: #181117;
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.finalActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 490px;
+  margin-top: 8px;
+  animation: fadeIn 0.6s ease-out 0.6s;
+  animation-fill-mode: both;
+}
+
+.dashboardButton {
+  width: 100%;
+  padding: 10px 40px;
+  background: #df84dc;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.3);
+  min-height: 44px;
+}
+
+
+.dashboardButton:hover {
+  background: #d46ed1;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(223, 132, 220, 0.4);
+}
+
+.dashboardButton:active {
+  transform: translateY(0);
+}
+
+@media (min-width: 640px) {
+  .dashboardButton {
+    width: auto;
+  }
+}
+
+.editLink {
+  font-size: 14px;
+  color: #886385;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.editLink:hover {
+  color: #df84dc;
+  text-decoration: underline;
 }
