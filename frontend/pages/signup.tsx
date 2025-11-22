@@ -39,7 +39,7 @@ export default function SignUp() {
             </Link>
 
             {/* Business Owner Card */}
-            <Link href="/signup/business" className={styles.roleCard}>
+            <Link href="/signup/business/step1" className={styles.roleCard}>
               <div className={styles.icon}>
                 <Image src="/ikonlar/store.svg" alt="Business" width={48} height={48} />
               </div>
