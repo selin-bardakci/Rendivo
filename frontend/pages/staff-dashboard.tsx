@@ -45,9 +45,7 @@ export default function StaffDashboardPage() {
       setLoading(false)
     }
   }
-      id: 4,
-      clientName: 'David Wilson',
-      service: 'Haircut',
+
   // Get appointments for selected date
   const getAppointmentsForDate = (date: Date) => {
     return appointments.filter(apt => {
@@ -227,6 +225,7 @@ export default function StaffDashboardPage() {
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           {/* Right Sidebar - Today's Schedule */}
@@ -283,7 +282,6 @@ export default function StaffDashboardPage() {
               )}
             </div>
           </div>
-          )}
         </div>
       </div>
     </Layout>
