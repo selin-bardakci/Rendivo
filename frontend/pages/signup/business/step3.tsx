@@ -1,16 +1,25 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import Layout from '../../../components/Layout'
 import styles from '../../../styles/businessSignup.module.css'
+import { registerBusiness } from '../../../lib/auth'
 
 export default function BusinessSignupStep3() {
   const router = useRouter()
   const [step1Data, setStep1Data] = useState<any>(null)
   const [step2Data, setStep2Data] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [businessId, setBusinessId] = useState<string>('')
+  const submittedRef = useRef(false)
 
   useEffect(() => {
+    // Prevent double submission in React StrictMode
+    if (submittedRef.current) return;
+    
     // Load previous steps data
     const step1 = sessionStorage.getItem('businessSignupStep1')
     const step2 = sessionStorage.getItem('businessSignupStep2')
@@ -20,19 +29,99 @@ export default function BusinessSignupStep3() {
       return
     }
 
-    setStep1Data(JSON.parse(step1))
-    setStep2Data(JSON.parse(step2))
-  }, [router])
+    const parsedStep1 = JSON.parse(step1)
+    const parsedStep2 = JSON.parse(step2)
+    
+    setStep1Data(parsedStep1)
+    setStep2Data(parsedStep2)
+
+    // Mark as submitted and automatically submit registration
+    submittedRef.current = true;
+    submitRegistration(parsedStep1, parsedStep2)
+  }, [])
+
+  const submitRegistration = async (step1: any, step2: any) => {
+    if (loading) return; // Prevent duplicate submissions
+    
+    setLoading(true)
+    setError(null)
+
+    try {
+      const registrationData = {
+        email: step1.email,
+        password: step1.password,
+        fullName: step1.fullName,
+        businessName: step2.businessName,
+        businessType: step2.businessType,
+        address: step2.address,
+        city: step2.city,
+        state: step2.state,
+        zipCode: step2.zipCode,
+        phone: step2.phone,
+        website: ''
+      }
+
+      console.log('Submitting registration data:', JSON.stringify(registrationData, null, 2))
+      const response = await registerBusiness(registrationData)
+      setBusinessId(response.business.businessId)
+      setSuccess(true)
+      
+      // Clear session storage
+      sessionStorage.removeItem('businessSignupStep1')
+      sessionStorage.removeItem('businessSignupStep2')
+    } catch (err: any) {
+      console.error('Registration error:', err)
+      console.error('Error response:', err?.response)
+      console.error('Error response data:', err?.response?.data)
+      setError(err?.response?.data?.message || err.message || 'Registration failed')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleGoToDashboard = () => {
-    // Clear session storage
-    sessionStorage.removeItem('businessSignupStep1')
-    sessionStorage.removeItem('businessSignupStep2')
-    // Redirect to business dashboard
     router.push('/business/dashboard')
   }
 
-  if (!step1Data || !step2Data) {
+  if (loading) {
+    return (
+      <Layout noFooterMargin>
+        <div className={styles.pageContainer}>
+          <main className={`${styles.mainContent} ${styles.step3Layout}`}>
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '24px' }}>⏳</div>
+              <h2>Creating your business account...</h2>
+              <p style={{ color: '#886385' }}>Please wait a moment</p>
+            </div>
+          </main>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout noFooterMargin>
+        <div className={styles.pageContainer}>
+          <main className={`${styles.mainContent} ${styles.step3Layout}`}>
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '24px', color: '#dc2626' }}>❌</div>
+              <h2>Registration Failed</h2>
+              <p style={{ color: '#dc2626', marginBottom: '24px' }}>{error}</p>
+              <button 
+                onClick={() => router.push('/signup/business/step1')}
+                className={styles.dashboardButton}
+              >
+                Try Again
+              </button>
+            </div>
+          </main>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (!step1Data || !step2Data || !success) {
     return null
   }
 
@@ -75,6 +164,17 @@ export default function BusinessSignupStep3() {
                 <span className={styles.summaryLabel}>Business Name:</span>
                 <span className={styles.summaryValue}>{step2Data.businessName}</span>
               </div>
+              {businessId && (
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Business ID:</span>
+                  <span className={styles.summaryValue} style={{ fontWeight: 600, color: '#df84dc' }}>
+                    {businessId}
+                  </span>
+                  <p style={{ fontSize: '12px', color: '#886385', marginTop: '4px' }}>
+                    Share this ID with your staff members so they can join your team
+                  </p>
+                </div>
+              )}
               <div className={styles.summaryItem}>
                 <span className={styles.summaryLabel}>Contact Email:</span>
                 <span className={styles.summaryValue}>{step2Data.publicEmail}</span>

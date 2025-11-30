@@ -1,12 +1,17 @@
 import React, { useState } from 'react'
+import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import styles from '../../styles/auth.module.css'
 import Link from 'next/link'
 import Image from 'next/image'
+import { registerCustomer } from '../../lib/auth'
 
 export default function CustomerSignup() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -14,6 +19,22 @@ export default function CustomerSignup() {
     phone: '',
     password: ''
   })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      await registerCustomer(formData)
+      // Redirect to customer dashboard on success
+      router.push('/customer/dashboard')
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err.message || 'Registration failed')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Password strength calculator
   const getPasswordStrength = (pwd: string) => {
@@ -36,7 +57,20 @@ export default function CustomerSignup() {
           </div>
 
           {/* Form */}
-          <form className={styles.authForm}>
+          <form onSubmit={handleSubmit} className={styles.authForm}>
+            {error && (
+              <div style={{ 
+                padding: '12px', 
+                background: '#fee2e2', 
+                border: '1px solid #fecaca', 
+                borderRadius: '8px', 
+                color: '#dc2626',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                {error}
+              </div>
+            )}
             {/* First Name & Last Name */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className={styles.formGroup} style={{ marginBottom: 0 }}>
@@ -177,8 +211,8 @@ export default function CustomerSignup() {
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className={styles.submitButton}>
-              Create Account
+            <button type="submit" className={styles.submitButton} disabled={loading}>
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 

@@ -1,15 +1,48 @@
 import React, { useState } from 'react'
+import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import styles from '../../styles/auth.module.css'
 import Link from 'next/link'
 import Image from 'next/image'
+import { registerStaff } from '../../lib/auth'
 
 export default function StaffSignup() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    businessId: ''
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
+    try {
+      await registerStaff(formData)
+      // Redirect to staff dashboard on success
+      router.push('/staff-dashboard')
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err.message || 'Registration failed')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Password strength calculator
   const getPasswordStrength = (pwd: string) => {
@@ -34,7 +67,20 @@ export default function StaffSignup() {
           </div>
 
           {/* Form */}
-          <form className={styles.authForm}>
+          <form onSubmit={handleSubmit} className={styles.authForm}>
+            {error && (
+              <div style={{ 
+                padding: '12px', 
+                background: '#fee2e2', 
+                border: '1px solid #fecaca', 
+                borderRadius: '8px', 
+                color: '#dc2626',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                {error}
+              </div>
+            )}
             {/* Full Name */}
             <div className={styles.formGroup}>
               <label htmlFor="full-name">Full Name</label>
@@ -42,6 +88,9 @@ export default function StaffSignup() {
                 type="text"
                 id="full-name"
                 placeholder="Enter your full name"
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                required
               />
             </div>
 
@@ -52,6 +101,9 @@ export default function StaffSignup() {
                 type="email"
                 id="email"
                 placeholder="Enter your email address"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
               />
             </div>
 
@@ -64,7 +116,11 @@ export default function StaffSignup() {
                   id="password"
                   placeholder="Create a password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setFormData({ ...formData, password: e.target.value })
+                  }}
+                  required
                 />
                 <button
                   type="button"
@@ -124,6 +180,7 @@ export default function StaffSignup() {
                   placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
@@ -159,6 +216,9 @@ export default function StaffSignup() {
                 type="text"
                 id="business-id"
                 placeholder="Enter your Business ID"
+                value={formData.businessId}
+                onChange={(e) => setFormData({ ...formData, businessId: e.target.value })}
+                required
               />
             </div>
 
@@ -192,8 +252,8 @@ export default function StaffSignup() {
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className={styles.submitButton}>
-              Create Account &amp; Join Business
+            <button type="submit" className={styles.submitButton} disabled={loading}>
+              {loading ? 'Creating Account...' : 'Create Account & Join Business'}
             </button>
           </form>
 

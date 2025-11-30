@@ -19,8 +19,18 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     try {
-      await login(email, password)
-      router.push('/dashboard')
+      const { user } = await login(email, password)
+      
+      // Redirect based on user role
+      if (user.role === 'business_owner') {
+        router.push('/business/dashboard')
+      } else if (user.role === 'staff') {
+        router.push('/staff-dashboard')
+      } else if (user.role === 'customer') {
+        router.push('/customer/dashboard')
+      } else {
+        router.push('/dashboard')
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Login failed')
     } finally {

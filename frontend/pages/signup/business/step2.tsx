@@ -8,11 +8,12 @@ export default function BusinessSignupStep2() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     businessName: '',
-    streetAddress: '',
+    businessType: '',
+    address: '',
     city: '',
     state: '',
-    postalCode: '',
-    phoneNumber: '',
+    zipCode: '',
+    phone: '',
     publicEmail: '',
     logoUrl: '' // Placeholder for future file upload
   })
@@ -72,6 +73,18 @@ export default function BusinessSignupStep2() {
                   />
                 </div>
 
+                {/* Business Type */}
+                <div className={styles.formGroup}>
+                  <label htmlFor="business-type">Business Type</label>
+                  <input
+                    type="text"
+                    id="business-type"
+                    placeholder="e.g. Salon, Spa, Barbershop, Clinic"
+                    value={formData.businessType}
+                    onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
+                  />
+                </div>
+
                 {/* Address Section */}
                 <div className={styles.addressSection}>
                   <h3 className={styles.subsectionTitle}>Business Address</h3>
@@ -83,8 +96,8 @@ export default function BusinessSignupStep2() {
                       type="text"
                       id="street-address"
                       placeholder="e.g. 123 Main St"
-                      value={formData.streetAddress}
-                      onChange={(e) => setFormData({ ...formData, streetAddress: e.target.value })}
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       required
                     />
                   </div>
@@ -119,8 +132,8 @@ export default function BusinessSignupStep2() {
                         type="text"
                         id="postal-code"
                         placeholder="Your postal code"
-                        value={formData.postalCode}
-                        onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                        value={formData.zipCode}
+                        onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
                         required
                       />
                     </div>
@@ -139,8 +152,8 @@ export default function BusinessSignupStep2() {
                         type="tel"
                         id="phone-number"
                         placeholder="(123) 456-7890"
-                        value={formData.phoneNumber}
-                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         required
                       />
                     </div>
