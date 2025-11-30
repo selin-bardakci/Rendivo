@@ -1,6 +1,9 @@
 import User from './User';
 import Business from './Business';
 import StaffMember from './StaffMember';
+import Service from './Service';
+import Appointment from './Appointment';
+import AppointmentService from './AppointmentService';
 
 // Define associations
 User.hasOne(Business, {
@@ -33,4 +36,61 @@ StaffMember.belongsTo(Business, {
   as: 'business',
 });
 
-export { User, Business, StaffMember };
+// Service associations
+Business.hasMany(Service, {
+  foreignKey: 'businessId',
+  as: 'services',
+});
+
+Service.belongsTo(Business, {
+  foreignKey: 'businessId',
+  as: 'business',
+});
+
+// Appointment associations
+User.hasMany(Appointment, {
+  foreignKey: 'customerId',
+  as: 'appointments',
+});
+
+Appointment.belongsTo(User, {
+  foreignKey: 'customerId',
+  as: 'customer',
+});
+
+Business.hasMany(Appointment, {
+  foreignKey: 'businessId',
+  as: 'appointments',
+});
+
+Appointment.belongsTo(Business, {
+  foreignKey: 'businessId',
+  as: 'business',
+});
+
+StaffMember.hasMany(Appointment, {
+  foreignKey: 'staffId',
+  as: 'appointments',
+});
+
+Appointment.belongsTo(StaffMember, {
+  foreignKey: 'staffId',
+  as: 'staff',
+});
+
+// Appointment-Service many-to-many relationship
+Appointment.belongsToMany(Service, {
+  through: AppointmentService,
+  foreignKey: 'appointmentId',
+  otherKey: 'serviceId',
+  as: 'services',
+});
+
+Service.belongsToMany(Appointment, {
+  through: AppointmentService,
+  foreignKey: 'serviceId',
+  otherKey: 'appointmentId',
+  as: 'appointments',
+});
+
+export { User, Business, StaffMember, Service, Appointment, AppointmentService };

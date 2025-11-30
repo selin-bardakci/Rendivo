@@ -1,18 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Layout from '../../components/Layout'
 import styles from '../../styles/businessDashboard.module.css'
+import { serviceApi } from '../../lib/api'
+import { getCurrentUser } from '../../lib/auth'
 
 interface Service {
-  id: string
+  id: number
   name: string
+  description?: string
   duration: number
   price: number
+  isActive: boolean
 }
 
 export default function BusinessServices() {
   const router = useRouter()
+  const [user, setUser] = useState<any>(null)
+  const [services, setServices] = useState<Service[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
   // Available services from discover page
   const availableServices = [
@@ -30,44 +38,86 @@ export default function BusinessServices() {
     'Pedicure'
   ]
   
-  const [services, setServices] = useState<Service[]>([
-    { id: '1', name: 'Women\'s Haircut', duration: 45, price: 50 },
-    { id: '2', name: 'Men\'s Haircut', duration: 30, price: 35 },
-    { id: '3', name: 'Hair Coloring', duration: 120, price: 150 },
-    { id: '4', name: 'Highlights', duration: 90, price: 120 },
-    { id: '5', name: 'Blowout', duration: 45, price: 40 },
-  ])
   const [showModal, setShowModal] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [newService, setNewService] = useState({
     name: '',
+    description: '',
     duration: '',
     price: ''
   })
   const [showServiceDropdown, setShowServiceDropdown] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleAddService = () => {
-    if (newService.name && newService.duration && newService.price) {
+  // Fetch user and services on mount
+  useEffect(() => {
+    const u = getCurrentUser()
+    if (!u) {
+      router.push('/login')
+      return
+    }
+    
+    if (u.role !== 'business_owner') {
+      router.push('/')
+      return
+    }
+    
+    setUser(u)
+    fetchServices()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const fetchServices = async () => {
+    try {
+      setLoading(true)
+      const response = await serviceApi.getOwnerServices()
+      setServices(response.data)
+    } catch (err: any) {
+      console.error('Error fetching services:', err)
+      setError(err.response?.data?.message || 'Failed to load services')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddService = async () => {
+    if (!newService.name || !newService.duration || !newService.price) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      
       if (editingService) {
         // Update existing service
-        setServices(services.map(s => 
-          s.id === editingService.id 
-            ? { ...editingService, name: newService.name, duration: parseInt(newService.duration), price: parseFloat(newService.price) }
-            : s
-        ))
-        setEditingService(null)
+        await serviceApi.update(editingService.id, {
+          name: newService.name,
+          description: newService.description,
+          price: parseFloat(newService.price),
+          duration: parseInt(newService.duration),
+        })
       } else {
         // Add new service
-        const service: Service = {
-          id: Date.now().toString(),
+        await serviceApi.create({
           name: newService.name,
+          description: newService.description,
+          price: parseFloat(newService.price),
           duration: parseInt(newService.duration),
-          price: parseFloat(newService.price)
-        }
-        setServices([...services, service])
+        })
       }
-      setNewService({ name: '', duration: '', price: '' })
+      
+      // Refresh services
+      await fetchServices()
+      
+      setNewService({ name: '', description: '', duration: '', price: '' })
       setShowModal(false)
+      setEditingService(null)
+    } catch (err: any) {
+      console.error('Error saving service:', err)
+      alert(err.response?.data?.message || 'Failed to save service')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -75,14 +125,23 @@ export default function BusinessServices() {
     setEditingService(service)
     setNewService({
       name: service.name,
+      description: service.description || '',
       duration: service.duration.toString(),
       price: service.price.toString()
     })
     setShowModal(true)
   }
 
-  const handleDeleteService = (id: string) => {
-    setServices(services.filter(s => s.id !== id))
+  const handleDeleteService = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this service?')) return
+    
+    try {
+      await serviceApi.delete(id)
+      await fetchServices()
+    } catch (err: any) {
+      console.error('Error deleting service:', err)
+      alert(err.response?.data?.message || 'Failed to delete service')
+    }
   }
 
   return (
@@ -100,7 +159,7 @@ export default function BusinessServices() {
                 className={styles.addButton}
                 onClick={() => {
                   setEditingService(null)
-                  setNewService({ name: '', duration: '', price: '' })
+                  setNewService({ name: '', description: '', duration: '', price: '' })
                   setShowModal(true)
                 }}
               >
@@ -110,38 +169,63 @@ export default function BusinessServices() {
             </div>
           </header>
 
+          {/* Loading State */}
+          {loading && (
+            <div className={styles.loading}>
+              <p>Loading services...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className={styles.error}>
+              <p>{error}</p>
+            </div>
+          )}
+
           {/* Services List */}
-          <div className={styles.servicesList}>
-            {services.map((service) => (
-              <div key={service.id} className={styles.serviceItem}>
-                <div className={styles.serviceLeft}>
-                  <div className={styles.dragHandle}>
-                    <span>::</span>
-                  </div>
-                  <div className={styles.serviceInfo}>
-                    <p className={styles.serviceName}>{service.name}</p>
-                    <p className={styles.serviceDetails}>
-                      {service.duration} min • ${service.price.toFixed(2)}
-                    </p>
-                  </div>
+          {!loading && !error && (
+            <div className={styles.servicesList}>
+              {services.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>No services yet. Add your first service to get started!</p>
                 </div>
-                <div className={styles.serviceActions}>
-                  <button 
-                    className={styles.editBtn}
-                    onClick={() => handleEditService(service)}
-                  >
-                    <Image src="/ikonlar/edit.svg" alt="Edit" width={20} height={20} />
-                  </button>
-                  <button 
-                    className={styles.deleteBtn}
-                    onClick={() => handleDeleteService(service.id)}
-                  >
-                    <Image src="/ikonlar/delete.svg" alt="Delete" width={20} height={20} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ) : (
+                services.map((service) => (
+                  <div key={service.id} className={styles.serviceItem}>
+                    <div className={styles.serviceLeft}>
+                      <div className={styles.dragHandle}>
+                        <span>::</span>
+                      </div>
+                      <div className={styles.serviceInfo}>
+                        <p className={styles.serviceName}>{service.name}</p>
+                        {service.description && (
+                          <p className={styles.serviceDescription}>{service.description}</p>
+                        )}
+                        <p className={styles.serviceDetails}>
+                          {service.duration} min • ${Number(service.price).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={styles.serviceActions}>
+                      <button 
+                        className={styles.editBtn}
+                        onClick={() => handleEditService(service)}
+                      >
+                        <Image src="/ikonlar/edit.svg" alt="Edit" width={20} height={20} />
+                      </button>
+                      <button 
+                        className={styles.deleteBtn}
+                        onClick={() => handleDeleteService(service.id)}
+                      >
+                        <Image src="/ikonlar/delete.svg" alt="Delete" width={20} height={20} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -150,7 +234,7 @@ export default function BusinessServices() {
         <div className={styles.modalOverlay} onClick={() => {
           setShowModal(false)
           setEditingService(null)
-          setNewService({ name: '', duration: '', price: '' })
+          setNewService({ name: '', description: '', duration: '', price: '' })
         }}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
@@ -162,7 +246,7 @@ export default function BusinessServices() {
                 onClick={() => {
                   setShowModal(false)
                   setEditingService(null)
-                  setNewService({ name: '', duration: '', price: '' })
+                  setNewService({ name: '', description: '', duration: '', price: '' })
                 }}
               >
                 ✕
@@ -202,6 +286,17 @@ export default function BusinessServices() {
                 </div>
               </div>
 
+              <div className={styles.formGroup}>
+                <label htmlFor="description">Description (Optional)</label>
+                <textarea
+                  id="description"
+                  placeholder="Brief description of the service..."
+                  value={newService.description}
+                  onChange={(e) => setNewService({ ...newService, description: e.target.value })}
+                  rows={3}
+                />
+              </div>
+
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label htmlFor="duration">Duration (minutes)</label>
@@ -234,7 +329,7 @@ export default function BusinessServices() {
                 onClick={() => {
                   setShowModal(false)
                   setEditingService(null)
-                  setNewService({ name: '', duration: '', price: '' })
+                  setNewService({ name: '', description: '', duration: '', price: '' })
                 }}
               >
                 Cancel
@@ -242,8 +337,9 @@ export default function BusinessServices() {
               <button 
                 className={styles.saveBtn}
                 onClick={handleAddService}
+                disabled={submitting}
               >
-                {editingService ? 'Update Service' : 'Add Service'}
+                {submitting ? 'Saving...' : (editingService ? 'Update Service' : 'Add Service')}
               </button>
             </div>
           </div>

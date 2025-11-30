@@ -104,6 +104,40 @@
   border: 1px solid #e5dce4;
 }
 
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #886385;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5dce4;
+}
+
+.error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 24px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #886385;
+  font-size: 16px;
+}
+
+.serviceDescription {
+  font-size: 14px;
+  color: #886385;
+  margin: 4px 0 0 0;
+}
+
 .serviceItem {
   display: flex;
   align-items: center;

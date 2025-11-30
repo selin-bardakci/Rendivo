@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import styles from '../../styles/booking.module.css'
+import { businessApi, appointmentApi } from '../../lib/api'
 
 export default function BookingPage() {
   const router = useRouter()
@@ -11,37 +12,54 @@ export default function BookingPage() {
   const [selectedStaff, setSelectedStaff] = useState<number | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // Mock business data - replace with real API call
-  const business = {
-    id: Number(businessId),
-    name: 'Beauty Studio Downtown',
-    location: '123 Main St, New York, NY 10001'
+  // Real data from API
+  const [business, setBusiness] = useState<any>(null)
+  const [services, setServices] = useState<any[]>([])
+  const [staff, setStaff] = useState<any[]>([])
+
+  // Fetch business data
+  useEffect(() => {
+    if (!businessId) return
+
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const [businessRes, staffRes] = await Promise.all([
+          businessApi.getById(businessId as string),
+          businessApi.getStaff(businessId as string),
+        ])
+        
+        setBusiness(businessRes.data)
+        setServices(businessRes.data.services || [])
+        setStaff(staffRes.data)
+      } catch (err) {
+        console.error('Error fetching business data:', err)
+        setError('Failed to load business data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [businessId])
+
+  // Generate available time slots (9 AM - 6 PM)
+  const generateTimeSlots = () => {
+    const slots = []
+    for (let hour = 9; hour <= 18; hour++) {
+      const period = hour >= 12 ? 'PM' : 'AM'
+      const displayHour = hour > 12 ? hour - 12 : hour
+      slots.push(`${displayHour}:00 ${period}`)
+      if (hour < 18) slots.push(`${displayHour}:30 ${period}`)
+    }
+    return slots
   }
 
-  // Mock services data
-  const services = [
-    { id: 1, name: 'Haircut', price: 45, duration: '30 min' },
-    { id: 2, name: 'Hair Styling', price: 35, duration: '30 min' },
-    { id: 3, name: 'Hair Coloring', price: 120, duration: '90 min' },
-    { id: 4, name: 'Highlights', price: 150, duration: '120 min' },
-    { id: 5, name: 'Blowout', price: 40, duration: '30 min' },
-    { id: 6, name: 'Deep Conditioning', price: 25, duration: '20 min' }
-  ]
-
-  // Mock staff data
-  const staff = [
-    { id: 1, name: 'Sarah Johnson', specialty: 'Hair Stylist', rating: 4.9 },
-    { id: 2, name: 'Michael Chen', specialty: 'Color Specialist', rating: 4.8 },
-    { id: 3, name: 'Emma Davis', specialty: 'Senior Stylist', rating: 4.9 }
-  ]
-
-  // Mock available times
-  const availableTimes = [
-    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-    '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM',
-    '4:00 PM', '4:30 PM', '5:00 PM'
-  ]
+  const availableTimes = generateTimeSlots()
 
   const toggleService = (serviceId: number) => {
     setSelectedServices(prev =>
@@ -60,7 +78,7 @@ export default function BookingPage() {
   const getTotalDuration = () => {
     const durations = services
       .filter(s => selectedServices.includes(s.id))
-      .map(s => parseInt(s.duration))
+      .map(s => s.duration)
     return durations.reduce((sum, d) => sum + d, 0)
   }
 
@@ -83,17 +101,54 @@ export default function BookingPage() {
     }
   }
 
-  const handleConfirmBooking = () => {
-    // Add your booking confirmation logic here
-    console.log('Booking confirmed:', {
-      businessId,
-      services: selectedServices,
-      staff: selectedStaff,
-      date: selectedDate,
-      time: selectedTime
-    })
-    // Redirect to success page or appointments page
-    router.push('/appointments')
+  const handleConfirmBooking = async () => {
+    if (!selectedDate || !selectedTime || selectedServices.length === 0) {
+      setError('Please complete all required fields')
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      setError(null)
+
+      // Format the date and time
+      const appointmentDate = selectedDate.toISOString().split('T')[0]
+      
+      // Convert time from "9:00 AM" format to "09:00:00"
+      const [time, period] = selectedTime.split(' ')
+      let [hours, minutes] = time.split(':')
+      let hour = parseInt(hours)
+      if (period === 'PM' && hour !== 12) hour += 12
+      if (period === 'AM' && hour === 12) hour = 0
+      const startTime = `${hour.toString().padStart(2, '0')}:${minutes}:00`
+
+      // Calculate total duration and end time
+      const totalDuration = getTotalDuration()
+      
+      const startDate = new Date(`${appointmentDate}T${startTime}`)
+      const endDate = new Date(startDate.getTime() + totalDuration * 60000)
+      const endTime = endDate.toTimeString().split(' ')[0]
+
+      const appointmentData = {
+        businessId: Number(businessId),
+        staffId: selectedStaff,
+        appointmentDate,
+        startTime,
+        endTime,
+        serviceIds: selectedServices,
+        notes: ''
+      }
+
+      await appointmentApi.create(appointmentData)
+      
+      // Redirect to appointments page with success message
+      router.push('/appointments?success=true')
+    } catch (err: any) {
+      console.error('Error creating appointment:', err)
+      setError(err.response?.data?.message || 'Failed to create appointment')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   // Calendar logic
@@ -153,13 +208,31 @@ export default function BookingPage() {
     <Layout>
       <div className={styles.container}>
         <div className={styles.content}>
-          {/* Header */}
-          <div className={styles.header}>
-            <div>
-              <h1 className={styles.title}>Book Appointment</h1>
-              <p className={styles.businessName}>{business.name}</p>
+          {/* Loading State */}
+          {loading && (
+            <div className={styles.loading}>
+              <p>Loading...</p>
             </div>
-          </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className={styles.error}>
+              <p>{error}</p>
+              <button onClick={() => router.push('/discover')}>Back to Discover</button>
+            </div>
+          )}
+
+          {/* Main Content */}
+          {!loading && !error && business && (
+            <>
+              {/* Header */}
+              <div className={styles.header}>
+                <div>
+                  <h1 className={styles.title}>Book Appointment</h1>
+                  <p className={styles.businessName}>{business.businessName}</p>
+                </div>
+              </div>
 
           {/* Progress Steps */}
           <div className={styles.progressSteps}>
@@ -205,7 +278,7 @@ export default function BookingPage() {
                       </div>
                     </div>
                     <div className={styles.serviceDetails}>
-                      <span className={styles.serviceDuration}>{service.duration}</span>
+                      <span className={styles.serviceDuration}>{service.duration} min</span>
                       <span className={styles.servicePrice}>${service.price}</span>
                     </div>
                   </div>
@@ -246,14 +319,11 @@ export default function BookingPage() {
                       onClick={() => setSelectedStaff(member.id)}
                     >
                       <div className={styles.staffAvatar}>
-                        {member.name.split(' ').map(n => n[0]).join('')}
+                        {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
                       </div>
                       <div className={styles.staffInfo}>
-                        <h4 className={styles.staffName}>{member.name}</h4>
-                        <p className={styles.staffSpecialty}>{member.specialty}</p>
-                        <div className={styles.staffRating}>
-                          ★ {member.rating}
-                        </div>
+                        <h4 className={styles.staffName}>{member.user?.firstName} {member.user?.lastName}</h4>
+                        <p className={styles.staffSpecialty}>{member.position || 'Staff Member'}</p>
                       </div>
                       <div className={styles.staffCheckbox}>
                         {selectedStaff === member.id && (
@@ -333,8 +403,8 @@ export default function BookingPage() {
               <div className={styles.confirmationCard}>
                 <div className={styles.confirmSection}>
                   <h3 className={styles.confirmSectionTitle}>Business</h3>
-                  <p className={styles.confirmText}>{business.name}</p>
-                  <p className={styles.confirmSubtext}>{business.location}</p>
+                  <p className={styles.confirmText}>{business.businessName}</p>
+                  <p className={styles.confirmSubtext}>{business.address}, {business.city}, {business.state}</p>
                 </div>
 
                 <div className={styles.confirmSection}>
@@ -356,10 +426,10 @@ export default function BookingPage() {
                 <div className={styles.confirmSection}>
                   <h3 className={styles.confirmSectionTitle}>Staff Member</h3>
                   <p className={styles.confirmText}>
-                    {staff.find(s => s.id === selectedStaff)?.name}
+                    {staff.find(s => s.id === selectedStaff)?.user?.firstName} {staff.find(s => s.id === selectedStaff)?.user?.lastName}
                   </p>
                   <p className={styles.confirmSubtext}>
-                    {staff.find(s => s.id === selectedStaff)?.specialty}
+                    {staff.find(s => s.id === selectedStaff)?.position || 'Staff Member'}
                   </p>
                 </div>
 
@@ -401,11 +471,17 @@ export default function BookingPage() {
                 </svg>
               </button>
             ) : (
-              <button onClick={handleConfirmBooking} className={styles.confirmButton}>
-                Confirm Booking
+              <button 
+                onClick={handleConfirmBooking} 
+                disabled={submitting}
+                className={styles.confirmButton}
+              >
+                {submitting ? 'Booking...' : 'Confirm Booking'}
               </button>
             )}
           </div>
+          </>
+          )}
         </div>
       </div>
     </Layout>

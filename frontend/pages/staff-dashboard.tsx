@@ -3,99 +3,65 @@ import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import { getCurrentUser, logout } from '../lib/auth'
 import styles from '../styles/staffDashboard.module.css'
+import { appointmentApi } from '../lib/api'
 
 export default function StaffDashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
+  const [appointments, setAppointments] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Mock staff data - replace with real data from backend
-  const staffMember = {
-    name: 'Sarah Johnson',
-    role: 'Hair Stylist',
-    email: 'sarah.johnson@beautystudio.com',
-    initials: 'SJ'
+  // Fetch user and appointments
+  useEffect(() => {
+    const u = getCurrentUser()
+    if (!u) {
+      router.push('/login')
+      return
+    }
+    
+    if (u.role !== 'staff') {
+      router.push('/')
+      return
+    }
+    
+    setUser(u)
+    fetchAppointments()
+  }, [])
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true)
+      // For staff, we need to get appointments where they are assigned
+      // For now, using the general getAll which should filter by the logged-in user
+      const response = await appointmentApi.getStaffAppointments()
+      setAppointments(response.data)
+    } catch (err: any) {
+      console.error('Error fetching appointments:', err)
+      setError(err.response?.data?.message || 'Failed to load appointments')
+    } finally {
+      setLoading(false)
+    }
   }
-
-  // Mock appointments data - replace with real API call
-  const appointments = [
-    {
-      id: 1,
-      clientName: 'Emily Roberts',
-      service: 'Haircut & Styling',
-      date: new Date(2025, 10, 25),
-      time: '9:00 AM',
-      duration: 60,
-      status: 'confirmed'
-    },
-    {
-      id: 2,
-      clientName: 'Michael Brown',
-      service: 'Hair Coloring',
-      date: new Date(2025, 10, 25),
-      time: '11:00 AM',
-      duration: 90,
-      status: 'confirmed'
-    },
-    {
-      id: 3,
-      clientName: 'Jessica Lee',
-      service: 'Blowout',
-      date: new Date(2025, 10, 25),
-      time: '2:30 PM',
-      duration: 30,
-      status: 'confirmed'
-    },
-    {
       id: 4,
       clientName: 'David Wilson',
       service: 'Haircut',
-      date: new Date(2025, 10, 28),
-      time: '10:00 AM',
-      duration: 45,
-      status: 'confirmed'
-    },
-    {
-      id: 5,
-      clientName: 'Amanda Garcia',
-      service: 'Hair Styling',
-      date: new Date(2025, 10, 28),
-      time: '3:00 PM',
-      duration: 45,
-      status: 'confirmed'
-    }
-  ]
-
   // Get appointments for selected date
   const getAppointmentsForDate = (date: Date) => {
-    return appointments.filter(apt => 
-      apt.date.getDate() === date.getDate() &&
-      apt.date.getMonth() === date.getMonth() &&
-      apt.date.getFullYear() === date.getFullYear()
-    ).sort((a, b) => {
-      const timeA = new Date(`1970/01/01 ${a.time}`)
-      const timeB = new Date(`1970/01/01 ${b.time}`)
-      return timeA.getTime() - timeB.getTime()
+    return appointments.filter(apt => {
+      const aptDate = new Date(apt.appointmentDate)
+      return aptDate.getDate() === date.getDate() &&
+        aptDate.getMonth() === date.getMonth() &&
+        aptDate.getFullYear() === date.getFullYear()
+    }).sort((a, b) => {
+      return a.startTime.localeCompare(b.startTime)
     })
   }
 
   // Get dates with appointments
-  const appointmentDates = appointments.map(apt => apt.date)
-
-  useEffect(() => {
-    // Temporarily bypass auth for testing
-    const mockUser = { email: 'staff@example.com', role: 'staff' }
-    setUser(mockUser)
-    
-    // Uncomment for production
-    // const u = getCurrentUser()
-    // if (!u || u.role !== 'staff') {
-    //   router.push('/login')
-    //   return
-    // }
-    // setUser(u)
-  }, [])
+  const appointmentDates = appointments.map(apt => new Date(apt.appointmentDate))
 
   const handleLogout = async () => {
     await logout()
@@ -186,10 +152,12 @@ export default function StaffDashboardPage() {
           <div className={styles.sidebar}>
             <div className={styles.profileCard}>
               <div className={styles.profilePicture}>
-                <span className={styles.profileInitials}>{staffMember.initials}</span>
+                <span className={styles.profileInitials}>
+                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                </span>
               </div>
-              <h2 className={styles.staffName}>{staffMember.name}</h2>
-              <p className={styles.staffRole}>{staffMember.role}</p>
+              <h2 className={styles.staffName}>{user?.firstName} {user?.lastName}</h2>
+              <p className={styles.staffRole}>{user?.role === 'staff' ? 'Staff Member' : user?.role}</p>
 
               <button onClick={handleLogout} className={styles.logoutButton}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -211,6 +179,15 @@ export default function StaffDashboardPage() {
               </div>
             </div>
 
+            {loading && (
+              <div className={styles.loading}>Loading appointments...</div>
+            )}
+
+            {error && !loading && (
+              <div className={styles.error}>{error}</div>
+            )}
+
+            {!loading && !error && (
             <div className={styles.calendarCard}>
               <div className={styles.calendarHeader}>
                 <button onClick={() => changeMonth(-1)} className={styles.monthButton}>
@@ -268,25 +245,30 @@ export default function StaffDashboardPage() {
 
               {todaysAppointments.length > 0 ? (
                 <div className={styles.appointmentsList}>
-                  {todaysAppointments.map((appointment) => (
+                  {todaysAppointments.map((appointment) => {
+                    const serviceNames = appointment.services?.map((s: any) => s.name).join(', ') || 'Service'
+                    const timeDisplay = appointment.startTime?.slice(0, 5) || 'Time'
+                    const customerName = appointment.customer?.fullName || 'Customer'
+                    
+                    return (
                     <div key={appointment.id} className={styles.appointmentItem}>
                       <div className={styles.appointmentTime}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="12" cy="12" r="10" />
                           <polyline points="12 6 12 12 16 14" />
                         </svg>
-                        {appointment.time}
+                        {timeDisplay}
                       </div>
                       <div className={styles.appointmentDetails}>
-                        <h3 className={styles.clientName}>{appointment.clientName}</h3>
-                        <p className={styles.serviceName}>{appointment.service}</p>
-                        <span className={styles.duration}>{appointment.duration} min</span>
+                        <h3 className={styles.clientName}>{customerName}</h3>
+                        <p className={styles.serviceName}>{serviceNames}</p>
+                        <span className={styles.duration}>{appointment.totalDuration} min</span>
                       </div>
                       <div className={`${styles.statusBadge} ${styles[appointment.status]}`}>
                         {appointment.status}
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               ) : (
                 <div className={styles.noAppointments}>
@@ -301,6 +283,7 @@ export default function StaffDashboardPage() {
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
     </Layout>

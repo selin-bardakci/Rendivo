@@ -1,73 +1,83 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import styles from '../../styles/businessStaff.module.css'
+import { businessApi } from '../../lib/api'
+import { getCurrentUser } from '../../lib/auth'
 
 interface StaffMember {
-  id: string
-  name: string
-  role: string
-  status: 'active' | 'inactive'
-  email: string
-  phone: string
-  avatar: string
+  id: number
+  userId: number
+  businessId: number
+  position: string
+  isActive: boolean
+  joinedAt: string
+  user?: {
+    id: number
+    firstName: string
+    lastName: string
+    fullName: string
+    email: string
+    phone: string
+  }
 }
 
 export default function StaffManagementPage() {
   const router = useRouter()
-
-  // Sample staff data
-  const [staff, setStaff] = useState<StaffMember[]>([
-    {
-      id: '1',
-      name: 'Olivia Chen',
-      role: 'Senior Stylist',
-      status: 'active',
-      email: 'olivia.chen@example.com',
-      phone: '+1 (555) 123-4567',
-      avatar: 'https://i.pravatar.cc/150?img=1'
-    },
-    {
-      id: '2',
-      name: 'Benjamin Carter',
-      role: 'Massage Therapist',
-      status: 'active',
-      email: 'ben.carter@example.com',
-      phone: '+1 (555) 234-5678',
-      avatar: 'https://i.pravatar.cc/150?img=12'
-    },
-    {
-      id: '3',
-      name: 'Sophia Rodriguez',
-      role: 'Nail Technician',
-      status: 'active',
-      email: 'sophia.rodriguez@example.com',
-      phone: '+1 (555) 345-6789',
-      avatar: 'https://i.pravatar.cc/150?img=5'
-    },
-    {
-      id: '4',
-      name: 'Liam Goldberg',
-      role: 'Junior Stylist',
-      status: 'inactive',
-      email: 'liam.goldberg@example.com',
-      phone: '+1 (555) 456-7890',
-      avatar: 'https://i.pravatar.cc/150?img=13'
-    }
-  ])
+  const [user, setUser] = useState<any>(null)
+  const [staff, setStaff] = useState<StaffMember[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [businessId, setBusinessId] = useState<string>('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null)
   const [showBusinessIdModal, setShowBusinessIdModal] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [copySuccess, setCopySuccess] = useState(false)
   const [showStatusDropdown, setShowStatusDropdown] = useState(false)
   const [showRoleDropdown, setShowRoleDropdown] = useState(false)
 
-  // Business ID - This would come from the business profile
-  const businessId = 'BIZ-7K9M-2XP4-QR8N'
+  // Fetch user and staff on mount
+  useEffect(() => {
+    const u = getCurrentUser()
+    if (!u) {
+      router.push('/login')
+      return
+    }
+    
+    if (u.role !== 'business_owner') {
+      router.push('/')
+      return
+    }
+    
+    setUser(u)
+    fetchStaffAndBusiness(u)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const fetchStaffAndBusiness = async (currentUser: any) => {
+    try {
+      setLoading(true)
+      // Get business info to get the businessId
+      const businessResponse = await businessApi.getAll()
+      const userBusiness = businessResponse.data.find((b: any) => b.ownerId === currentUser.id)
+      
+      if (userBusiness) {
+        setBusinessId(userBusiness.businessId)
+        // Fetch staff for this business
+        const staffResponse = await businessApi.getStaff(userBusiness.id)
+        setStaff(staffResponse.data)
+      }
+    } catch (err: any) {
+      console.error('Error fetching staff:', err)
+      setError(err.response?.data?.message || 'Failed to load staff')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const roles = ['All', 'Senior Stylist', 'Junior Stylist', 'Massage Therapist', 'Nail Technician']
   const statuses = [
@@ -80,7 +90,7 @@ export default function StaffManagementPage() {
     setSelectedStaff(member)
   }
 
-  const handleDeleteStaff = (id: string) => {
+  const handleDeleteStaff = (id: number) => {
     setStaff(staff.filter(member => member.id !== id))
     setDeleteConfirm(null)
   }
@@ -96,10 +106,14 @@ export default function StaffManagementPage() {
   }
 
   const filteredStaff = staff.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         member.role.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || member.status === statusFilter
-    const matchesRole = roleFilter === 'all' || roleFilter === 'All' || member.role === roleFilter
+    const memberName = member.user?.fullName || ''
+    const memberRole = member.position || ''
+    const matchesSearch = memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         memberRole.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || 
+                         (statusFilter === 'active' && member.isActive) ||
+                         (statusFilter === 'inactive' && !member.isActive)
+    const matchesRole = roleFilter === 'all' || roleFilter === 'All' || memberRole === roleFilter
     
     return matchesSearch && matchesStatus && matchesRole
   })
@@ -211,39 +225,55 @@ export default function StaffManagementPage() {
           </div>
 
           {/* Staff Table */}
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStaff.map((member) => (
-                  <tr key={member.id}>
-                    <td>
-                      <div className={styles.nameCell}>
-                        <img src={member.avatar} alt={member.name} className={styles.avatar} />
-                        <span className={styles.name}>{member.name}</span>
-                      </div>
-                    </td>
-                    <td className={styles.roleCell}>{member.role}</td>
-                    <td>
-                      <span className={`${styles.statusBadge} ${member.status === 'active' ? styles.statusActive : styles.statusInactive}`}>
-                        <span className={styles.statusDot}></span>
-                        {member.status === 'active' ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className={styles.actionButtons}>
-                        <button 
-                          className={styles.viewButton}
-                          onClick={() => handleViewStaff(member)}
-                          title="View details"
-                        >
+          {loading && (
+            <div className={styles.loading}>Loading staff...</div>
+          )}
+
+          {error && !loading && (
+            <div className={styles.error}>{error}</div>
+          )}
+
+          {!loading && !error && (
+            <div className={styles.tableContainer}>
+              {filteredStaff.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>No staff members found. Add staff members by sharing your Business ID.</p>
+                </div>
+              ) : (
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredStaff.map((member) => (
+                      <tr key={member.id}>
+                        <td>
+                          <div className={styles.nameCell}>
+                            <div className={styles.avatar}>
+                              {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
+                            </div>
+                            <span className={styles.name}>{member.user?.fullName || 'Unknown'}</span>
+                          </div>
+                        </td>
+                        <td className={styles.roleCell}>{member.position || 'Staff Member'}</td>
+                        <td>
+                          <span className={`${styles.statusBadge} ${member.isActive ? styles.statusActive : styles.statusInactive}`}>
+                            <span className={styles.statusDot}></span>
+                            {member.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={styles.actionButtons}>
+                            <button 
+                              className={styles.viewButton}
+                              onClick={() => handleViewStaff(member)}
+                              title="View details"
+                            >
                           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -260,13 +290,13 @@ export default function StaffManagementPage() {
                         </button>
                       </div>
                     </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Business ID Section */}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}          {/* Business ID Section */}
           <div className={styles.businessIdSection}>
             <div className={styles.businessIdCard}>
               <div className={styles.businessIdHeader}>
@@ -386,26 +416,38 @@ export default function StaffManagementPage() {
             </div>
             <div className={styles.modalBody}>
               <div className={styles.staffDetailHeader}>
-                <img src={selectedStaff.avatar} alt={selectedStaff.name} className={styles.modalAvatar} />
+                <div className={styles.modalAvatar}>
+                  {selectedStaff.user?.firstName?.[0]}{selectedStaff.user?.lastName?.[0]}
+                </div>
                 <div>
-                  <h3 className={styles.modalName}>{selectedStaff.name}</h3>
-                  <p className={styles.modalRole}>{selectedStaff.role}</p>
+                  <h3 className={styles.staffName}>{selectedStaff.user?.fullName || 'Unknown'}</h3>
+                  <p className={styles.staffRole}>{selectedStaff.position || 'Staff Member'}</p>
                 </div>
               </div>
-              <div className={styles.detailsList}>
-                <div className={styles.detailItem}>
+              <div className={styles.staffDetails}>
+                <div className={styles.detailRow}>
                   <span className={styles.detailLabel}>Email:</span>
-                  <span className={styles.detailValue}>{selectedStaff.email}</span>
+                  <span className={styles.detailValue}>{selectedStaff.user?.email || 'N/A'}</span>
                 </div>
-                <div className={styles.detailItem}>
+                <div className={styles.detailRow}>
                   <span className={styles.detailLabel}>Phone:</span>
-                  <span className={styles.detailValue}>{selectedStaff.phone}</span>
+                  <span className={styles.detailValue}>{selectedStaff.user?.phone || 'N/A'}</span>
                 </div>
-                <div className={styles.detailItem}>
+                <div className={styles.detailRow}>
                   <span className={styles.detailLabel}>Status:</span>
-                  <span className={`${styles.statusBadge} ${selectedStaff.status === 'active' ? styles.statusActive : styles.statusInactive}`}>
+                  <span className={`${styles.statusBadge} ${selectedStaff.isActive ? styles.statusActive : styles.statusInactive}`}>
                     <span className={styles.statusDot}></span>
-                    {selectedStaff.status === 'active' ? 'Active' : 'Inactive'}
+                    {selectedStaff.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Joined:</span>
+                  <span className={styles.detailValue}>
+                    {new Date(selectedStaff.joinedAt).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
                   </span>
                 </div>
               </div>

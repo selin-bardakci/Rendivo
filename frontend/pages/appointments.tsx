@@ -4,59 +4,67 @@ import Layout from '../components/Layout'
 import { getCurrentUser, logout } from '../lib/auth'
 import styles from '../styles/appointments.module.css'
 import Link from 'next/link'
+import { appointmentApi } from '../lib/api'
 
 export default function AppointmentsPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
+  const [appointments, setAppointments] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  // Mock data - replace with real data from your backend
-  const upcomingBookings = 3
-  const totalBookings = 12
-  const appointmentDates = [
-    new Date(2025, 10, 25), // Nov 25
-    new Date(2025, 10, 28), // Nov 28
-    new Date(2025, 11, 5),  // Dec 5
-  ]
+  // Fetch appointments from API
+  useEffect(() => {
+    if (!user) return
 
-  // Mock appointments list
-  const appointments = [
-    {
-      id: 1,
-      service: 'Haircut & Styling',
-      provider: 'Beauty Studio Downtown',
-      location: '123 Main St, New York, NY',
-      date: 'Nov 25, 2025',
-      time: '2:00 PM - 3:00 PM',
-      status: 'upcoming'
-    },
-    {
-      id: 2,
-      service: 'Massage Therapy',
-      provider: 'Wellness Center',
-      location: '456 Park Ave, New York, NY',
-      date: 'Nov 28, 2025',
-      time: '10:00 AM - 11:00 AM',
-      status: 'upcoming'
-    },
-    {
-      id: 3,
-      service: 'Nail Treatment',
-      provider: 'Glamour Salon',
-      location: '789 Broadway, New York, NY',
-      date: 'Dec 5, 2025',
-      time: '4:30 PM - 5:30 PM',
-      status: 'upcoming'
+    const fetchAppointments = async () => {
+      try {
+        setLoading(true)
+        const response = await appointmentApi.getAll()
+        setAppointments(response.data)
+        
+        // Show success message if redirected from booking
+        if (router.query.success === 'true') {
+          setSuccessMessage('Appointment booked successfully!')
+          setTimeout(() => setSuccessMessage(null), 5000)
+        }
+      } catch (err) {
+        console.error('Error fetching appointments:', err)
+        setError('Failed to load appointments')
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    fetchAppointments()
+  }, [user, router.query])
+
+  const upcomingBookings = appointments.filter(a => a.status === 'pending' || a.status === 'confirmed').length
+  const totalBookings = appointments.length
+
+  const appointmentDates = appointments
+    .filter(a => a.status === 'pending' || a.status === 'confirmed')
+    .map(a => new Date(a.appointmentDate))
 
   const handleReschedule = (appointmentId: number) => {
     router.push(`/appointment/${appointmentId}`)
   }
 
-  const handleCancel = (appointmentId: number) => {
-    router.push(`/appointment/${appointmentId}`)
+  const handleCancel = async (appointmentId: number) => {
+    if (!confirm('Are you sure you want to cancel this appointment?')) return
+    
+    try {
+      await appointmentApi.updateStatus(appointmentId, 'cancelled')
+      // Refresh appointments
+      const response = await appointmentApi.getAll()
+      setAppointments(response.data)
+    } catch (err) {
+      console.error('Error cancelling appointment:', err)
+      alert('Failed to cancel appointment')
+    }
   }
 
   useEffect(() => {
@@ -90,7 +98,7 @@ export default function AppointmentsPage() {
   const getAppointmentIdForDate = (date: Date) => {
     // Find appointment that matches this date
     const appointment = appointments.find(app => {
-      const appDate = new Date(app.date)
+      const appDate = new Date(app.appointmentDate)
       return appDate.getDate() === date.getDate() &&
              appDate.getMonth() === date.getMonth() &&
              appDate.getFullYear() === date.getFullYear()
@@ -261,54 +269,81 @@ export default function AppointmentsPage() {
               </div>
             </div>
 
+            {/* Success Message */}
+            {successMessage && (
+              <div className={styles.successMessage}>
+                {successMessage}
+              </div>
+            )}
+
             {/* Appointments List */}
             <div className={styles.appointmentsList}>
               <h2 className={styles.appointmentsTitle}>Your Appointments</h2>
-              {appointments.length > 0 ? (
+              
+              {loading ? (
+                <div className={styles.loading}>Loading appointments...</div>
+              ) : error ? (
+                <div className={styles.error}>{error}</div>
+              ) : appointments.length > 0 ? (
                 <div className={styles.appointmentsGrid}>
-                  {appointments.map((appointment) => (
+                  {appointments.map((appointment) => {
+                    const serviceNames = appointment.services?.map((s: any) => s.name).join(', ') || 'Services'
+                    const appointmentDate = new Date(appointment.appointmentDate)
+                    const formattedDate = appointmentDate.toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })
+                    const timeRange = `${appointment.startTime.slice(0, 5)} - ${appointment.endTime.slice(0, 5)}`
+                    
+                    return (
                     <div key={appointment.id} className={styles.appointmentCard}>
                       <div className={styles.appointmentInfo}>
-                        <h3 className={styles.serviceName}>{appointment.service}</h3>
-                        <p className={styles.providerName}>{appointment.provider}</p>
+                        <h3 className={styles.serviceName}>{serviceNames}</h3>
+                        <p className={styles.providerName}>{appointment.business?.businessName}</p>
                         <div className={styles.appointmentDetails}>
                           <div className={styles.detailItem}>
                             <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <span>{appointment.location}</span>
+                            <span>{appointment.business?.address}, {appointment.business?.city}</span>
                           </div>
                           <div className={styles.detailItem}>
                             <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <span>{appointment.date}</span>
+                            <span>{formattedDate}</span>
                           </div>
                           <div className={styles.detailItem}>
                             <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>{appointment.time}</span>
+                            <span>{timeRange}</span>
                           </div>
+                        </div>
+                        <div className={styles.statusBadge} data-status={appointment.status}>
+                          {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                         </div>
                       </div>
                       <div className={styles.appointmentActions}>
                         <button 
                           className={`${styles.actionButton} ${styles.rescheduleButton}`}
                           onClick={() => handleReschedule(appointment.id)}
+                          disabled={appointment.status === 'cancelled'}
                         >
                           Reschedule
                         </button>
                         <button 
                           className={`${styles.actionButton} ${styles.cancelButton}`}
                           onClick={() => handleCancel(appointment.id)}
+                          disabled={appointment.status === 'cancelled'}
                         >
                           Cancel
                         </button>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               ) : (
                 <div className={styles.noAppointments}>

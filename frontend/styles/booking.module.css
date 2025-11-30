@@ -21,6 +21,34 @@
   }
 }
 
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #886385;
+}
+
+.error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 24px;
+  border-radius: 12px;
+  margin: 40px 0;
+  text-align: center;
+}
+
+.error button {
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: #886385;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
 /* Header */
 .header {
   margin-bottom: 32px;

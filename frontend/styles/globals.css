@@ -124,6 +124,22 @@ body {
 @media(max-width:768px){
   .top-header{padding: 0px 16px;}
 }
+
+.nav-link {
+  color: #181117;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #f8f6f8;
+  color: #df84dc;
+}
+
 .container {
   max-width: 960px;
   margin: 40px auto;

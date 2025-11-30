@@ -1,83 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import styles from '../styles/discover.module.css'
 import Link from 'next/link'
+import { businessApi } from '../lib/api'
 
 export default function DiscoverPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [businesses, setBusinesses] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Mock services list - replace with real data from backend
-  const availableServices = [
-    'Haircut & Styling',
-    'Massage Therapy',
-    'Nail Treatment',
-    'Facial Treatment',
-    'Waxing',
-    'Makeup',
-    'Spa Treatment',
-    'Body Treatment',
-    'Skin Care',
-    'Hair Coloring',
-    'Manicure',
-    'Pedicure'
-  ]
+  // Fetch businesses from API
+  useEffect(() => {
+    fetchBusinesses()
+  }, [])
 
-  // Mock businesses data - replace with real API call
-  const businesses = [
-    {
-      id: 1,
-      name: 'Beauty Studio Downtown',
-      location: '123 Main St, New York, NY 10001',
-      services: ['Haircut & Styling', 'Hair Coloring', 'Makeup'],
-      rating: 4.8,
-      reviewCount: 124,
-      image: '/placeholder-business.jpg'
-    },
-    {
-      id: 2,
-      name: 'Wellness Center',
-      location: '456 Park Ave, New York, NY 10022',
-      services: ['Massage Therapy', 'Spa Treatment', 'Body Treatment'],
-      rating: 4.9,
-      reviewCount: 98
-    },
-    {
-      id: 3,
-      name: 'Glamour Salon',
-      location: '789 Broadway, New York, NY 10003',
-      services: ['Nail Treatment', 'Manicure', 'Pedicure'],
-      rating: 4.7,
-      reviewCount: 156
-    },
-    {
-      id: 4,
-      name: 'Serenity Spa',
-      location: '321 5th Ave, New York, NY 10016',
-      services: ['Facial Treatment', 'Skin Care', 'Spa Treatment'],
-      rating: 4.9,
-      reviewCount: 203
-    },
-    {
-      id: 5,
-      name: 'Elite Hair Studio',
-      location: '654 Madison Ave, New York, NY 10065',
-      services: ['Haircut & Styling', 'Hair Coloring'],
-      rating: 4.6,
-      reviewCount: 87
-    },
-    {
-      id: 6,
-      name: 'Radiance Beauty Bar',
-      location: '987 Lexington Ave, New York, NY 10021',
-      services: ['Makeup', 'Waxing', 'Facial Treatment'],
-      rating: 4.8,
-      reviewCount: 142
+  const fetchBusinesses = async () => {
+    try {
+      setLoading(true)
+      const response = await businessApi.getAll({
+        search: searchQuery || undefined,
+        services: selectedServices.length > 0 ? selectedServices.join(',') : undefined,
+      })
+      setBusinesses(response.data)
+    } catch (error) {
+      console.error('Error fetching businesses:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  // Re-fetch when search or filters change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchBusinesses()
+    }, 500) // Debounce search
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery, selectedServices])
 
   const toggleService = (service: string) => {
     setSelectedServices(prev =>
@@ -93,20 +55,21 @@ export default function DiscoverPage() {
 
   const applyFilters = () => {
     setShowFilterModal(false)
-    // Filter logic will be handled by backend
-    console.log('Applied filters:', selectedServices)
   }
 
-  // Filter businesses based on search and selected services
-  const filteredBusinesses = businesses.filter(business => {
-    const matchesSearch = business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         business.location.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesServices = selectedServices.length === 0 ||
-                           selectedServices.some(service => business.services.includes(service))
-    
-    return matchesSearch && matchesServices
-  })
+  if (loading) {
+    return (
+      <Layout>
+        <div className={styles.container}>
+          <div className={styles.content}>
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <p>Loading businesses...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
 
   return (
     <Layout>
@@ -170,42 +133,35 @@ export default function DiscoverPage() {
 
           {/* Results Count */}
           <div className={styles.resultsCount}>
-            {filteredBusinesses.length} {filteredBusinesses.length === 1 ? 'business' : 'businesses'} found
+            {businesses.length} {businesses.length === 1 ? 'business' : 'businesses'} found
           </div>
 
           {/* Business Cards Grid */}
           <div className={styles.businessGrid}>
-            {filteredBusinesses.map(business => (
+            {businesses.map(business => (
               <div key={business.id} className={styles.businessCard}>
                 <div className={styles.cardContent}>
-                  <h3 className={styles.businessName}>{business.name}</h3>
+                  <h3 className={styles.businessName}>{business.businessName}</h3>
                   
                   <div className={styles.businessLocation}>
                     <svg className={styles.locationIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span>{business.location}</span>
-                  </div>
-
-                  <div className={styles.businessRating}>
-                    <div className={styles.stars}>
-                      {'★'.repeat(Math.floor(business.rating))}
-                      {'☆'.repeat(5 - Math.floor(business.rating))}
-                    </div>
-                    <span className={styles.ratingText}>
-                      {business.rating} ({business.reviewCount} reviews)
-                    </span>
+                    <span>{business.address}, {business.city}, {business.state}</span>
                   </div>
 
                   <div className={styles.servicesTags}>
-                    {business.services.slice(0, 3).map(service => (
-                      <span key={service} className={styles.serviceTag}>
-                        {service}
+                    {business.services?.slice(0, 3).map((service: any) => (
+                      <span key={service.id} className={styles.serviceTag}>
+                        {service.name}
                       </span>
                     ))}
-                    {business.services.length > 3 && (
+                    {business.services && business.services.length > 3 && (
                       <span className={styles.serviceTag}>+{business.services.length - 3} more</span>
+                    )}
+                    {(!business.services || business.services.length === 0) && (
+                      <span className={styles.serviceTag} style={{ color: '#999' }}>No services yet</span>
                     )}
                   </div>
                 </div>
@@ -221,7 +177,7 @@ export default function DiscoverPage() {
           </div>
 
           {/* No Results */}
-          {filteredBusinesses.length === 0 && (
+          {businesses.length === 0 && (
             <div className={styles.noResults}>
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <circle cx="11" cy="11" r="8" />
@@ -249,20 +205,8 @@ export default function DiscoverPage() {
 
               <div className={styles.modalContent}>
                 <p className={styles.modalDescription}>
-                  Select one or more services to filter businesses
+                  Service filtering coming soon!
                 </p>
-                <div className={styles.servicesList}>
-                  {availableServices.map(service => (
-                    <label key={service} className={styles.serviceCheckbox}>
-                      <input
-                        type="checkbox"
-                        checked={selectedServices.includes(service)}
-                        onChange={() => toggleService(service)}
-                      />
-                      <span className={styles.checkboxLabel}>{service}</span>
-                    </label>
-                  ))}
-                </div>
               </div>
 
               <div className={styles.modalActions}>
