@@ -27,8 +27,8 @@ export default function CustomerSignup() {
 
     try {
       await registerCustomer(formData)
-      // Redirect to customer dashboard on success
-      router.push('/customer/dashboard')
+      // Redirect to appointments page on success
+      router.push('/appointments')
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Registration failed')
     } finally {

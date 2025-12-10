@@ -6,9 +6,9 @@ import { AuthRequest } from '../middleware/auth';
 import firebaseAdmin from '../config/firebase';
 
 // Generate JWT token
-const generateToken = (userId: number, email: string, role: string): string => {
+const generateToken = (userId: number, email: string, role: string, firstName?: string, lastName?: string, fullName?: string): string => {
   return jwt.sign(
-    { userId, email, role },
+    { userId, email, role, firstName, lastName, fullName },
     process.env.JWT_SECRET || 'your-secret-key',
     { expiresIn: '7d' }
   );
@@ -39,7 +39,7 @@ export const registerCustomer = async (req: AuthRequest, res: Response): Promise
     });
 
     // Generate token
-    const token = generateToken(user.id, user.email, user.role);
+    const token = generateToken(user.id, user.email, user.role, user.firstName, user.lastName, user.fullName);
 
     res.status(201).json({
       message: 'Customer registered successfully',
@@ -88,7 +88,7 @@ export const registerStaff = async (req: AuthRequest, res: Response): Promise<Re
     });
 
     // Generate token
-    const token = generateToken(user.id, user.email, user.role);
+    const token = generateToken(user.id, user.email, user.role, user.firstName, user.lastName, user.fullName);
 
     res.status(201).json({
       message: 'Staff registered successfully',
@@ -165,7 +165,7 @@ export const registerBusiness = async (req: AuthRequest, res: Response): Promise
     console.log('Business created:', business.id, business.businessId);
 
     // Generate token
-    const token = generateToken(user.id, user.email, user.role);
+    const token = generateToken(user.id, user.email, user.role, user.firstName, user.lastName, user.fullName);
 
     res.status(201).json({
       message: 'Business registered successfully',
@@ -210,7 +210,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<Response |
     await user.save();
 
     // Generate token
-    const token = generateToken(user.id, user.email, user.role);
+    const token = generateToken(user.id, user.email, user.role, user.firstName, user.lastName, user.fullName);
 
     // Get additional data based on role
     let additionalData: any = {};
@@ -306,7 +306,7 @@ export const firebaseAuth = async (req: AuthRequest, res: Response): Promise<Res
     await user.save();
 
     // Generate JWT token
-    const token = generateToken(user.id, user.email, user.role);
+    const token = generateToken(user.id, user.email, user.role, user.firstName, user.lastName, user.fullName);
 
     res.status(200).json({
       message: 'Firebase authentication successful',

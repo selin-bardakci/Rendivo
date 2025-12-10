@@ -27,7 +27,7 @@ export default function LoginPage() {
       } else if (user.role === 'staff') {
         router.push('/staff-dashboard')
       } else if (user.role === 'customer') {
-        router.push('/customer/dashboard')
+        router.push('/appointments')
       } else {
         router.push('/dashboard')
       }

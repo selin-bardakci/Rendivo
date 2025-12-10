@@ -183,10 +183,14 @@ export default function AppointmentsPage() {
             <div className={styles.profileCard}>
               <div className={styles.profilePicture}>
                 <div className={styles.profileInitials}>
-                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                  {user?.firstName?.[0]?.toUpperCase() || user?.fullName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                 </div>
               </div>
-              <h3 className={styles.userName}>{user?.email || 'User'}</h3>
+              <h3 className={styles.userName}>
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}` 
+                  : user?.fullName || user?.email || 'User'}
+              </h3>
               
               <div className={styles.statsContainer}>
                 <div className={styles.statCard}>
