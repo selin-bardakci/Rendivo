@@ -76,6 +76,23 @@
   text-transform: capitalize;
 }
 
+.statusBadge.pending {
+  background: linear-gradient(135deg, #fff9e6 0%, #ffe8b3 100%);
+  color: #d68910;
+  box-shadow: 0 4px 12px rgba(255, 232, 179, 0.3);
+  border: 2px solid #ffe8b3;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(255, 232, 179, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(255, 232, 179, 0.5);
+  }
+}
+
 .statusBadge.upcoming {
   background: rgba(223, 132, 220, 0.15);
   color: var(--color-primary);
@@ -417,6 +434,241 @@
   background: #c82333;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.modalButtonPrimary {
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.modalButtonPrimary:hover:not(:disabled) {
+  background: #a5579c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(136, 99, 133, 0.3);
+}
+
+.modalButtonPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Reschedule Modal */
+.rescheduleModal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(24, 17, 23, 0.2);
+}
+
+.rescheduleContent {
+  margin: 24px 0;
+}
+
+.staffSection,
+.serviceSection,
+.dateSection,
+.timeSection {
+  margin-bottom: 24px;
+}
+
+.staffSection h4,
+.serviceSection h4,
+.dateSection h4,
+.timeSection h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #181117;
+  margin-bottom: 16px;
+}
+
+.staffGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.staffButton {
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.staffButton:hover {
+  border-color: var(--color-primary);
+  background: rgba(223, 132, 220, 0.05);
+}
+
+.staffButton.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.staffName {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.staffPosition {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.serviceButton {
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.serviceButton:hover {
+  border-color: var(--color-primary);
+  background: rgba(223, 132, 220, 0.05);
+}
+
+.serviceButton.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.serviceName {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.serviceDetails {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.selectedSummary {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(223, 132, 220, 0.1);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.dateSection,
+.timeSection {
+  margin-bottom: 24px;
+}
+
+.dateSection h4,
+.timeSection h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #181117;
+  margin-bottom: 16px;
+}
+
+.dateGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.dateButton {
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 12px;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.dateButton:hover {
+  border-color: var(--color-primary);
+  background: rgba(223, 132, 220, 0.05);
+}
+
+.dateButton.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.dateDay {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.dateNumber {
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.dateMonth {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.timeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.timeButton {
+  background: white;
+  border: 2px solid #e5dce4;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 600;
+  color: #181117;
+}
+
+.timeButton:hover {
+  border-color: var(--color-primary);
+  background: rgba(223, 132, 220, 0.05);
+}
+
+.timeButton.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.noSlots {
+  text-align: center;
+  padding: 24px;
+  color: #886385;
+  font-size: 14px;
 }
 
 /* Responsive */

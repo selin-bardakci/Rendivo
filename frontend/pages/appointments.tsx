@@ -15,6 +15,8 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null)
 
   // Fetch appointments from API
   useEffect(() => {
@@ -53,14 +55,21 @@ export default function AppointmentsPage() {
     router.push(`/appointment/${appointmentId}`)
   }
 
-  const handleCancel = async (appointmentId: number) => {
-    if (!confirm('Are you sure you want to cancel this appointment?')) return
+  const handleCancel = (appointmentId: number) => {
+    setAppointmentToCancel(appointmentId)
+    setShowCancelModal(true)
+  }
+
+  const handleCancelConfirm = async () => {
+    if (!appointmentToCancel) return
     
     try {
-      await appointmentApi.updateStatus(appointmentId, 'cancelled')
+      await appointmentApi.cancel(appointmentToCancel)
       // Refresh appointments
       const response = await appointmentApi.getAll()
       setAppointments(response.data)
+      setShowCancelModal(false)
+      setAppointmentToCancel(null)
     } catch (err) {
       console.error('Error cancelling appointment:', err)
       alert('Failed to cancel appointment')
@@ -358,6 +367,32 @@ export default function AppointmentsPage() {
           </div>
         </div>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowCancelModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Cancel Appointment?</h3>
+            <p className={styles.modalText}>
+              Are you sure you want to cancel this appointment? This action cannot be undone.
+            </p>
+            <div className={styles.modalActions}>
+              <button 
+                className={styles.modalButtonSecondary}
+                onClick={() => setShowCancelModal(false)}
+              >
+                Keep Appointment
+              </button>
+              <button 
+                className={styles.modalButtonDanger}
+                onClick={handleCancelConfirm}
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   )
 }

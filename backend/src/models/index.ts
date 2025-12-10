@@ -4,6 +4,7 @@ import StaffMember from './StaffMember';
 import Service from './Service';
 import Appointment from './Appointment';
 import AppointmentService from './AppointmentService';
+import Shift from './Shift';
 
 // Define associations
 User.hasOne(Business, {
@@ -93,4 +94,25 @@ Service.belongsToMany(Appointment, {
   as: 'appointments',
 });
 
-export { User, Business, StaffMember, Service, Appointment, AppointmentService };
+// Shift associations
+StaffMember.hasMany(Shift, {
+  foreignKey: 'staffId',
+  as: 'shifts',
+});
+
+Shift.belongsTo(StaffMember, {
+  foreignKey: 'staffId',
+  as: 'staff',
+});
+
+Business.hasMany(Shift, {
+  foreignKey: 'businessId',
+  as: 'shifts',
+});
+
+Shift.belongsTo(Business, {
+  foreignKey: 'businessId',
+  as: 'business',
+});
+
+export { User, Business, StaffMember, Service, Appointment, AppointmentService, Shift };

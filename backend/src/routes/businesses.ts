@@ -3,7 +3,9 @@ import {
   getAllBusinesses,
   getBusinessById,
   getBusinessStaff,
+  getBusinessDashboard,
 } from '../controllers/businessController';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -11,5 +13,8 @@ const router = express.Router();
 router.get('/businesses', getAllBusinesses);
 router.get('/businesses/:id', getBusinessById);
 router.get('/businesses/:businessId/staff', getBusinessStaff);
+
+// Protected routes
+router.get('/business/dashboard', authenticate, getBusinessDashboard);
 
 export default router;

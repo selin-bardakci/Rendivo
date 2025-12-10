@@ -151,10 +151,15 @@ export default function StaffDashboardPage() {
             <div className={styles.profileCard}>
               <div className={styles.profilePicture}>
                 <span className={styles.profileInitials}>
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  {user?.firstName?.[0] || user?.fullName?.[0] || 'S'}
+                  {user?.lastName?.[0] || user?.fullName?.[1] || 'M'}
                 </span>
               </div>
-              <h2 className={styles.staffName}>{user?.firstName} {user?.lastName}</h2>
+              <h2 className={styles.staffName}>
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}`
+                  : user?.fullName || 'Staff Member'}
+              </h2>
               <p className={styles.staffRole}>{user?.role === 'staff' ? 'Staff Member' : user?.role}</p>
 
               <button onClick={handleLogout} className={styles.logoutButton}>

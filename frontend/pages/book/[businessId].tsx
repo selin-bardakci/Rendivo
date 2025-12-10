@@ -20,6 +20,11 @@ export default function BookingPage() {
   const [business, setBusiness] = useState<any>(null)
   const [services, setServices] = useState<any[]>([])
   const [staff, setStaff] = useState<any[]>([])
+  
+  // Shift-based availability
+  const [availableDates, setAvailableDates] = useState<string[]>([])
+  const [availableTimes, setAvailableTimes] = useState<string[]>([])
+  const [loadingAvailability, setLoadingAvailability] = useState(false)
 
   // Fetch business data
   useEffect(() => {
@@ -35,7 +40,8 @@ export default function BookingPage() {
         
         setBusiness(businessRes.data)
         setServices(businessRes.data.services || [])
-        setStaff(staffRes.data)
+        // Use staff from business data which has user populated
+        setStaff(businessRes.data.staff || staffRes.data)
       } catch (err) {
         console.error('Error fetching business data:', err)
         setError('Failed to load business data')
@@ -47,19 +53,102 @@ export default function BookingPage() {
     fetchData()
   }, [businessId])
 
-  // Generate available time slots (9 AM - 6 PM)
-  const generateTimeSlots = () => {
-    const slots = []
-    for (let hour = 9; hour <= 18; hour++) {
-      const period = hour >= 12 ? 'PM' : 'AM'
-      const displayHour = hour > 12 ? hour - 12 : hour
-      slots.push(`${displayHour}:00 ${period}`)
-      if (hour < 18) slots.push(`${displayHour}:30 ${period}`)
+  // Fetch staff shifts when staff is selected
+  useEffect(() => {
+    if (!businessId || !selectedStaff) {
+      setAvailableDates([])
+      setSelectedDate(null)
+      setSelectedTime(null)
+      return
     }
-    return slots
-  }
 
-  const availableTimes = generateTimeSlots()
+    const fetchStaffShifts = async () => {
+      try {
+        setLoadingAvailability(true)
+        
+        // Get shifts for next 30 days
+        const startDate = new Date().toISOString().split('T')[0]
+        const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        
+        const response = await fetch(
+          `http://localhost:5001/api/shifts/staff-shifts?businessId=${businessId}&staffId=${selectedStaff}&startDate=${startDate}&endDate=${endDate}`
+        )
+        
+        if (response.ok) {
+          const data = await response.json()
+          setAvailableDates(data.availableDates || [])
+        } else {
+          setAvailableDates([])
+        }
+      } catch (err) {
+        console.error('Error fetching staff shifts:', err)
+        setAvailableDates([])
+      } finally {
+        setLoadingAvailability(false)
+      }
+    }
+
+    fetchStaffShifts()
+  }, [businessId, selectedStaff])
+
+  // Fetch available time slots when date is selected
+  useEffect(() => {
+    if (!businessId || !selectedStaff || !selectedDate || selectedServices.length === 0) {
+      setAvailableTimes([])
+      setSelectedTime(null)
+      return
+    }
+
+    const fetchAvailableTimeSlots = async () => {
+      try {
+        setLoadingAvailability(true)
+        
+        // Format date as YYYY-MM-DD in local timezone
+        const year = selectedDate.getFullYear()
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+        const day = String(selectedDate.getDate()).padStart(2, '0')
+        const dateStr = `${year}-${month}-${day}`
+        
+        // Calculate total duration of selected services
+        const totalDuration = selectedServices.reduce((sum, serviceId) => {
+          const service = services.find(s => s.id === serviceId)
+          return sum + (service?.duration || 0)
+        }, 0)
+        
+        const response = await fetch(
+          `http://localhost:5001/api/shifts/available-slots?businessId=${businessId}&staffId=${selectedStaff}&date=${dateStr}&duration=${totalDuration}`
+        )
+        
+        if (response.ok) {
+          const data = await response.json()
+          
+          // Format available slots for display
+          const slots: string[] = []
+          
+          if (data.availableSlots && data.availableSlots.length > 0) {
+            data.availableSlots.forEach((slot: any) => {
+              const [startHour, startMin] = slot.startTime.split(':').map(Number)
+              const period = startHour >= 12 ? 'PM' : 'AM'
+              const displayHour = startHour > 12 ? startHour - 12 : (startHour === 0 ? 12 : startHour)
+              const timeStr = `${displayHour}:${startMin.toString().padStart(2, '0')} ${period}`
+              slots.push(timeStr)
+            })
+          }
+          
+          setAvailableTimes(slots)
+        } else {
+          setAvailableTimes([])
+        }
+      } catch (err) {
+        console.error('Error fetching time slots:', err)
+        setAvailableTimes([])
+      } finally {
+        setLoadingAvailability(false)
+      }
+    }
+
+    fetchAvailableTimeSlots()
+  }, [businessId, selectedStaff, selectedDate, selectedServices, services])
 
   const toggleService = (serviceId: number) => {
     setSelectedServices(prev =>
@@ -111,8 +200,11 @@ export default function BookingPage() {
       setSubmitting(true)
       setError(null)
 
-      // Format the date and time
-      const appointmentDate = selectedDate.toISOString().split('T')[0]
+      // Format the date in local timezone (YYYY-MM-DD)
+      const year = selectedDate.getFullYear()
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+      const day = String(selectedDate.getDate()).padStart(2, '0')
+      const appointmentDate = `${year}-${month}-${day}`
       
       // Convert time from "9:00 AM" format to "09:00:00"
       const [time, period] = selectedTime.split(' ')
@@ -173,7 +265,19 @@ export default function BookingPage() {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-      const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+      // Use local date string for comparison (YYYY-MM-DD format)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const dayStr = String(date.getDate()).padStart(2, '0')
+      const dateStr = `${year}-${month}-${dayStr}`
+      
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+      todayStart.setHours(0, 0, 0, 0)
+      const checkDate = new Date(date)
+      checkDate.setHours(0, 0, 0, 0)
+      const isPast = checkDate < todayStart
+      const isAvailable = availableDates.includes(dateStr)
+      const isDisabled = isPast || (!isAvailable && availableDates.length > 0)
       const isSelected = selectedDate?.getDate() === day &&
                         selectedDate?.getMonth() === currentMonth.getMonth() &&
                         selectedDate?.getFullYear() === currentMonth.getFullYear()
@@ -181,11 +285,11 @@ export default function BookingPage() {
       days.push(
         <button
           key={day}
-          disabled={isPast}
+          disabled={isDisabled}
           onClick={() => setSelectedDate(date)}
           className={`${styles.calendarDay} ${styles.calendarDayButton} ${
             isSelected ? styles.selectedDay : ''
-          } ${isPast ? styles.pastDay : ''}`}
+          } ${isDisabled ? styles.pastDay : ''}`}
         >
           {day}
         </button>
@@ -319,10 +423,15 @@ export default function BookingPage() {
                       onClick={() => setSelectedStaff(member.id)}
                     >
                       <div className={styles.staffAvatar}>
-                        {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
+                        {member.user?.firstName?.[0] || member.user?.fullName?.[0] || 'S'}
+                        {member.user?.lastName?.[0] || member.user?.fullName?.[1] || 'M'}
                       </div>
                       <div className={styles.staffInfo}>
-                        <h4 className={styles.staffName}>{member.user?.firstName} {member.user?.lastName}</h4>
+                        <h4 className={styles.staffName}>
+                          {member.user?.firstName && member.user?.lastName 
+                            ? `${member.user.firstName} ${member.user.lastName}`
+                            : member.user?.fullName || 'Staff Member'}
+                        </h4>
                         <p className={styles.staffSpecialty}>{member.position || 'Staff Member'}</p>
                       </div>
                       <div className={styles.staffCheckbox}>
@@ -341,34 +450,40 @@ export default function BookingPage() {
               {selectedStaff && (
                 <div className={styles.section}>
                   <h3 className={styles.sectionTitle}>Select Date</h3>
-                  <div className={styles.calendarContainer}>
-                    <div className={styles.calendarHeader}>
-                      <button onClick={() => changeMonth(-1)} className={styles.monthButton}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="15 18 9 12 15 6" />
-                        </svg>
-                      </button>
-                      <h3 className={styles.monthTitle}>
-                        {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                      </h3>
-                      <button onClick={() => changeMonth(1)} className={styles.monthButton}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                      </button>
-                    </div>
+                  {loadingAvailability ? (
+                    <p className={styles.infoMessage}>Loading available dates...</p>
+                  ) : availableDates.length === 0 ? (
+                    <p className={styles.infoMessage}>This staff member has no available shifts. Please select another staff member.</p>
+                  ) : (
+                    <div className={styles.calendarContainer}>
+                      <div className={styles.calendarHeader}>
+                        <button onClick={() => changeMonth(-1)} className={styles.monthButton}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="15 18 9 12 15 6" />
+                          </svg>
+                        </button>
+                        <h3 className={styles.monthTitle}>
+                          {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                        </h3>
+                        <button onClick={() => changeMonth(1)} className={styles.monthButton}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </button>
+                      </div>
 
-                    <div className={styles.calendarGrid}>
-                      <div className={styles.calendarDayHeader}>Sun</div>
-                      <div className={styles.calendarDayHeader}>Mon</div>
-                      <div className={styles.calendarDayHeader}>Tue</div>
-                      <div className={styles.calendarDayHeader}>Wed</div>
-                      <div className={styles.calendarDayHeader}>Thu</div>
-                      <div className={styles.calendarDayHeader}>Fri</div>
-                      <div className={styles.calendarDayHeader}>Sat</div>
-                      {renderCalendar()}
+                      <div className={styles.calendarGrid}>
+                        <div className={styles.calendarDayHeader}>Sun</div>
+                        <div className={styles.calendarDayHeader}>Mon</div>
+                        <div className={styles.calendarDayHeader}>Tue</div>
+                        <div className={styles.calendarDayHeader}>Wed</div>
+                        <div className={styles.calendarDayHeader}>Thu</div>
+                        <div className={styles.calendarDayHeader}>Fri</div>
+                        <div className={styles.calendarDayHeader}>Sat</div>
+                        {renderCalendar()}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -376,19 +491,25 @@ export default function BookingPage() {
               {selectedDate && (
                 <div className={styles.section}>
                   <h3 className={styles.sectionTitle}>Select Time</h3>
-                  <div className={styles.timesGrid}>
-                    {availableTimes.map(time => (
-                      <button
-                        key={time}
-                        className={`${styles.timeButton} ${
-                          selectedTime === time ? styles.timeButtonSelected : ''
-                        }`}
-                        onClick={() => setSelectedTime(time)}
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
+                  {loadingAvailability ? (
+                    <p className={styles.infoMessage}>Loading available times...</p>
+                  ) : availableTimes.length === 0 ? (
+                    <p className={styles.infoMessage}>No available time slots for this date. Please select another date.</p>
+                  ) : (
+                    <div className={styles.timesGrid}>
+                      {availableTimes.map(time => (
+                        <button
+                          key={time}
+                          className={`${styles.timeButton} ${
+                            selectedTime === time ? styles.timeButtonSelected : ''
+                          }`}
+                          onClick={() => setSelectedTime(time)}
+                        >
+                          {time}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

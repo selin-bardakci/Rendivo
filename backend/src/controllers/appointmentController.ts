@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Op } from 'sequelize';
 import { AuthRequest } from '../middleware/auth';
 import { Appointment, Service, Business, StaffMember, User, AppointmentService } from '../models';
 import { AppointmentStatus } from '../models/Appointment';
@@ -354,14 +355,136 @@ export const cancelAppointment = async (req: AuthRequest, res: Response): Promis
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    await appointment.update({ status: AppointmentStatus.CANCELLED });
+    await appointment.destroy();
 
     res.json({
       message: 'Appointment cancelled successfully',
-      appointment,
     });
   } catch (error: any) {
     console.error('Cancel appointment error:', error);
     res.status(500).json({ message: 'Error cancelling appointment', error: error.message });
+  }
+};
+
+// Reschedule appointment (customer or business owner)
+export const rescheduleAppointment = async (req: AuthRequest, res: Response): Promise<Response | void> => {
+  try {
+    const { id } = req.params;
+    const { appointmentDate, startTime, endTime, staffId, serviceIds, totalDuration, totalPrice } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (!appointmentDate || !startTime || !endTime) {
+      return res.status(400).json({ message: 'Appointment date, start time, and end time are required' });
+    }
+
+    const appointment = await Appointment.findByPk(id);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // Check authorization
+    const business = await Business.findOne({ where: { ownerId: userId } });
+    const isCustomer = appointment.customerId === userId;
+    const isBusinessOwner = business && business.id === appointment.businessId;
+
+    if (!isCustomer && !isBusinessOwner) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const newStaffId = staffId || appointment.staffId;
+
+    // Check if new time slot is available
+    const conflictingAppointment = await Appointment.findOne({
+      where: {
+        staffId: newStaffId,
+        appointmentDate,
+        status: {
+          [Op.ne]: AppointmentStatus.CANCELLED
+        },
+        id: {
+          [Op.ne]: id
+        }
+      }
+    });
+
+    if (conflictingAppointment) {
+      // Check for time overlap
+      const newStart = startTime;
+      const newEnd = endTime;
+      const existingStart = conflictingAppointment.startTime;
+      const existingEnd = conflictingAppointment.endTime;
+
+      if (
+        (newStart >= existingStart && newStart < existingEnd) ||
+        (newEnd > existingStart && newEnd <= existingEnd) ||
+        (newStart <= existingStart && newEnd >= existingEnd)
+      ) {
+        return res.status(409).json({ message: 'This time slot is not available' });
+      }
+    }
+
+    // Update appointment
+    const updateData: any = {
+      appointmentDate,
+      startTime,
+      endTime
+    };
+
+    if (staffId) updateData.staffId = staffId;
+    if (totalDuration) updateData.totalDuration = totalDuration;
+    if (totalPrice) updateData.totalPrice = totalPrice;
+
+    await appointment.update(updateData);
+
+    // Update services if provided
+    if (serviceIds && serviceIds.length > 0) {
+      // Remove old service associations
+      await AppointmentService.destroy({ where: { appointmentId: id } });
+      
+      // Add new service associations
+      for (const serviceId of serviceIds) {
+        await AppointmentService.create({
+          appointmentId: Number(id),
+          serviceId
+        });
+      }
+    }
+
+    const updatedAppointment = await Appointment.findByPk(id, {
+      include: [
+        {
+          model: Service,
+          as: 'services',
+          through: { attributes: [] },
+        },
+        {
+          model: Business,
+          as: 'business',
+          attributes: ['id', 'businessName', 'address', 'city', 'state', 'phone', 'email'],
+        },
+        {
+          model: StaffMember,
+          as: 'staff',
+          include: [{
+            model: User,
+            as: 'user',
+            attributes: ['fullName'],
+          }],
+          attributes: ['id', 'position'],
+        },
+      ],
+    });
+
+    res.json({
+      message: 'Appointment rescheduled successfully',
+      appointment: updatedAppointment,
+    });
+  } catch (error: any) {
+    console.error('Reschedule appointment error:', error);
+    res.status(500).json({ message: 'Error rescheduling appointment', error: error.message });
   }
 };

@@ -3,93 +3,305 @@ import { useState, useEffect } from 'react'
 import Layout from '../../components/Layout'
 import styles from '../../styles/appointmentDetails.module.css'
 import Link from 'next/link'
+import { appointmentApi } from '../../lib/api'
+import axios from 'axios'
 
 export default function AppointmentDetails() {
   const router = useRouter()
   const { id } = router.query
 
-  // Mock appointment data - replace with real API call using the id
   const [appointment, setAppointment] = useState<any>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  
+  // Reschedule state
+  const [businessStaff, setBusinessStaff] = useState<any[]>([])
+  const [businessServices, setBusinessServices] = useState<any[]>([])
+  const [selectedStaff, setSelectedStaff] = useState<any>(null)
+  const [selectedServices, setSelectedServices] = useState<any[]>([])
+  const [availableDates, setAvailableDates] = useState<string[]>([])
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<any[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<any>(null)
+  const [rescheduleLoading, setRescheduleLoading] = useState(false)
 
   useEffect(() => {
-    if (id) {
-      // Mock data - replace with actual API call
-      const mockAppointments: any = {
-        '1': {
-          id: 1,
-          service: 'Haircut & Styling',
-          provider: 'Beauty Studio Downtown',
-          staff: 'Sarah Johnson',
-          location: '123 Main St, New York, NY 10001',
-          date: 'November 25, 2025',
-          time: '2:00 PM - 3:00 PM',
-          duration: '60 minutes',
-          status: 'upcoming',
-          services: [
-            { name: 'Haircut', price: 45, duration: '30 min' },
-            { name: 'Hair Styling', price: 35, duration: '30 min' }
-          ],
-          totalPrice: 80,
-          notes: 'Please arrive 10 minutes early for consultation.'
-        },
-        '2': {
-          id: 2,
-          service: 'Massage Therapy',
-          provider: 'Wellness Center',
-          staff: 'Michael Chen',
-          location: '456 Park Ave, New York, NY 10022',
-          date: 'November 28, 2025',
-          time: '10:00 AM - 11:00 AM',
-          duration: '60 minutes',
-          status: 'upcoming',
-          services: [
-            { name: 'Deep Tissue Massage', price: 120, duration: '60 min' }
-          ],
-          totalPrice: 120,
-          notes: 'Bring comfortable clothing.'
-        },
-        '3': {
-          id: 3,
-          service: 'Nail Treatment',
-          provider: 'Glamour Salon',
-          staff: 'Emma Davis',
-          location: '789 Broadway, New York, NY 10003',
-          date: 'December 5, 2025',
-          time: '4:30 PM - 5:30 PM',
-          duration: '60 minutes',
-          status: 'upcoming',
-          services: [
-            { name: 'Manicure', price: 35, duration: '30 min' },
-            { name: 'Pedicure', price: 45, duration: '30 min' }
-          ],
-          totalPrice: 80,
-          notes: ''
-        }
+    const fetchAppointment = async () => {
+      if (!id) return
+      
+      try {
+        setLoading(true)
+        setError('')
+        const response = await appointmentApi.getById(Number(id))
+        console.log('Fetched appointment data:', response.data)
+        setAppointment(response.data)
+      } catch (err: any) {
+        console.error('Error fetching appointment:', err)
+        setError(err.response?.data?.message || 'Failed to load appointment')
+      } finally {
+        setLoading(false)
       }
-      setAppointment(mockAppointments[id as string])
     }
+
+    fetchAppointment()
   }, [id])
 
-  const handleReschedule = () => {
-    // Implement reschedule logic - could navigate to booking page with pre-filled data
-    console.log('Reschedule appointment:', id)
-    // router.push(`/reschedule/${id}`)
+  const handleReschedule = async () => {
+    if (!appointment) return
+    
+    setShowRescheduleModal(true)
+    
+    // Fetch business staff and services
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+      
+      // Get business staff
+      const staffRes = await axios.get(`${apiUrl}/businesses/${appointment.businessId}/staff`)
+      console.log('Staff response:', staffRes.data)
+      const staffList = staffRes.data.staff || staffRes.data || []
+      setBusinessStaff(staffList)
+      
+      // Get business services
+      const servicesRes = await axios.get(`${apiUrl}/businesses/${appointment.businessId}/services`)
+      console.log('Services response:', servicesRes.data)
+      setBusinessServices(servicesRes.data || [])
+      
+      // Set current staff and services as default
+      setSelectedStaff(appointment.staff)
+      setSelectedServices(appointment.services || [])
+      
+      // Get available dates for current staff
+      const datesRes = await axios.get(
+        `${apiUrl}/shifts/staff-shifts?businessId=${appointment.businessId}&staffId=${appointment.staffId}`
+      )
+      console.log('Dates response:', datesRes.data)
+      setAvailableDates(datesRes.data.availableDates || [])
+    } catch (err) {
+      console.error('Error fetching reschedule data:', err)
+    }
   }
 
-  const handleCancelConfirm = () => {
-    console.log('Cancel appointment:', id)
-    setShowCancelModal(false)
-    // Add your cancel API call here
-    // Then redirect to appointments page
-    router.push('/appointments')
+  const handleStaffChange = async (staff: any) => {
+    setSelectedStaff(staff)
+    setSelectedDate(null)
+    setSelectedTimeSlot(null)
+    setAvailableTimeSlots([])
+    
+    // Fetch available dates for selected staff
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+      const datesRes = await axios.get(
+        `${apiUrl}/shifts/staff-shifts?businessId=${appointment.businessId}&staffId=${staff.id}`
+      )
+      setAvailableDates(datesRes.data.availableDates || [])
+    } catch (err) {
+      console.error('Error fetching staff shifts:', err)
+      setAvailableDates([])
+    }
+  }
+
+  const handleServiceToggle = (service: any) => {
+    const isSelected = selectedServices.some(s => s.id === service.id)
+    if (isSelected) {
+      setSelectedServices(selectedServices.filter(s => s.id !== service.id))
+    } else {
+      setSelectedServices([...selectedServices, service])
+    }
+    
+    // If a date is already selected, refetch time slots with new duration
+    if (selectedDate) {
+      setSelectedTimeSlot(null)
+      // Refetch will happen automatically when services state updates
+      setTimeout(() => {
+        if (selectedDate) {
+          fetchAvailableTimeSlots(selectedDate)
+        }
+      }, 100)
+    }
+  }
+
+  const fetchAvailableTimeSlots = async (date: Date) => {
+    if (!appointment || !selectedStaff || selectedServices.length === 0) return
+    
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const dateStr = `${year}-${month}-${day}`
+      
+      // Calculate total duration of selected services
+      const totalDuration = selectedServices.reduce((sum, s) => sum + s.duration, 0)
+      
+      const response = await axios.get(
+        `${apiUrl}/shifts/available-slots?businessId=${appointment.businessId}&staffId=${selectedStaff.id}&date=${dateStr}&duration=${totalDuration}`
+      )
+      console.log('Time slots response:', response.data)
+      setAvailableTimeSlots(response.data.availableSlots || [])
+    } catch (err) {
+      console.error('Error fetching time slots:', err)
+      setAvailableTimeSlots([])
+    }
+  }
+
+  const handleDateSelect = (dateStr: string) => {
+    const date = new Date(dateStr + 'T00:00:00')
+    setSelectedDate(date)
+    setSelectedTimeSlot(null)
+    fetchAvailableTimeSlots(date)
+  }
+
+  const handleConfirmReschedule = async () => {
+    if (!selectedDate || !selectedTimeSlot || !appointment || !selectedStaff || selectedServices.length === 0) return
+    
+    try {
+      setRescheduleLoading(true)
+      
+      const year = selectedDate.getFullYear()
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+      const day = String(selectedDate.getDate()).padStart(2, '0')
+      const appointmentDate = `${year}-${month}-${day}`
+      
+      // Calculate total duration and price
+      const totalDuration = selectedServices.reduce((sum, s) => sum + s.duration, 0)
+      const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0)
+      const endTime = calculateEndTime(selectedTimeSlot.startTime, totalDuration)
+      
+      const response = await appointmentApi.reschedule(Number(id), {
+        staffId: selectedStaff.id,
+        serviceIds: selectedServices.map(s => s.id),
+        appointmentDate,
+        startTime: selectedTimeSlot.startTime,
+        endTime: endTime,
+        totalDuration,
+        totalPrice
+      })
+      
+      setAppointment(response.data.appointment)
+      setShowRescheduleModal(false)
+      setSelectedStaff(null)
+      setSelectedServices([])
+      setSelectedDate(null)
+      setSelectedTimeSlot(null)
+      alert('Appointment rescheduled successfully!')
+      
+      // Refresh appointment data
+      const refreshedData = await appointmentApi.getById(Number(id))
+      setAppointment(refreshedData.data)
+    } catch (err: any) {
+      console.error('Error rescheduling:', err)
+      alert(err.response?.data?.message || 'Failed to reschedule appointment')
+    } finally {
+      setRescheduleLoading(false)
+    }
+  }
+
+  const calculateEndTime = (startTime: string, durationMinutes: number): string => {
+    const [hours, minutes] = startTime.split(':').map(Number)
+    const totalMinutes = hours * 60 + minutes + durationMinutes
+    const endHours = Math.floor(totalMinutes / 60)
+    const endMinutes = totalMinutes % 60
+    return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00`
+  }
+
+  const handleCancelConfirm = async () => {
+    try {
+      await appointmentApi.cancel(Number(id))
+      setShowCancelModal(false)
+      router.push('/appointments')
+    } catch (err: any) {
+      console.error('Error canceling appointment:', err)
+      alert(err.response?.data?.message || 'Failed to cancel appointment')
+    }
+  }
+
+  // Format appointment data
+  const formatAppointmentData = () => {
+    if (!appointment) return null
+    
+    console.log('Formatting appointment:', {
+      appointmentDate: appointment.appointmentDate,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      staff: appointment.staff,
+      business: appointment.business,
+      services: appointment.services
+    })
+    
+    const appointmentDate = new Date(appointment.appointmentDate)
+    const formattedDate = appointmentDate.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    })
+    const timeRange = `${appointment.startTime?.slice(0, 5)} - ${appointment.endTime?.slice(0, 5)}`
+    const staffName = appointment.staff?.user?.fullName || 'Staff Member'
+    const businessName = appointment.business?.businessName || 'Business'
+    const location = `${appointment.business?.address || ''}, ${appointment.business?.city || ''} ${appointment.business?.state || ''}`
+    const totalPrice = appointment.services?.reduce((sum: number, s: any) => sum + (s.price || 0), 0) || 0
+    const status = String(appointment.status || 'pending').toLowerCase()
+
+    return {
+      date: formattedDate,
+      time: timeRange,
+      staff: staffName,
+      provider: businessName,
+      location: location,
+      services: appointment.services || [],
+      totalPrice: totalPrice,
+      notes: appointment.notes || '',
+      status: status
+    }
+  }
+
+  const formattedData = formatAppointmentData()
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className={styles.container}>
+          <div className={styles.loading}>Loading appointment details...</div>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className={styles.container}>
+          <div className={styles.error}>{error}</div>
+          <Link href="/appointments" className={styles.backButton}>
+            Back to Appointments
+          </Link>
+        </div>
+      </Layout>
+    )
   }
 
   if (!appointment) {
     return (
       <Layout>
         <div className={styles.container}>
-          <div className={styles.loading}>Loading appointment details...</div>
+          <div className={styles.error}>Appointment not found</div>
+          <Link href="/appointments" className={styles.backButton}>
+            Back to Appointments
+          </Link>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (!formattedData) {
+    return (
+      <Layout>
+        <div className={styles.container}>
+          <div className={styles.error}>Error formatting appointment data</div>
+          <Link href="/appointments" className={styles.backButton}>
+            Back to Appointments
+          </Link>
         </div>
       </Layout>
     )
@@ -108,8 +320,8 @@ export default function AppointmentDetails() {
               Back
             </Link>
             <h1 className={styles.title}>Appointment Details</h1>
-            <span className={`${styles.statusBadge} ${styles[appointment.status]}`}>
-              {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+            <span className={`${styles.statusBadge} ${styles[formattedData.status]}`}>
+              {formattedData.status.charAt(0).toUpperCase() + formattedData.status.slice(1)}
             </span>
           </div>
 
@@ -127,7 +339,7 @@ export default function AppointmentDetails() {
                       </svg>
                       Date
                     </div>
-                    <div className={styles.infoValue}>{appointment.date}</div>
+                    <div className={styles.infoValue}>{formattedData.date}</div>
                   </div>
 
                   <div className={styles.infoItem}>
@@ -137,7 +349,7 @@ export default function AppointmentDetails() {
                       </svg>
                       Time
                     </div>
-                    <div className={styles.infoValue}>{appointment.time}</div>
+                    <div className={styles.infoValue}>{formattedData.time}</div>
                   </div>
 
                   <div className={styles.infoItem}>
@@ -148,7 +360,7 @@ export default function AppointmentDetails() {
                       </svg>
                       Location
                     </div>
-                    <div className={styles.infoValue}>{appointment.location}</div>
+                    <div className={styles.infoValue}>{formattedData.location}</div>
                   </div>
 
                   <div className={styles.infoItem}>
@@ -158,7 +370,7 @@ export default function AppointmentDetails() {
                       </svg>
                       Staff
                     </div>
-                    <div className={styles.infoValue}>{appointment.staff}</div>
+                    <div className={styles.infoValue}>{formattedData.staff}</div>
                   </div>
 
                   <div className={styles.infoItem}>
@@ -168,17 +380,7 @@ export default function AppointmentDetails() {
                       </svg>
                       Provider
                     </div>
-                    <div className={styles.infoValue}>{appointment.provider}</div>
-                  </div>
-
-                  <div className={styles.infoItem}>
-                    <div className={styles.infoLabel}>
-                      <svg className={styles.infoIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Duration
-                    </div>
-                    <div className={styles.infoValue}>{appointment.duration}</div>
+                    <div className={styles.infoValue}>{formattedData.provider}</div>
                   </div>
                 </div>
               </div>
@@ -187,27 +389,27 @@ export default function AppointmentDetails() {
               <div className={styles.cardSection}>
                 <h2 className={styles.sectionTitle}>Service Breakdown</h2>
                 <div className={styles.servicesList}>
-                  {appointment.services.map((service: any, index: number) => (
+                  {formattedData.services.map((service: any, index: number) => (
                     <div key={index} className={styles.serviceItem}>
                       <div className={styles.serviceInfo}>
                         <span className={styles.serviceName}>{service.name}</span>
-                        <span className={styles.serviceDuration}>{service.duration}</span>
+                        <span className={styles.serviceDuration}>{service.duration} min</span>
                       </div>
                       <span className={styles.servicePrice}>${service.price}</span>
                     </div>
                   ))}
                   <div className={styles.serviceTotal}>
                     <span className={styles.totalLabel}>Total</span>
-                    <span className={styles.totalPrice}>${appointment.totalPrice}</span>
+                    <span className={styles.totalPrice}>${formattedData.totalPrice}</span>
                   </div>
                 </div>
               </div>
 
               {/* Notes */}
-              {appointment.notes && (
+              {formattedData.notes && (
                 <div className={styles.cardSection}>
                   <h2 className={styles.sectionTitle}>Additional Notes</h2>
-                  <p className={styles.notes}>{appointment.notes}</p>
+                  <p className={styles.notes}>{formattedData.notes}</p>
                 </div>
               )}
             </div>
@@ -266,6 +468,152 @@ export default function AppointmentDetails() {
                   onClick={handleCancelConfirm}
                 >
                   Yes, Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reschedule Modal */}
+        {showRescheduleModal && (
+          <div className={styles.modalOverlay} onClick={() => setShowRescheduleModal(false)}>
+            <div className={styles.rescheduleModal} onClick={(e) => e.stopPropagation()}>
+              <h3 className={styles.modalTitle}>Reschedule Appointment</h3>
+              
+              <div className={styles.rescheduleContent}>
+                {/* Staff Selection */}
+                <div className={styles.staffSection}>
+                  <h4>Select Staff Member</h4>
+                  <div className={styles.staffGrid}>
+                    {businessStaff.map((staff) => {
+                      const isSelected = selectedStaff?.id === staff.id
+                      const staffName = staff.user?.fullName || 
+                                       (staff.user?.firstName && staff.user?.lastName 
+                                         ? `${staff.user.firstName} ${staff.user.lastName}` 
+                                         : 'Staff Member')
+                      return (
+                        <button
+                          key={staff.id}
+                          className={`${styles.staffButton} ${isSelected ? styles.selected : ''}`}
+                          onClick={() => handleStaffChange(staff)}
+                        >
+                          <div className={styles.staffName}>{staffName}</div>
+                          {staff.position && <div className={styles.staffPosition}>{staff.position}</div>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Service Selection */}
+                <div className={styles.serviceSection}>
+                  <h4>Select Services</h4>
+                  <div className={styles.serviceGrid}>
+                    {businessServices.map((service) => {
+                      const isSelected = selectedServices.some(s => s.id === service.id)
+                      return (
+                        <button
+                          key={service.id}
+                          className={`${styles.serviceButton} ${isSelected ? styles.selected : ''}`}
+                          onClick={() => handleServiceToggle(service)}
+                        >
+                          <div className={styles.serviceName}>{service.name}</div>
+                          <div className={styles.serviceDetails}>
+                            <span className={styles.servicePrice}>${service.price}</span>
+                            <span className={styles.serviceDuration}>{service.duration} min</span>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {selectedServices.length > 0 && (
+                    <div className={styles.selectedSummary}>
+                      <span>Total Duration: {selectedServices.reduce((sum, s) => sum + s.duration, 0)} min</span>
+                      <span>Total Price: ${selectedServices.reduce((sum, s) => sum + s.price, 0)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Date Selection */}
+                {selectedStaff && (
+                  <div className={styles.dateSection}>
+                    <h4>Select a Date</h4>
+                    {availableDates.length > 0 ? (
+                      <div className={styles.dateGrid}>
+                        {availableDates.map((dateStr) => {
+                          const date = new Date(dateStr + 'T00:00:00')
+                          const isSelected = selectedDate?.toDateString() === date.toDateString()
+                          return (
+                            <button
+                              key={dateStr}
+                              className={`${styles.dateButton} ${isSelected ? styles.selected : ''}`}
+                              onClick={() => handleDateSelect(dateStr)}
+                            >
+                              <div className={styles.dateDay}>
+                                {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                              </div>
+                              <div className={styles.dateNumber}>
+                                {date.getDate()}
+                              </div>
+                              <div className={styles.dateMonth}>
+                                {date.toLocaleDateString('en-US', { month: 'short' })}
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <p className={styles.noSlots}>No available dates for this staff member</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Time Slot Selection */}
+                {selectedDate && selectedServices.length > 0 && (
+                  <div className={styles.timeSection}>
+                    <h4>Select a Time</h4>
+                    {availableTimeSlots.length > 0 ? (
+                      <div className={styles.timeGrid}>
+                        {availableTimeSlots.map((slot, index) => {
+                          const isSelected = selectedTimeSlot?.startTime === slot.startTime
+                          return (
+                            <button
+                              key={index}
+                              className={`${styles.timeButton} ${isSelected ? styles.selected : ''}`}
+                              onClick={() => setSelectedTimeSlot(slot)}
+                            >
+                              {slot.startTime.slice(0, 5)} - {slot.endTime.slice(0, 5)}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <p className={styles.noSlots}>No available time slots for this date</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.modalActions}>
+                <button 
+                  className={styles.modalButtonSecondary}
+                  onClick={() => {
+                    setShowRescheduleModal(false)
+                    setSelectedStaff(null)
+                    setSelectedServices([])
+                    setSelectedDate(null)
+                    setSelectedTimeSlot(null)
+                  }}
+                  disabled={rescheduleLoading}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className={styles.modalButtonPrimary}
+                  onClick={handleConfirmReschedule}
+                  disabled={!selectedDate || !selectedTimeSlot || !selectedStaff || selectedServices.length === 0 || rescheduleLoading}
+                >
+                  {rescheduleLoading ? 'Rescheduling...' : 'Confirm Reschedule'}
                 </button>
               </div>
             </div>

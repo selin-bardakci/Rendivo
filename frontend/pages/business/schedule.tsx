@@ -1,15 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import styles from '../../styles/businessSchedule.module.css'
+import api from '../../lib/api'
+import { getCurrentUser } from '../../lib/auth'
 
 interface Shift {
-  id: string
-  staffName: string
-  date: string
+  id: number
+  staffId: number
+  shiftDate: string
   startTime: string
   endTime: string
-  color: string
+  staff: {
+    id: number
+    user: {
+      id: number
+      firstName?: string
+      lastName?: string
+      fullName?: string
+    }
+  }
+}
+
+interface StaffMember {
+  id: number
+  position?: string
+  user: {
+    id: number
+    firstName?: string
+    lastName?: string
+    fullName?: string
+    email: string
+  }
 }
 
 export default function StaffSchedulePage() {
@@ -19,26 +41,78 @@ export default function StaffSchedulePage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [showStaffDropdown, setShowStaffDropdown] = useState(false)
   const [editingShift, setEditingShift] = useState<Shift | null>(null)
+  const [shifts, setShifts] = useState<Shift[]>([])
+  const [staff, setStaff] = useState<StaffMember[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [newShift, setNewShift] = useState({
-    staffName: '',
+    staffId: 0,
     startTime: '',
     endTime: ''
   })
 
-  // Sample shifts
-  const [shifts, setShifts] = useState<Shift[]>([
-    { id: '1', staffName: 'Olivia Chen', date: '2024-11-05', startTime: '09:00', endTime: '17:00', color: 'pink' },
-    { id: '2', staffName: 'Ben Carter', date: '2024-11-07', startTime: '10:00', endTime: '18:00', color: 'purple' },
-    { id: '3', staffName: 'Isabella Rossi', date: '2024-11-08', startTime: '09:00', endTime: '15:00', color: 'blue' },
-    { id: '4', staffName: 'Liam Gomez', date: '2024-11-20', startTime: '12:00', endTime: '20:00', color: 'green' },
-  ])
+  useEffect(() => {
+    const user = getCurrentUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }
 
-  const staff = [
-    { name: 'Olivia Chen', color: 'pink' },
-    { name: 'Ben Carter', color: 'purple' },
-    { name: 'Isabella Rossi', color: 'blue' },
-    { name: 'Liam Gomez', color: 'green' }
-  ]
+    if (user.role !== 'business_owner') {
+      router.push('/')
+      return
+    }
+
+    fetchData()
+  }, [currentDate])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      
+      // Calculate date range (5 weeks from current date)
+      const startDate = formatDate(currentDate)
+      const endDate = new Date(currentDate)
+      endDate.setDate(endDate.getDate() + 34)
+      const endDateStr = formatDate(endDate)
+
+      const [shiftsResponse, staffResponse] = await Promise.all([
+        api.get(`/shifts?startDate=${startDate}&endDate=${endDateStr}`),
+        api.get('/shifts/staff-members')
+      ])
+
+      setShifts(shiftsResponse.data)
+      setStaff(staffResponse.data)
+    } catch (err: any) {
+      console.error('Error fetching data:', err)
+      setError(err?.response?.data?.message || 'Failed to load data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStaffName = (staffMember: StaffMember) => {
+    const user = staffMember.user
+    if (user.fullName) return user.fullName
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`
+    if (user.firstName) return user.firstName
+    return user.email
+  }
+
+  const getShiftStaffName = (shift: Shift) => {
+    const user = shift.staff?.user
+    if (!user) return 'Unknown'
+    if (user.fullName) return user.fullName
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`
+    if (user.firstName) return user.firstName
+    return 'Staff'
+  }
+
+  const getStaffColor = (staffId: number) => {
+    const colors = ['pink', 'purple', 'blue', 'green', 'orange', 'teal']
+    return colors[staffId % colors.length]
+  }
 
   const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"]
@@ -68,7 +142,7 @@ export default function StaffSchedulePage() {
 
   const getShiftsForDate = (date: Date) => {
     const dateStr = formatDate(date)
-    return shifts.filter(shift => shift.date === dateStr)
+    return shifts.filter(shift => shift.shiftDate === dateStr)
   }
 
   const isToday = (date: Date) => {
@@ -83,64 +157,98 @@ export default function StaffSchedulePage() {
   const handleDayClick = (date: Date) => {
     setSelectedDate(formatDate(date))
     setEditingShift(null)
-    setNewShift({ staffName: '', startTime: '', endTime: '' })
+    setNewShift({ staffId: 0, startTime: '', endTime: '' })
     setShowAddModal(true)
   }
 
   const handleShiftClick = (shift: Shift, e: React.MouseEvent) => {
     e.stopPropagation()
     setEditingShift(shift)
-    setSelectedDate(shift.date)
+    setSelectedDate(shift.shiftDate)
     setNewShift({
-      staffName: shift.staffName,
+      staffId: shift.staffId,
       startTime: shift.startTime,
       endTime: shift.endTime
     })
     setShowAddModal(true)
   }
 
-  const handleAddShift = () => {
-    if (newShift.staffName && newShift.startTime && newShift.endTime && selectedDate) {
-      const selectedStaff = staff.find(s => s.name === newShift.staffName)
-      
-      if (editingShift) {
-        // Update existing shift
-        setShifts(shifts.map(s => 
-          s.id === editingShift.id 
-            ? { ...s, staffName: newShift.staffName, startTime: newShift.startTime, endTime: newShift.endTime, date: selectedDate }
-            : s
-        ))
-      } else {
-        // Add new shift
-        const shift: Shift = {
-          id: Date.now().toString(),
-          staffName: newShift.staffName,
-          date: selectedDate,
-          startTime: newShift.startTime,
-          endTime: newShift.endTime,
-          color: selectedStaff?.color || 'pink'
+  const handleAddShift = async () => {
+    if (newShift.staffId && newShift.startTime && newShift.endTime && selectedDate) {
+      try {
+        setSubmitting(true)
+        if (editingShift) {
+          // Update existing shift
+          const response = await api.put(`/shifts/${editingShift.id}`, {
+            staffId: newShift.staffId,
+            shiftDate: selectedDate,
+            startTime: newShift.startTime,
+            endTime: newShift.endTime
+          })
+          setShifts(shifts.map(s => s.id === editingShift.id ? response.data : s))
+        } else {
+          // Add new shift
+          const response = await api.post('/shifts', {
+            staffId: newShift.staffId,
+            shiftDate: selectedDate,
+            startTime: newShift.startTime,
+            endTime: newShift.endTime
+          })
+          setShifts([...shifts, response.data])
         }
-        setShifts([...shifts, shift])
+        
+        setNewShift({ staffId: 0, startTime: '', endTime: '' })
+        setShowAddModal(false)
+        setSelectedDate(null)
+        setEditingShift(null)
+      } catch (err: any) {
+        alert(err?.response?.data?.message || 'Failed to save shift')
+      } finally {
+        setSubmitting(false)
       }
-      
-      setNewShift({ staffName: '', startTime: '', endTime: '' })
-      setShowAddModal(false)
-      setSelectedDate(null)
-      setEditingShift(null)
     }
   }
 
-  const handleDeleteShift = () => {
+  const handleDeleteShift = async () => {
     if (editingShift) {
-      setShifts(shifts.filter(s => s.id !== editingShift.id))
-      setShowAddModal(false)
-      setEditingShift(null)
-      setNewShift({ staffName: '', startTime: '', endTime: '' })
-      setSelectedDate(null)
+      try {
+        await api.delete(`/shifts/${editingShift.id}`)
+        setShifts(shifts.filter(s => s.id !== editingShift.id))
+        setShowAddModal(false)
+        setEditingShift(null)
+        setNewShift({ staffId: 0, startTime: '', endTime: '' })
+        setSelectedDate(null)
+      } catch (err: any) {
+        alert(err?.response?.data?.message || 'Failed to delete shift')
+      }
     }
   }
 
   const days = getDaysInMonth(currentDate)
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className={styles.pageContainer}>
+          <div className={styles.contentWrapper}>
+            <p>Loading schedule...</p>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className={styles.pageContainer}>
+          <div className={styles.contentWrapper}>
+            <p style={{ color: 'red' }}>{error}</p>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
 
   return (
     <Layout>
@@ -209,12 +317,12 @@ export default function StaffSchedulePage() {
                       {dayShifts.map((shift) => (
                         <div 
                           key={shift.id} 
-                          className={`${styles.shiftCard} ${styles[`shift${shift.color.charAt(0).toUpperCase() + shift.color.slice(1)}`]}`}
+                          className={`${styles.shiftCard} ${styles[`shift${getStaffColor(shift.staffId).charAt(0).toUpperCase() + getStaffColor(shift.staffId).slice(1)}`]}`}
                           onClick={(e) => handleShiftClick(shift, e)}
                         >
-                          <p className={styles.shiftName}>{shift.staffName}</p>
+                          <p className={styles.shiftName}>{getShiftStaffName(shift)}</p>
                           <p className={styles.shiftTime}>
-                            {shift.startTime} - {shift.endTime}
+                            {shift.startTime.substring(0, 5)} - {shift.endTime.substring(0, 5)}
                           </p>
                         </div>
                       ))}
@@ -258,8 +366,8 @@ export default function StaffSchedulePage() {
                     className={styles.selectButton}
                     onClick={() => setShowStaffDropdown(!showStaffDropdown)}
                   >
-                    <span className={newShift.staffName ? styles.selectedText : styles.placeholderText}>
-                      {newShift.staffName || 'Select staff...'}
+                    <span className={newShift.staffId ? styles.selectedText : styles.placeholderText}>
+                      {newShift.staffId ? getStaffName(staff.find(s => s.id === newShift.staffId)!) : 'Select staff...'}
                     </span>
                     <svg className={`${styles.selectArrow} ${showStaffDropdown ? styles.selectArrowOpen : ''}`} width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -269,9 +377,9 @@ export default function StaffSchedulePage() {
                     <div className={styles.dropdownMenu}>
                       <button
                         type="button"
-                        className={`${styles.dropdownItem} ${!newShift.staffName ? styles.dropdownItemActive : ''}`}
+                        className={`${styles.dropdownItem} ${!newShift.staffId ? styles.dropdownItemActive : ''}`}
                         onClick={() => {
-                          setNewShift({ ...newShift, staffName: '' })
+                          setNewShift({ ...newShift, staffId: 0 })
                           setShowStaffDropdown(false)
                         }}
                       >
@@ -279,15 +387,15 @@ export default function StaffSchedulePage() {
                       </button>
                       {staff.map((member) => (
                         <button
-                          key={member.name}
+                          key={member.id}
                           type="button"
-                          className={`${styles.dropdownItem} ${newShift.staffName === member.name ? styles.dropdownItemActive : ''}`}
+                          className={`${styles.dropdownItem} ${newShift.staffId === member.id ? styles.dropdownItemActive : ''}`}
                           onClick={() => {
-                            setNewShift({ ...newShift, staffName: member.name })
+                            setNewShift({ ...newShift, staffId: member.id })
                             setShowStaffDropdown(false)
                           }}
                         >
-                          {member.name}
+                          {getStaffName(member)}
                         </button>
                       ))}
                     </div>
@@ -326,11 +434,15 @@ export default function StaffSchedulePage() {
                 </button>
               )}
               <div className={styles.modalActions}>
-                <button className={styles.cancelBtn} onClick={() => setShowAddModal(false)}>
+                <button className={styles.cancelBtn} onClick={() => setShowAddModal(false)} disabled={submitting}>
                   Cancel
                 </button>
-                <button className={styles.saveBtn} onClick={handleAddShift}>
-                  {editingShift ? 'Save Changes' : 'Add Shift'}
+                <button 
+                  className={styles.saveBtn} 
+                  onClick={handleAddShift}
+                  disabled={submitting || !newShift.staffId || !newShift.startTime || !newShift.endTime}
+                >
+                  {submitting ? 'Saving...' : (editingShift ? 'Save Changes' : 'Add Shift')}
                 </button>
               </div>
             </div>

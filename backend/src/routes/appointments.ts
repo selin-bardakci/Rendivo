@@ -8,6 +8,7 @@ import {
   getAppointmentById,
   updateAppointmentStatus,
   cancelAppointment,
+  rescheduleAppointment,
 } from '../controllers/appointmentController';
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.post('/appointments', authenticate, createAppointment);
 router.get('/appointments', authenticate, getCustomerAppointments);
 router.get('/appointments/:id', authenticate, getAppointmentById);
 router.delete('/appointments/:id', authenticate, cancelAppointment);
+router.patch('/appointments/:id/reschedule', authenticate, rescheduleAppointment);
 
 // Business owner routes
 router.get('/business/appointments', authenticate, getBusinessAppointments);

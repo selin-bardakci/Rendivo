@@ -48,6 +48,15 @@ export const appointmentApi = {
   getAll: () => api.get('/appointments'),
   getById: (id: number) => api.get(`/appointments/${id}`),
   cancel: (id: number) => api.delete(`/appointments/${id}`),
+  reschedule: (id: number, data: { 
+    staffId?: number;
+    serviceIds?: number[];
+    appointmentDate: string; 
+    startTime: string; 
+    endTime: string;
+    totalDuration?: number;
+    totalPrice?: number;
+  }) => api.patch(`/appointments/${id}/reschedule`, data),
   
   // Business owner endpoints
   getBusinessAppointments: () => api.get('/business/appointments'),
