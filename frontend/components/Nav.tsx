@@ -3,16 +3,34 @@ import Image from 'next/image'
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { getCurrentUser, logout } from '../lib/auth'
+import api from '../lib/api'
 
 const Nav: React.FC = () => {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null)
 
   useEffect(() => {
     const u = getCurrentUser()
     setUser(u)
+    
+    // Check approval status for business owners
+    if (u?.role === 'business_owner') {
+      checkApprovalStatus()
+    }
   }, [router.pathname])
+
+  const checkApprovalStatus = async () => {
+    try {
+      const response = await api.get('/business/dashboard')
+      const status = response.data?.business?.approvalStatus
+      console.log('Nav approval status:', status)
+      setApprovalStatus(status)
+    } catch (error) {
+      console.error('Error checking approval status:', error)
+    }
+  }
 
   const scrollToFeatures = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
@@ -70,19 +88,77 @@ const Nav: React.FC = () => {
         )
       
       case 'business_owner':
+        const isPending = approvalStatus === 'pending'
+        
+        const handleDisabledClick = (e: React.MouseEvent) => {
+          if (isPending) {
+            e.preventDefault()
+            e.stopPropagation()
+          }
+        }
+        
         return (
           <>
-            <Link href="/business/dashboard" className="nav-link">
+            <Link 
+              href="/business/dashboard" 
+              className="nav-link"
+              onClick={handleDisabledClick}
+              style={isPending ? { 
+                pointerEvents: 'none', 
+                opacity: 0.5, 
+                cursor: 'not-allowed',
+                textDecoration: 'none'
+              } : {}}
+            >
               Dashboard
             </Link>
-            <Link href="/business/services" className="nav-link">
+            <Link 
+              href="/business/services" 
+              className="nav-link"
+              onClick={handleDisabledClick}
+              style={isPending ? { 
+                pointerEvents: 'none', 
+                opacity: 0.5, 
+                cursor: 'not-allowed',
+                textDecoration: 'none'
+              } : {}}
+            >
               Services
             </Link>
-            <Link href="/business/staff" className="nav-link">
+            <Link 
+              href="/business/staff" 
+              className="nav-link"
+              onClick={handleDisabledClick}
+              style={isPending ? { 
+                pointerEvents: 'none', 
+                opacity: 0.5, 
+                cursor: 'not-allowed',
+                textDecoration: 'none'
+              } : {}}
+            >
               Staff
             </Link>
-            <Link href="/business/schedule" className="nav-link">
+            <Link 
+              href="/business/schedule" 
+              className="nav-link"
+              onClick={handleDisabledClick}
+              style={isPending ? { 
+                pointerEvents: 'none', 
+                opacity: 0.5, 
+                cursor: 'not-allowed',
+                textDecoration: 'none'
+              } : {}}
+            >
               Schedule
+            </Link>
+          </>
+        )
+      
+      case 'admin':
+        return (
+          <>
+            <Link href="/admin/dashboard" className="nav-link">
+              Admin Dashboard
             </Link>
           </>
         )

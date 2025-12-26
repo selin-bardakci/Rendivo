@@ -175,7 +175,9 @@ export const registerBusiness = async (req: AuthRequest, res: Response): Promise
         id: business.id,
         businessName: business.businessName,
         businessId: business.businessId,
+        approvalStatus: business.approvalStatus,
       },
+      approvalStatus: business.approvalStatus,
     });
   } catch (error: any) {
     console.error('Register business error:', error);
@@ -217,6 +219,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<Response |
     if (user.role === UserRole.BUSINESS_OWNER) {
       const business = await Business.findOne({ where: { ownerId: user.id } });
       additionalData.business = business;
+      additionalData.approvalStatus = business?.approvalStatus;
     } else if (user.role === UserRole.STAFF) {
       const staffMembership = await StaffMember.findOne({ 
         where: { userId: user.id },

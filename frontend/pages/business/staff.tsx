@@ -54,9 +54,33 @@ export default function StaffManagementPage() {
     }
     
     setUser(u)
-    fetchStaffAndBusiness(u)
+    checkApprovalAndFetch(u)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const checkApprovalAndFetch = async (currentUser: any) => {
+    try {
+      // Check approval status first
+      const apiModule = await import('../../lib/api')
+      const businessCheck = await apiModule.default.get('/business/dashboard')
+      
+      if (businessCheck.data?.business?.approvalStatus === 'pending') {
+        router.push('/business/pending-approval')
+        return
+      }
+      
+      if (businessCheck.data?.business?.approvalStatus === 'rejected') {
+        setError('Your business application has been rejected. Please contact support.')
+        setLoading(false)
+        return
+      }
+      
+      fetchStaffAndBusiness(currentUser)
+    } catch (err: any) {
+      console.error('Error checking approval:', err)
+      fetchStaffAndBusiness(currentUser) // Try anyway if check fails
+    }
+  }
 
   const fetchStaffAndBusiness = async (currentUser: any) => {
     try {

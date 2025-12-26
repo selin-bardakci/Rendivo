@@ -19,11 +19,23 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     try {
-      const { user } = await login(email, password)
+      const response = await login(email, password)
+      const { user, approvalStatus } = response
       
-      // Redirect based on user role
-      if (user.role === 'business_owner') {
-        router.push('/business/dashboard')
+      // Redirect based on user role and approval status
+      if (user.role === 'admin') {
+        router.push('/admin/dashboard')
+      } else if (user.role === 'business_owner') {
+        // Check if business is approved
+        if (approvalStatus === 'pending') {
+          router.push('/business/pending-approval')
+        } else if (approvalStatus === 'rejected') {
+          setError('Your business application has been rejected. Please contact support.')
+          setLoading(false)
+          return
+        } else {
+          router.push('/business/dashboard')
+        }
       } else if (user.role === 'staff') {
         router.push('/staff-dashboard')
       } else if (user.role === 'customer') {

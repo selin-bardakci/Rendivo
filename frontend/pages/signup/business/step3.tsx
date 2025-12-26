@@ -64,11 +64,17 @@ export default function BusinessSignupStep3() {
       console.log('Submitting registration data:', JSON.stringify(registrationData, null, 2))
       const response = await registerBusiness(registrationData)
       setBusinessId(response.business.businessId)
-      setSuccess(true)
       
       // Clear session storage
       sessionStorage.removeItem('businessSignupStep1')
       sessionStorage.removeItem('businessSignupStep2')
+      
+      // Redirect based on approval status
+      if (response.approvalStatus === 'pending') {
+        router.push('/business/pending-approval')
+      } else {
+        setSuccess(true)
+      }
     } catch (err: any) {
       console.error('Registration error:', err)
       console.error('Error response:', err?.response)

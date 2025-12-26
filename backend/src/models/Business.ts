@@ -1,6 +1,13 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
+// Business approval status
+export enum ApprovalStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
+}
+
 // Business attributes interface
 export interface BusinessAttributes {
   id: number;
@@ -18,12 +25,15 @@ export interface BusinessAttributes {
   website?: string;
   logo?: string;
   businessId: string; // Unique business identifier for staff to join
+  approvalStatus: ApprovalStatus;
+  approvedAt?: Date;
+  rejectionReason?: string;
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-interface BusinessCreationAttributes extends Optional<BusinessAttributes, 'id' | 'businessId' | 'isActive'> {}
+interface BusinessCreationAttributes extends Optional<BusinessAttributes, 'id' | 'businessId' | 'isActive' | 'approvalStatus'> {}
 
 // Business Model
 class Business extends Model<BusinessAttributes, BusinessCreationAttributes> implements BusinessAttributes {
@@ -42,6 +52,9 @@ class Business extends Model<BusinessAttributes, BusinessCreationAttributes> imp
   public website?: string;
   public logo?: string;
   public businessId!: string;
+  public approvalStatus!: ApprovalStatus;
+  public approvedAt?: Date;
+  public rejectionReason?: string;
   public isActive!: boolean;
 
   public readonly createdAt!: Date;
@@ -116,6 +129,19 @@ Business.init(
       allowNull: false,
       unique: true,
       defaultValue: () => `BIZ${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+    },
+    approvalStatus: {
+      type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+      allowNull: false,
+      defaultValue: 'pending',
+    },
+    approvedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    rejectionReason: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     isActive: {
       type: DataTypes.BOOLEAN,

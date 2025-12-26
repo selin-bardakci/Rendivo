@@ -49,16 +49,16 @@ export async function registerStaff(data: StaffSignupData) {
 
 export async function registerBusiness(data: BusinessSignupData) {
   const resp = await api.post('/auth/register/business', data)
-  const { token, user, business } = resp.data
+  const { token, user, business, approvalStatus } = resp.data
   Cookies.set(TOKEN_KEY, token)
-  return { token, user, business }
+  return { token, user, business, approvalStatus }
 }
 
 export async function login(email: string, password: string) {
   const resp = await api.post('/auth/login', { email, password })
-  const { token, user } = resp.data
+  const { token, user, approvalStatus } = resp.data
   Cookies.set(TOKEN_KEY, token)
-  return { token, user }
+  return { token, user, approvalStatus }
 }
 
 export async function authenticateWithFirebase(

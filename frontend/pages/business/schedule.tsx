@@ -64,8 +64,29 @@ export default function StaffSchedulePage() {
       return
     }
 
-    fetchData()
-  }, [currentDate])
+    checkApprovalAndFetchData()
+  }, [])
+
+  const checkApprovalAndFetchData = async () => {
+    try {
+      const response = await api.get('/business/dashboard')
+      
+      if (response.data.business?.approvalStatus === 'pending') {
+        router.push('/business/pending-approval')
+        return
+      }
+      
+      if (response.data.business?.approvalStatus === 'rejected') {
+        setError('Your business application has been rejected. Please contact support.')
+        return
+      }
+      
+      fetchData()
+    } catch (err: any) {
+      console.error('Error checking approval status:', err)
+      fetchData() // Try to fetch anyway if check fails
+    }
+  }
 
   const fetchData = async () => {
     try {

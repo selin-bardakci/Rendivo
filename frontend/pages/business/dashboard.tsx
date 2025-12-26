@@ -31,6 +31,19 @@ export default function DashboardPage() {
     try {
       setLoading(true)
       const response = await api.get('/business/dashboard')
+      
+      // Check if business is approved
+      if (response.data.business?.approvalStatus === 'pending') {
+        router.push('/business/pending-approval')
+        return
+      }
+      
+      if (response.data.business?.approvalStatus === 'rejected') {
+        setError('Your business application has been rejected. Please contact support.')
+        setLoading(false)
+        return
+      }
+      
       setDashboardData(response.data)
     } catch (err: any) {
       console.error('Error fetching dashboard data:', err)

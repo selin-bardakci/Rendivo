@@ -11,6 +11,7 @@ export const getAllBusinesses = async (req: AuthRequest, res: Response): Promise
 
     const whereClause: any = {
       isActive: true,
+      approvalStatus: 'approved',
     };
 
     // Search by business name or type

@@ -63,9 +63,33 @@ export default function BusinessServices() {
     }
     
     setUser(u)
-    fetchServices()
+    checkApprovalStatus()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const checkApprovalStatus = async () => {
+    try {
+      // Import api at the top if not already
+      const apiModule = await import('../../lib/api')
+      const businessCheck = await apiModule.default.get('/business/dashboard')
+      
+      if (businessCheck.data?.business?.approvalStatus === 'pending') {
+        router.push('/business/pending-approval')
+        return
+      }
+      
+      if (businessCheck.data?.business?.approvalStatus === 'rejected') {
+        setError('Your business application has been rejected. Please contact support.')
+        setLoading(false)
+        return
+      }
+      
+      fetchServices()
+    } catch (err: any) {
+      console.error('Error checking approval:', err)
+      fetchServices() // Try anyway if check fails
+    }
+  }
 
   const fetchServices = async () => {
     try {
