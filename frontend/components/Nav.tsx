@@ -151,6 +151,19 @@ const Nav: React.FC = () => {
             >
               Schedule
             </Link>
+            <Link 
+              href="/business/appointments" 
+              className="nav-link"
+              onClick={handleDisabledClick}
+              style={isPending ? { 
+                pointerEvents: 'none', 
+                opacity: 0.5, 
+                cursor: 'not-allowed',
+                textDecoration: 'none'
+              } : {}}
+            >
+              Appointments
+            </Link>
           </>
         )
       

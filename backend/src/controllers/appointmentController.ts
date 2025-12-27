@@ -129,7 +129,7 @@ export const getCustomerAppointments = async (req: AuthRequest, res: Response): 
           include: [{
             model: User,
             as: 'user',
-            attributes: ['fullName'],
+            attributes: ['id', 'firstName', 'lastName', 'fullName'],
           }],
           attributes: ['id', 'position'],
         },
@@ -170,7 +170,7 @@ export const getBusinessAppointments = async (req: AuthRequest, res: Response): 
         {
           model: User,
           as: 'customer',
-          attributes: ['id', 'fullName', 'email', 'phone'],
+          attributes: ['id', 'firstName', 'lastName', 'fullName', 'email', 'phone'],
         },
         {
           model: StaffMember,
@@ -224,7 +224,7 @@ export const getStaffAppointments = async (req: AuthRequest, res: Response): Pro
         {
           model: User,
           as: 'customer',
-          attributes: ['id', 'fullName', 'email', 'phone'],
+          attributes: ['id', 'firstName', 'lastName', 'fullName', 'email', 'phone'],
         },
       ],
       order: [['appointmentDate', 'ASC'], ['startTime', 'ASC']],
@@ -355,10 +355,17 @@ export const cancelAppointment = async (req: AuthRequest, res: Response): Promis
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    await appointment.destroy();
+    // Update status to cancelled instead of deleting
+    await appointment.update({
+      status: AppointmentStatus.CANCELLED
+    });
 
     res.json({
       message: 'Appointment cancelled successfully',
+      appointment: {
+        id: appointment.id,
+        status: AppointmentStatus.CANCELLED
+      }
     });
   } catch (error: any) {
     console.error('Cancel appointment error:', error);

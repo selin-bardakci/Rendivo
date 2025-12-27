@@ -46,7 +46,7 @@ export default function StaffDashboardPage() {
     }
   }
 
-  // Get appointments for selected date
+  // Get appointments for selected date (including cancelled to show in sidebar)
   const getAppointmentsForDate = (date: Date) => {
     return appointments.filter(apt => {
       const aptDate = new Date(apt.appointmentDate)
@@ -58,8 +58,10 @@ export default function StaffDashboardPage() {
     })
   }
 
-  // Get dates with appointments
-  const appointmentDates = appointments.map(apt => new Date(apt.appointmentDate))
+  // Get dates with appointments (excluding cancelled)
+  const appointmentDates = appointments
+    .filter(apt => apt.status !== 'cancelled')
+    .map(apt => new Date(apt.appointmentDate))
 
   const handleLogout = async () => {
     await logout()
@@ -251,8 +253,13 @@ export default function StaffDashboardPage() {
                 <div className={styles.appointmentsList}>
                   {todaysAppointments.map((appointment) => {
                     const serviceNames = appointment.services?.map((s: any) => s.name).join(', ') || 'Service'
-                    const timeDisplay = appointment.startTime?.slice(0, 5) || 'Time'
-                    const customerName = appointment.customer?.fullName || 'Customer'
+                    const timeRange = `${appointment.startTime?.slice(0, 5) || '00:00'} - ${appointment.endTime?.slice(0, 5) || '00:00'}`
+                    const customer = appointment.customer
+                    const customerName = customer?.fullName || 
+                                        (customer?.firstName && customer?.lastName ? `${customer.firstName} ${customer.lastName}` : null) ||
+                                        customer?.firstName ||
+                                        customer?.email ||
+                                        'Customer'
                     
                     return (
                     <div key={appointment.id} className={styles.appointmentItem}>
@@ -261,7 +268,7 @@ export default function StaffDashboardPage() {
                           <circle cx="12" cy="12" r="10" />
                           <polyline points="12 6 12 12 16 14" />
                         </svg>
-                        {timeDisplay}
+                        {timeRange}
                       </div>
                       <div className={styles.appointmentDetails}>
                         <h3 className={styles.clientName}>{customerName}</h3>

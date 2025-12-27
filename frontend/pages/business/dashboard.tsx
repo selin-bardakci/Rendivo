@@ -169,7 +169,7 @@ export default function DashboardPage() {
             <div className={styles.appointmentsCard}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Upcoming Appointments ({upcomingAppointments.length})</h2>
-                <button className={styles.viewScheduleBtn} onClick={() => router.push('/business/schedule')}>View Full Schedule</button>
+                <button className={styles.viewScheduleBtn} onClick={() => router.push('/business/appointments')}>View Appointments</button>
               </div>
               <div className={styles.appointmentsList}>
                 {upcomingAppointments.length === 0 ? (
