@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import styles from '../../styles/businessStaff.module.css'
-import { businessApi } from '../../lib/api'
+import api, { businessApi } from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
 
 interface StaffMember {
@@ -85,18 +85,23 @@ export default function StaffManagementPage() {
   const fetchStaffAndBusiness = async (currentUser: any) => {
     try {
       setLoading(true)
-      // Get business info to get the businessId
-      const businessResponse = await businessApi.getAll()
-      const userBusiness = businessResponse.data.find((b: any) => b.ownerId === currentUser.id)
+      console.log('📊 Fetching owner business and staff...')
+      
+      // Get owner's business info directly from backend
+      const businessResponse = await api.get('/business/my-business')
+      const userBusiness = businessResponse.data
+      
+      console.log('🏢 Owner business:', userBusiness.id, userBusiness.businessName, 'BusinessID:', userBusiness.businessId)
       
       if (userBusiness) {
         setBusinessId(userBusiness.businessId)
-        // Fetch staff for this business
-        const staffResponse = await businessApi.getStaff(userBusiness.id)
+        // Fetch staff for this business using authenticated endpoint
+        const staffResponse = await api.get('/business/staff')
+        console.log('👥 Staff fetched:', staffResponse.data.length)
         setStaff(staffResponse.data)
       }
     } catch (err: any) {
-      console.error('Error fetching staff:', err)
+      console.error('❌ Error fetching staff:', err)
       setError(err.response?.data?.message || 'Failed to load staff')
     } finally {
       setLoading(false)

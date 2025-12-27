@@ -63,6 +63,8 @@ export const getBusinessStaffMembers = async (req: AuthRequest, res: Response): 
   try {
     const userId = req.user?.id;
 
+    console.log('🔍 getBusinessStaffMembers called by user:', userId);
+
     if (!userId) {
       return res.status(401).json({ message: 'User not authenticated' });
     }
@@ -72,9 +74,18 @@ export const getBusinessStaffMembers = async (req: AuthRequest, res: Response): 
       where: { ownerId: userId, isActive: true },
     });
 
+    console.log('🏢 Business found:', business ? {
+      id: business.id,
+      name: business.businessName,
+      ownerId: business.ownerId,
+      isActive: business.isActive
+    } : 'NOT FOUND');
+
     if (!business) {
       return res.status(404).json({ message: 'Business not found' });
     }
+
+    console.log('📋 Fetching staff for business:', business.id, 'Owner:', userId);
 
     const staff = await StaffMember.findAll({
       where: {
@@ -91,9 +102,14 @@ export const getBusinessStaffMembers = async (req: AuthRequest, res: Response): 
       order: [['createdAt', 'ASC']],
     });
 
+    console.log('👥 Found staff members:', staff.length);
+    staff.forEach(s => {
+      console.log(`  - Staff ID: ${s.id}, User: ${(s as any).user?.fullName || (s as any).user?.email}, BusinessId: ${s.businessId}, Active: ${s.isActive}`);
+    });
+
     res.json(staff);
   } catch (error: any) {
-    console.error('Get business staff members error:', error);
+    console.error('❌ Get business staff members error:', error);
     res.status(500).json({ message: 'Error fetching staff members', error: error.message });
   }
 };

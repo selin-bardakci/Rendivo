@@ -102,7 +102,26 @@ export const getBusinessById = async (req: AuthRequest, res: Response): Promise<
 // Get staff for a business
 export const getBusinessStaff = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
-    const { businessId } = req.params;
+    let businessId: number;
+    
+    // If businessId is in params, use it (public route)
+    if (req.params.businessId) {
+      businessId = parseInt(req.params.businessId);
+    } 
+    // Otherwise, get business of authenticated user (protected route)
+    else if (req.user?.id) {
+      const business = await Business.findOne({
+        where: { ownerId: req.user.id, isActive: true },
+      });
+      
+      if (!business) {
+        return res.status(404).json({ message: 'Business not found' });
+      }
+      
+      businessId = business.id;
+    } else {
+      return res.status(400).json({ message: 'Business ID required' });
+    }
 
     const staff = await StaffMember.findAll({
       where: {
@@ -354,5 +373,29 @@ export const getBusinessDashboard = async (req: AuthRequest, res: Response): Pro
   } catch (error: any) {
     console.error('Get business dashboard error:', error);
     res.status(500).json({ message: 'Error fetching dashboard data', error: error.message });
+  }
+};
+// Get owner's business information
+export const getMyBusiness = async (req: AuthRequest, res: Response): Promise<Response | void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    // Get business owned by the user
+    const business = await Business.findOne({
+      where: { ownerId: userId, isActive: true },
+    });
+
+    if (!business) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    res.json(business);
+  } catch (error: any) {
+    console.error('Get my business error:', error);
+    res.status(500).json({ message: 'Error fetching business', error: error.message });
   }
 };

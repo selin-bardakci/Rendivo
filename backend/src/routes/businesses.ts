@@ -4,6 +4,7 @@ import {
   getBusinessById,
   getBusinessStaff,
   getBusinessDashboard,
+  getMyBusiness,
 } from '../controllers/businessController';
 import { authenticate } from '../middleware/auth';
 
@@ -14,7 +15,9 @@ router.get('/businesses', getAllBusinesses);
 router.get('/businesses/:id', getBusinessById);
 router.get('/businesses/:businessId/staff', getBusinessStaff);
 
-// Protected routes
+// Protected routes (for business owners)
 router.get('/business/dashboard', authenticate, getBusinessDashboard);
+router.get('/business/my-business', authenticate, getMyBusiness); // Returns owner's business info
+router.get('/business/staff', authenticate, getBusinessStaff); // Get owner's business staff
 
 export default router;

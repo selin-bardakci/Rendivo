@@ -98,15 +98,20 @@ export default function StaffSchedulePage() {
       endDate.setDate(endDate.getDate() + 34)
       const endDateStr = formatDate(endDate)
 
+      console.log('📅 Fetching schedule data...')
       const [shiftsResponse, staffResponse] = await Promise.all([
         api.get(`/shifts?startDate=${startDate}&endDate=${endDateStr}`),
         api.get('/shifts/staff-members')
       ])
 
+      console.log('✅ Shifts received:', shiftsResponse.data.length)
+      console.log('👥 Staff received:', staffResponse.data.length, staffResponse.data)
+      
       setShifts(shiftsResponse.data)
       setStaff(staffResponse.data)
     } catch (err: any) {
-      console.error('Error fetching data:', err)
+      console.error('❌ Error fetching data:', err)
+      console.error('Error details:', err?.response?.data)
       setError(err?.response?.data?.message || 'Failed to load data')
     } finally {
       setLoading(false)
@@ -385,7 +390,10 @@ export default function StaffSchedulePage() {
                   <button
                     type="button"
                     className={styles.selectButton}
-                    onClick={() => setShowStaffDropdown(!showStaffDropdown)}
+                    onClick={() => {
+                      console.log('🔽 Staff dropdown clicked. Available staff:', staff.length, staff)
+                      setShowStaffDropdown(!showStaffDropdown)
+                    }}
                   >
                     <span className={newShift.staffId ? styles.selectedText : styles.placeholderText}>
                       {newShift.staffId ? getStaffName(staff.find(s => s.id === newShift.staffId)!) : 'Select staff...'}
@@ -406,12 +414,18 @@ export default function StaffSchedulePage() {
                       >
                         Select staff...
                       </button>
+                      {staff.length === 0 && (
+                        <div className={styles.dropdownItem} style={{ color: '#999', cursor: 'default' }}>
+                          No staff members available
+                        </div>
+                      )}
                       {staff.map((member) => (
                         <button
                           key={member.id}
                           type="button"
                           className={`${styles.dropdownItem} ${newShift.staffId === member.id ? styles.dropdownItemActive : ''}`}
                           onClick={() => {
+                            console.log('👤 Selected staff:', member)
                             setNewShift({ ...newShift, staffId: member.id })
                             setShowStaffDropdown(false)
                           }}
