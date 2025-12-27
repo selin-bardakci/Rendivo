@@ -49,7 +49,9 @@ export default function StaffSchedulePage() {
   const [newShift, setNewShift] = useState({
     staffId: 0,
     startTime: '',
-    endTime: ''
+    endTime: '',
+    applyToWeek: false,
+    applyToMonth: false
   })
 
   useEffect(() => {
@@ -146,10 +148,16 @@ export default function StaffSchedulePage() {
   const getDaysInMonth = (startDate: Date) => {
     const days = []
     
-    // Get 35 days starting from startDate (5 weeks)
+    // Calculate the Monday of the week containing startDate
+    const dayOfWeek = startDate.getDay() // 0 = Sunday, 1 = Monday, etc.
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+    const monday = new Date(startDate)
+    monday.setDate(startDate.getDate() - daysToMonday)
+    
+    // Get 35 days starting from Monday (5 weeks)
     for (let i = 0; i < 35; i++) {
-      const date = new Date(startDate)
-      date.setDate(startDate.getDate() + i)
+      const date = new Date(monday)
+      date.setDate(monday.getDate() + i)
       days.push({
         date: date,
         isCurrentMonth: true
@@ -176,25 +184,50 @@ export default function StaffSchedulePage() {
     return date.toDateString() === today.toDateString()
   }
 
+  const isPastDate = (date: Date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const compareDate = new Date(date)
+    compareDate.setHours(0, 0, 0, 0)
+    return compareDate < today
+  }
+
   const goToToday = () => {
     setCurrentDate(new Date())
   }
 
+  const goToPreviousWeek = () => {
+    const newDate = new Date(currentDate)
+    newDate.setDate(currentDate.getDate() - 7)
+    setCurrentDate(newDate)
+  }
+
+  const goToNextWeek = () => {
+    const newDate = new Date(currentDate)
+    newDate.setDate(currentDate.getDate() + 7)
+    setCurrentDate(newDate)
+  }
+
   const handleDayClick = (date: Date) => {
+    if (isPastDate(date)) return // Geçmiş tarihlere shift eklenemez
     setSelectedDate(formatDate(date))
     setEditingShift(null)
-    setNewShift({ staffId: 0, startTime: '', endTime: '' })
+    setNewShift({ staffId: 0, startTime: '', endTime: '', applyToWeek: false, applyToMonth: false })
     setShowAddModal(true)
   }
 
   const handleShiftClick = (shift: Shift, e: React.MouseEvent) => {
     e.stopPropagation()
+    const shiftDate = new Date(shift.shiftDate)
+    if (isPastDate(shiftDate)) return // Geçmiş tarihli shift'ler editlenemez
     setEditingShift(shift)
     setSelectedDate(shift.shiftDate)
     setNewShift({
       staffId: shift.staffId,
       startTime: shift.startTime,
-      endTime: shift.endTime
+      endTime: shift.endTime,
+      applyToWeek: false,
+      applyToMonth: false
     })
     setShowAddModal(true)
   }
@@ -213,17 +246,91 @@ export default function StaffSchedulePage() {
           })
           setShifts(shifts.map(s => s.id === editingShift.id ? response.data : s))
         } else {
-          // Add new shift
-          const response = await api.post('/shifts', {
-            staffId: newShift.staffId,
-            shiftDate: selectedDate,
-            startTime: newShift.startTime,
-            endTime: newShift.endTime
-          })
-          setShifts([...shifts, response.data])
+          // Add new shift(s)
+          const datesToAdd: string[] = []
+          
+          if (newShift.applyToMonth) {
+            // Tüm aya ekle
+            const selectedDateObj = new Date(selectedDate)
+            const month = selectedDateObj.getMonth()
+            const year = selectedDateObj.getFullYear()
+            const daysInMonth = new Date(year, month + 1, 0).getDate()
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+              const date = new Date(year, month, day)
+              if (date >= today) {
+                datesToAdd.push(formatDate(date))
+              }
+            }
+          } else if (newShift.applyToWeek) {
+            // Tüm haftaya ekle (Monday to Sunday)
+            const selectedDateObj = new Date(selectedDate)
+            const dayOfWeek = selectedDateObj.getDay() // 0 = Sunday, 1 = Monday, etc.
+            // Calculate days to subtract to get to Monday
+            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+            const monday = new Date(selectedDateObj)
+            monday.setDate(selectedDateObj.getDate() - daysToMonday)
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            
+            for (let i = 0; i < 7; i++) {
+              const date = new Date(monday)
+              date.setDate(monday.getDate() + i)
+              if (date >= today) {
+                datesToAdd.push(formatDate(date))
+              }
+            }
+          } else {
+            // Sadece seçili güne ekle
+            datesToAdd.push(selectedDate)
+          }
+          
+          // Tüm tarihler için shift oluştur veya güncelle
+          const newShifts = []
+          for (const date of datesToAdd) {
+            // Bu tarihte bu staff member'ın shift'i var mı kontrol et
+            const existingShift = shifts.find(
+              s => s.shiftDate === date && s.staffId === newShift.staffId
+            )
+            
+            try {
+              if (existingShift) {
+                // Mevcut shift'i güncelle
+                const response = await api.put(`/shifts/${existingShift.id}`, {
+                  staffId: newShift.staffId,
+                  shiftDate: date,
+                  startTime: newShift.startTime,
+                  endTime: newShift.endTime
+                })
+                // Shifts array'inde güncelle
+                setShifts(prevShifts => prevShifts.map(s => 
+                  s.id === existingShift.id ? response.data : s
+                ))
+              } else {
+                // Yeni shift ekle
+                const response = await api.post('/shifts', {
+                  staffId: newShift.staffId,
+                  shiftDate: date,
+                  startTime: newShift.startTime,
+                  endTime: newShift.endTime
+                })
+                newShifts.push(response.data)
+              }
+            } catch (err: any) {
+              console.error(`Failed to save shift for ${date}:`, err?.response?.data?.message)
+              // Hata olsa bile devam et
+            }
+          }
+          
+          // Yeni eklenen shift'leri state'e ekle
+          if (newShifts.length > 0) {
+            setShifts(prevShifts => [...prevShifts, ...newShifts])
+          }
         }
         
-        setNewShift({ staffId: 0, startTime: '', endTime: '' })
+        setNewShift({ staffId: 0, startTime: '', endTime: '', applyToWeek: false, applyToMonth: false })
         setShowAddModal(false)
         setSelectedDate(null)
         setEditingShift(null)
@@ -242,7 +349,7 @@ export default function StaffSchedulePage() {
         setShifts(shifts.filter(s => s.id !== editingShift.id))
         setShowAddModal(false)
         setEditingShift(null)
-        setNewShift({ staffId: 0, startTime: '', endTime: '' })
+        setNewShift({ staffId: 0, startTime: '', endTime: '', applyToWeek: false, applyToMonth: false })
         setSelectedDate(null)
       } catch (err: any) {
         alert(err?.response?.data?.message || 'Failed to delete shift')
@@ -303,6 +410,18 @@ export default function StaffSchedulePage() {
           {/* Controls */}
           <div className={styles.controls}>
             <div className={styles.navigation}>
+              <div className={styles.navButtons}>
+                <button onClick={goToPreviousWeek} className={styles.navButton}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button onClick={goToNextWeek} className={styles.navButton}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
               <h2 className={styles.currentMonth}>
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h2>
@@ -331,20 +450,23 @@ export default function StaffSchedulePage() {
               {days.map((day, index) => {
                 const dayShifts = getShiftsForDate(day.date)
                 const isTodayDate = isToday(day.date)
+                const isPast = isPastDate(day.date)
                 
                 return (
                   <div
                     key={index}
-                    className={`${styles.calendarCell} ${isTodayDate ? styles.today : ''}`}
+                    className={`${styles.calendarCell} ${isTodayDate ? styles.today : ''} ${isPast ? styles.pastDate : ''}`}
                     onClick={() => handleDayClick(day.date)}
+                    style={isPast ? { cursor: 'not-allowed' } : {}}
                   >
                     <span className={styles.dayNumber}>{day.date.getDate()}</span>
                     <div className={styles.shiftsContainer}>
                       {dayShifts.map((shift) => (
                         <div 
                           key={shift.id} 
-                          className={`${styles.shiftCard} ${styles[`shift${getStaffColor(shift.staffId).charAt(0).toUpperCase() + getStaffColor(shift.staffId).slice(1)}`]}`}
+                          className={`${styles.shiftCard} ${styles[`shift${getStaffColor(shift.staffId).charAt(0).toUpperCase() + getStaffColor(shift.staffId).slice(1)}`]} ${isPast ? styles.pastShift : ''}`}
                           onClick={(e) => handleShiftClick(shift, e)}
+                          style={isPast ? { cursor: 'not-allowed' } : {}}
                         >
                           <p className={styles.shiftName}>{getShiftStaffName(shift)}</p>
                           <p className={styles.shiftTime}>
@@ -458,6 +580,55 @@ export default function StaffSchedulePage() {
                   />
                 </div>
               </div>
+
+              {!editingShift && (
+                <div className={styles.bulkOptions}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={newShift.applyToWeek}
+                      onChange={(e) => setNewShift({ 
+                        ...newShift, 
+                        applyToWeek: e.target.checked,
+                        applyToMonth: e.target.checked ? false : newShift.applyToMonth
+                      })}
+                      className={styles.checkbox}
+                    />
+                    <span className={styles.checkboxText}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Schedule for this week
+                    </span>
+                  </label>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={newShift.applyToMonth}
+                      onChange={(e) => setNewShift({ 
+                        ...newShift, 
+                        applyToMonth: e.target.checked,
+                        applyToWeek: e.target.checked ? false : newShift.applyToWeek
+                      })}
+                      className={styles.checkbox}
+                    />
+                    <span className={styles.checkboxText}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Schedule for this month
+                    </span>
+                  </label>
+                  {(newShift.applyToWeek || newShift.applyToMonth) && (
+                    <div className={styles.bulkWarning}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      This shift will be added for the {newShift.applyToMonth ? 'entire month' : 'entire week'} (from today onwards)
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className={styles.modalFooter}>
               {editingShift && (

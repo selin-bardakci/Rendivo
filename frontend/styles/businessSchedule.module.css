@@ -186,11 +186,13 @@
   border: 1px solid #e5dce4;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  overflow-x: auto;
 }
 
 .dayHeaders {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 8px;
 }
@@ -207,21 +209,24 @@
 
 .calendarGrid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .calendarCell {
   background: white;
   border: 1px solid #e5dce4;
   border-radius: 12px;
-  padding: 8px;
-  min-height: 100px;
+  padding: 6px;
+  height: 110px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .calendarCell:hover {
@@ -243,6 +248,25 @@
   border: 2px solid #df84dc;
 }
 
+.pastDate {
+  opacity: 0.5;
+  background: #fafafa;
+}
+
+.pastDate:hover {
+  background: #fafafa;
+  border-color: #e5dce4;
+}
+
+.pastShift {
+  opacity: 0.7;
+}
+
+.pastShift:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .dayNumber {
   font-size: 0.875rem;
   font-weight: 700;
@@ -253,6 +277,10 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-width: 0;
 }
 
 .shiftCard {
@@ -261,6 +289,8 @@
   border-left: 3px solid;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .shiftCard:hover {
@@ -422,6 +452,7 @@
   flex-direction: column;
   gap: 6px;
   margin-bottom: 12px;
+  align-items: flex-start;
 }
 
 .formGroup label {
@@ -432,7 +463,7 @@
 
 .input,
 .select {
-  width: 100%;
+  max-width: 200px;
   padding: 8px 10px;
   border: 1px solid #e5dce4;
   border-radius: 8px;
@@ -463,12 +494,13 @@
 /* Custom Select Dropdown */
 .customSelect {
   position: relative;
-  width: 100%;
+  max-width: 200px;
 }
 
 .selectButton {
   width: 100%;
-  padding: 9px 32px 9px 12px;
+  padding: 9px 12px;
+  padding-right: 36px;
   border: 1px solid #e5dce4;
   border-radius: 8px;
   background: white;
@@ -481,7 +513,7 @@
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  position: relative;
 }
 
 .selectButton:hover {
@@ -505,12 +537,17 @@
 }
 
 .selectArrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   transition: transform 0.2s;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .selectArrowOpen {
-  transform: rotate(180deg);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .dropdownMenu {
@@ -574,26 +611,22 @@
 
 /* Time Inputs */
 .timeInputs {
-  display: flex;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
   margin-top: 12px;
 }
 
 .timeGroup {
-  flex: 0 0 auto;
-  width: 110px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 .timeGroupRight {
-  flex: 0 0 auto;
-  width: 110px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-left: auto;
 }
 
 .timeGroup label,
@@ -605,6 +638,7 @@
 
 .timeInput {
   width: 100%;
+  max-width: 140px;
   padding: 8px 9px;
   border: 1px solid #e5dce4;
   border-radius: 8px;
@@ -788,4 +822,76 @@
     height: 12px;
     padding: 0;
   }
+}
+
+/* Bulk Options */
+.bulkOptions {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8f6f8;
+  border-radius: 12px;
+  border: 1px solid #e5dce4;
+}
+
+.bulkOptionTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #181117;
+  margin-bottom: 12px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.checkboxLabel:hover {
+  background: #fefefe;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #df84dc;
+}
+
+.checkboxText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #181117;
+}
+
+.checkboxText svg {
+  color: #886385;
+}
+
+.bulkWarning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.bulkWarning svg {
+  flex-shrink: 0;
+  color: #d97706;
 }
