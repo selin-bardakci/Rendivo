@@ -12,12 +12,45 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailNotVerified, setEmailNotVerified] = useState(false)
+  const [resendingEmail, setResendingEmail] = useState(false)
+  const [resendMessage, setResendMessage] = useState('')
   const router = useRouter()
+
+  async function handleResendVerification() {
+    setResendingEmail(true)
+    setResendMessage('')
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setResendMessage('Verification email has been sent! Please check your inbox.')
+      } else {
+        setResendMessage(data.message || 'Failed to resend email. Please try again.')
+      }
+    } catch (error) {
+      setResendMessage('An error occurred. Please try again later.')
+    } finally {
+      setResendingEmail(false)
+    }
+  }
 
   async function onSubmit(e: any) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setEmailNotVerified(false)
+    setResendMessage('')
+
     try {
       const response = await login(email, password)
       const { user, approvalStatus } = response
@@ -44,7 +77,15 @@ export default function LoginPage() {
         router.push('/dashboard')
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Login failed')
+      const errorMessage = err?.response?.data?.message || err.message || 'Login failed'
+      
+      // Check if error is due to unverified email
+      if (err?.response?.status === 403 && errorMessage.toLowerCase().includes('email not verified')) {
+        setEmailNotVerified(true)
+        setError('Your email address has not been verified yet.')
+      } else {
+        setError(errorMessage)
+      }
     } finally {
       setLoading(false)
     }
@@ -111,6 +152,46 @@ export default function LoginPage() {
             {error && (
               <div className={styles.errorMessage}>
                 {error}
+                {emailNotVerified && (
+                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #fecaca' }}>
+                    <p style={{ fontSize: '14px', marginBottom: '8px' }}>
+                      Didn't receive the verification email?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendingEmail}
+                      style={{
+                        background: 'white',
+                        color: '#991b1b',
+                        border: '2px solid #991b1b',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        cursor: resendingEmail ? 'not-allowed' : 'pointer',
+                        opacity: resendingEmail ? 0.6 : 1,
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {resendingEmail ? 'Sending...' : 'Resend Verification Email'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {resendMessage && (
+              <div style={{
+                padding: '12px',
+                background: resendMessage.includes('sent') ? '#f0fdf4' : '#fee2e2',
+                border: `1px solid ${resendMessage.includes('sent') ? '#bbf7d0' : '#fecaca'}`,
+                borderRadius: '8px',
+                color: resendMessage.includes('sent') ? '#166534' : '#dc2626',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                {resendMessage}
               </div>
             )}
 

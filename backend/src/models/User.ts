@@ -31,6 +31,8 @@ export interface UserAttributes {
   authProvider: AuthProvider;
   firebaseUid?: string;
   emailVerified: boolean;
+  verificationToken?: string;
+  verificationTokenExpires?: Date;
   isActive: boolean;
   lastLogin?: Date;
   createdAt?: Date;
@@ -52,6 +54,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public authProvider!: AuthProvider;
   public firebaseUid?: string;
   public emailVerified!: boolean;
+  public verificationToken?: string;
+  public verificationTokenExpires?: Date;
   public isActive!: boolean;
   public lastLogin?: Date;
 
@@ -125,6 +129,14 @@ User.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    verificationToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    verificationTokenExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     isActive: {
       type: DataTypes.BOOLEAN,

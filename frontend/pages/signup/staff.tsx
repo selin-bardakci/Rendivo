@@ -35,8 +35,8 @@ export default function StaffSignup() {
 
     try {
       await registerStaff(formData)
-      // Redirect to staff dashboard on success
-      router.push('/staff-dashboard')
+      // Redirect to email verification page with email
+      router.push(`/email-verification-sent?email=${encodeURIComponent(formData.email)}`)
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Registration failed')
     } finally {

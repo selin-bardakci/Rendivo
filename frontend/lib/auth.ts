@@ -34,6 +34,7 @@ export interface BusinessSignupData {
 }
 
 export async function registerCustomer(data: CustomerSignupData) {
+  console.log('🔍 auth.ts - Data before sending:', JSON.stringify(data, null, 2))
   const resp = await api.post('/auth/register/customer', data)
   const { token, user } = resp.data
   Cookies.set(TOKEN_KEY, token)

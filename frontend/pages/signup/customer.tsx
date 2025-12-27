@@ -25,10 +25,12 @@ export default function CustomerSignup() {
     setLoading(true)
     setError(null)
 
+    console.log('Frontend - Submitting email:', formData.email)
+
     try {
-      await registerCustomer(formData)
-      // Redirect to appointments page on success
-      router.push('/appointments')
+      const response = await registerCustomer(formData)
+      // Redirect to email verification page with email
+      router.push(`/email-verification-sent?email=${encodeURIComponent(formData.email)}`)
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Registration failed')
     } finally {
@@ -101,9 +103,12 @@ export default function CustomerSignup() {
               <input
                 type="email"
                 id="email"
+                name="email"
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                autocomplete="off"
+                required
               />
             </div>
 

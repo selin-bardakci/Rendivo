@@ -63,18 +63,13 @@ export default function BusinessSignupStep3() {
 
       console.log('Submitting registration data:', JSON.stringify(registrationData, null, 2))
       const response = await registerBusiness(registrationData)
-      setBusinessId(response.business.businessId)
       
       // Clear session storage
       sessionStorage.removeItem('businessSignupStep1')
       sessionStorage.removeItem('businessSignupStep2')
       
-      // Redirect based on approval status
-      if (response.approvalStatus === 'pending') {
-        router.push('/business/pending-approval')
-      } else {
-        setSuccess(true)
-      }
+      // Redirect to email verification page
+      router.push(`/email-verification-sent?email=${encodeURIComponent(step1.email)}`)
     } catch (err: any) {
       console.error('Registration error:', err)
       console.error('Error response:', err?.response)
@@ -111,7 +106,6 @@ export default function BusinessSignupStep3() {
         <div className={styles.pageContainer}>
           <main className={`${styles.mainContent} ${styles.step3Layout}`}>
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '24px', color: '#dc2626' }}>❌</div>
               <h2>Registration Failed</h2>
               <p style={{ color: '#dc2626', marginBottom: '24px' }}>{error}</p>
               <button 
