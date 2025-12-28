@@ -46,6 +46,7 @@ export default function StaffSchedulePage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
   const [newShift, setNewShift] = useState({
     staffId: 0,
     startTime: '',
@@ -213,6 +214,7 @@ export default function StaffSchedulePage() {
     setSelectedDate(formatDate(date))
     setEditingShift(null)
     setNewShift({ staffId: 0, startTime: '', endTime: '', applyToWeek: false, applyToMonth: false })
+    setValidationError(null)
     setShowAddModal(true)
   }
 
@@ -229,11 +231,20 @@ export default function StaffSchedulePage() {
       applyToWeek: false,
       applyToMonth: false
     })
+    setValidationError(null)
     setShowAddModal(true)
   }
 
   const handleAddShift = async () => {
     if (newShift.staffId && newShift.startTime && newShift.endTime && selectedDate) {
+      // Validate that end time is after start time
+      if (newShift.endTime <= newShift.startTime) {
+        setValidationError('End time must be after start time')
+        return
+      }
+      
+      setValidationError(null)
+      
       try {
         setSubmitting(true)
         if (editingShift) {
@@ -485,11 +496,17 @@ export default function StaffSchedulePage() {
 
       {/* Add Shift Modal */}
       {showAddModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowAddModal(false)}>
+        <div className={styles.modalOverlay} onClick={() => {
+          setShowAddModal(false)
+          setValidationError(null)
+        }}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>{editingShift ? 'Edit Shift' : 'Add New Shift'}</h2>
-              <button className={styles.closeButton} onClick={() => setShowAddModal(false)}>
+              <button className={styles.closeButton} onClick={() => {
+                setShowAddModal(false)
+                setValidationError(null)
+              }}>
                 <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -576,10 +593,29 @@ export default function StaffSchedulePage() {
                     type="time"
                     value={newShift.endTime}
                     onChange={(e) => setNewShift({ ...newShift, endTime: e.target.value })}
+                    min={newShift.startTime}
                     className={styles.timeInput}
                   />
                 </div>
               </div>
+
+              {validationError && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: '#fee2e2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '8px',
+                  color: '#dc2626',
+                  fontSize: '14px',
+                  marginTop: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '16px' }}>⚠️</span>
+                  {validationError}
+                </div>
+              )}
 
               {!editingShift && (
                 <div className={styles.bulkOptions}>
@@ -640,7 +676,10 @@ export default function StaffSchedulePage() {
                 </button>
               )}
               <div className={styles.modalActions}>
-                <button className={styles.cancelBtn} onClick={() => setShowAddModal(false)} disabled={submitting}>
+                <button className={styles.cancelBtn} onClick={() => {
+                  setShowAddModal(false)
+                  setValidationError(null)
+                }} disabled={submitting}>
                   Cancel
                 </button>
                 <button 
