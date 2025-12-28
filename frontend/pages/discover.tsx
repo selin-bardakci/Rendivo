@@ -5,9 +5,23 @@ import styles from '../styles/discover.module.css'
 import Link from 'next/link'
 import { businessApi } from '../lib/api'
 
+const BUSINESS_CATEGORIES = [
+  'Beauty & Wellness',
+  'Healthcare',
+  'Fitness & Sports',
+  'Professional Services',
+  'Education & Tutoring',
+  'Pet Services',
+  'Automotive',
+  'Photography & Video',
+  'Therapy & Counseling',
+  'Other'
+]
+
 export default function DiscoverPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [businesses, setBusinesses] = useState<any[]>([])
@@ -23,6 +37,7 @@ export default function DiscoverPage() {
       setLoading(true)
       const response = await businessApi.getAll({
         search: searchQuery || undefined,
+        businessType: selectedCategory || undefined,
         services: selectedServices.length > 0 ? selectedServices.join(',') : undefined,
       })
       setBusinesses(response.data)
@@ -39,7 +54,7 @@ export default function DiscoverPage() {
       fetchBusinesses()
     }, 500) // Debounce search
     return () => clearTimeout(timeoutId)
-  }, [searchQuery, selectedServices])
+  }, [searchQuery, selectedCategory, selectedServices])
 
   const toggleService = (service: string) => {
     setSelectedServices(prev =>
@@ -51,6 +66,7 @@ export default function DiscoverPage() {
 
   const clearFilters = () => {
     setSelectedServices([])
+    setSelectedCategory('')
   }
 
   const applyFilters = () => {
@@ -96,7 +112,22 @@ export default function DiscoverPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button 
+            
+            <div className={styles.filterGroup}>
+              <select
+                className={styles.categorySelect}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                {BUSINESS_CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+
+              <button 
               className={styles.filterButton}
               onClick={() => setShowFilterModal(true)}
             >
@@ -108,12 +139,24 @@ export default function DiscoverPage() {
                 <span className={styles.filterBadge}>{selectedServices.length}</span>
               )}
             </button>
+            </div>
           </div>
 
           {/* Active Filters */}
-          {selectedServices.length > 0 && (
+          {(selectedServices.length > 0 || selectedCategory) && (
             <div className={styles.activeFilters}>
               <span className={styles.filterLabel}>Active filters:</span>
+              {selectedCategory && (
+                <span className={styles.filterTag}>
+                  Category: {selectedCategory}
+                  <button 
+                    className={styles.removeFilter}
+                    onClick={() => setSelectedCategory('')}
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
               {selectedServices.map(service => (
                 <span key={service} className={styles.filterTag}>
                   {service}
@@ -142,6 +185,17 @@ export default function DiscoverPage() {
               <div key={business.id} className={styles.businessCard}>
                 <div className={styles.cardContent}>
                   <h3 className={styles.businessName}>{business.businessName}</h3>
+                  
+                  {business.businessType && (
+                    <div style={{ 
+                      color: '#df84dc', 
+                      fontSize: '13px', 
+                      fontWeight: '500',
+                      marginBottom: '8px'
+                    }}>
+                      {business.businessType}
+                    </div>
+                  )}
                   
                   <div className={styles.businessLocation}>
                     <svg className={styles.locationIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

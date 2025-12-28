@@ -4,8 +4,23 @@ import { useRouter } from 'next/router'
 import Layout from '../../../components/Layout'
 import styles from '../../../styles/businessSignup.module.css'
 
+const BUSINESS_CATEGORIES = [
+  'Beauty & Wellness',
+  'Healthcare',
+  'Fitness & Sports',
+  'Professional Services',
+  'Education & Tutoring',
+  'Pet Services',
+  'Automotive',
+  'Photography & Video',
+  'Therapy & Counseling',
+  'Other'
+]
+
 export default function BusinessSignupStep2() {
   const router = useRouter()
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [customBusinessType, setCustomBusinessType] = useState('')
   const [formData, setFormData] = useState({
     businessName: '',
     businessType: '',
@@ -25,6 +40,21 @@ export default function BusinessSignupStep2() {
       router.push('/signup/business/step1')
     }
   }, [router])
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category)
+    if (category !== 'Other') {
+      setFormData({ ...formData, businessType: category })
+      setCustomBusinessType('')
+    } else {
+      setFormData({ ...formData, businessType: '' })
+    }
+  }
+
+  const handleCustomTypeChange = (value: string) => {
+    setCustomBusinessType(value)
+    setFormData({ ...formData, businessType: value })
+  }
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,15 +105,45 @@ export default function BusinessSignupStep2() {
 
                 {/* Business Type */}
                 <div className={styles.formGroup}>
-                  <label htmlFor="business-type">Business Type</label>
-                  <input
-                    type="text"
+                  <label htmlFor="business-type">Business Category</label>
+                  <select
                     id="business-type"
-                    placeholder="e.g. Salon, Spa, Barbershop, Clinic"
-                    value={formData.businessType}
-                    onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
-                  />
+                    value={selectedCategory}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '8px',
+                      fontSize: '15px',
+                      backgroundColor: 'white',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="">Select a category</option>
+                    {BUSINESS_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                {/* Custom Business Type - Shows only when Other is selected */}
+                {selectedCategory === 'Other' && (
+                  <div className={styles.formGroup}>
+                    <label htmlFor="custom-business-type">Specify Your Business Type</label>
+                    <input
+                      type="text"
+                      id="custom-business-type"
+                      placeholder="e.g. Photography Studio, Event Planning"
+                      value={customBusinessType}
+                      onChange={(e) => handleCustomTypeChange(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
 
                 {/* Address Section */}
                 <div className={styles.addressSection}>

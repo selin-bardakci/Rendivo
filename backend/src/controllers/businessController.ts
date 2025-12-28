@@ -8,12 +8,17 @@ import { notificationService } from '../services/notificationService';
 // Get all active businesses (for discover page)
 export const getAllBusinesses = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
-    const { search, services } = req.query;
+    const { search, services, businessType } = req.query;
 
     const whereClause: any = {
       isActive: true,
       approvalStatus: 'approved',
     };
+
+    // Filter by business type (category)
+    if (businessType && typeof businessType === 'string') {
+      whereClause.businessType = businessType;
+    }
 
     // Search by business name or type
     if (search && typeof search === 'string') {
