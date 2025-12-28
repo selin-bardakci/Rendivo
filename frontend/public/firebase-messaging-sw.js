@@ -5,7 +5,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-comp
 
 // Initialize Firebase in service worker
 firebase.initializeApp({
-
+  apiKey: "AIzaSyD-9KcUmN_LT4AHFiPcNraJzoXeXRp05uk",
+  authDomain: "rendivo-oopd-project.firebaseapp.com",
+  projectId: "rendivo-oopd-project",
+  storageBucket: "rendivo-oopd-project.firebasestorage.app",
+  messagingSenderId: "736988249882",
+  appId: "1:736988249882:web:8608c6b1ab5a177b8ff6a3"
 });
 
 const messaging = firebase.messaging();
