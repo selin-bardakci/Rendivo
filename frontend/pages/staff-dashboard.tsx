@@ -121,7 +121,7 @@ export default function StaffDashboardPage() {
           <span className={styles.dayNumber}>{day}</span>
           {hasApt && (
             <span className={styles.appointmentCount}>
-              {getAppointmentsForDate(date).length}
+              {getAppointmentsForDate(date).filter(apt => apt.status !== 'cancelled').length}
             </span>
           )}
         </button>
