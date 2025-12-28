@@ -15,14 +15,16 @@ export interface CustomerSignupData {
 export interface StaffSignupData {
   email: string
   password: string
-  fullName: string
+  firstName: string
+  lastName: string
   businessId: string
 }
 
 export interface BusinessSignupData {
   email: string
   password: string
-  fullName: string
+  firstName: string
+  lastName: string
   businessName: string
   businessType?: string
   address?: string

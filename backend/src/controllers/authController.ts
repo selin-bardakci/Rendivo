@@ -2,6 +2,7 @@ import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, Business, StaffMember } from '../models';
 import { UserRole, AuthProvider } from '../models/User';
+import { ApprovalStatus } from '../models/Business';
 import { AuthRequest } from '../middleware/auth';
 import firebaseAdmin from '../config/firebase';
 import EmailService from '../services/emailService';
@@ -71,7 +72,13 @@ export const registerCustomer = async (req: AuthRequest, res: Response): Promise
 // Register Staff (Local Auth)
 export const registerStaff = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
-    const { email, password, fullName, businessId } = req.body;
+    console.log('📥 Register staff request body:', req.body);
+    const { email, password, firstName, lastName, businessId } = req.body;
+
+    if (!email || !password || !firstName || !lastName || !businessId) {
+      console.log('❌ Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName, businessId: !!businessId });
+      return res.status(400).json({ message: 'All fields are required: email, password, firstName, lastName, businessId' });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -89,10 +96,15 @@ export const registerStaff = async (req: AuthRequest, res: Response): Promise<Re
     const verificationToken = EmailService.generateVerificationToken();
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
+    // Create fullName from firstName and lastName
+    const fullName = `${firstName} ${lastName}`;
+
     // Create new staff user
     const user = await User.create({
       email,
       password,
+      firstName,
+      lastName,
       fullName,
       role: UserRole.STAFF,
       authProvider: AuthProvider.LOCAL,
@@ -116,6 +128,84 @@ export const registerStaff = async (req: AuthRequest, res: Response): Promise<Re
       console.error('Failed to send verification email:', emailError);
     }
 
+    // Send welcome notification to staff
+    try {
+      const { notificationService } = await import('../services/notificationService');
+      await notificationService.sendNotification({
+        userId: user.id.toString(),
+        type: 'staff_added',
+        title: '🎉 Welcome to the Team!',
+        message: `You've been added to ${business.businessName}! We're excited to have you on board! 💙`,
+        relatedId: business.id.toString(),
+        relatedType: 'appointment',
+        actionUrl: `/staff-dashboard`,
+        emailData: {
+          to: user.email,
+          subject: '🎉 Welcome to the Team!',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+              <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">🎉 Welcome Aboard!</h2>
+              <p style="color: #555; line-height: 1.6;">Hi ${fullName}! 👋</p>
+              <p style="color: #555; line-height: 1.6;">Exciting news! You've been added as a staff member at <strong>${business.businessName}</strong>! 🌟</p>
+              <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                <p style="margin: 5px 0;"><strong>🏢 Business:</strong> ${business.businessName}</p>
+                <p style="margin: 5px 0;"><strong>📧 Your Email:</strong> ${user.email}</p>
+                <p style="margin: 5px 0;"><strong>🔑 Your Role:</strong> Staff Member</p>
+              </div>
+              <p style="color: #555; line-height: 1.6;">Please verify your email to get started. Once verified, you'll be able to:</p>
+              <ul style="color: #555; line-height: 1.6;">
+                <li>View your schedule and appointments</li>
+                <li>Manage your availability</li>
+                <li>Connect with customers</li>
+              </ul>
+              <p style="color: #555; line-height: 1.6;">We're thrilled to have you on the team! Let's do amazing work together! 💙</p>
+              <p style="color: #999; font-size: 12px; margin-top: 30px;">Welcome to the family! 🎉</p>
+            </div>
+          `
+        }
+      });
+
+      // Send notification to business owner about new staff
+      const businessOwner = await User.findByPk(business.ownerId);
+      if (businessOwner) {
+        await notificationService.sendNotification({
+          userId: business.ownerId.toString(),
+          type: 'staff_added',
+          title: '👥 New Team Member!',
+          message: `${fullName} has joined your team at ${business.businessName}! 🎉`,
+          relatedId: business.id.toString(),
+          relatedType: 'appointment',
+          actionUrl: `/business/staff`,
+          emailData: {
+            to: businessOwner.email,
+            subject: '👥 New Team Member Joined!',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">👥 Team Update!</h2>
+                <p style="color: #555; line-height: 1.6;">Hello! 👋</p>
+                <p style="color: #555; line-height: 1.6;">Great news! A new staff member has joined your team! 🎉</p>
+                <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                  <p style="margin: 5px 0;"><strong>👤 New Staff:</strong> ${fullName}</p>
+                  <p style="margin: 5px 0;"><strong>📧 Email:</strong> ${user.email}</p>
+                  <p style="margin: 5px 0;"><strong>🏢 Business:</strong> ${business.businessName}</p>
+                </div>
+                <p style="color: #555; line-height: 1.6;">They'll need to verify their email before accessing the platform. Once verified, they'll be ready to:</p>
+                <ul style="color: #555; line-height: 1.6;">
+                  <li>View their schedule and appointments</li>
+                  <li>Manage their availability</li>
+                  <li>Serve your customers</li>
+                </ul>
+                <p style="color: #555; line-height: 1.6;">Your team is growing! Keep up the great work! 💙</p>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">Your business is thriving! 🌟</p>
+              </div>
+            `
+          }
+        });
+      }
+    } catch (notifError) {
+      console.error('Failed to send welcome notification:', notifError);
+    }
+
     res.status(201).json({
       message: 'Staff registered successfully. Please check your email to verify your account.',
       user: user.toSafeObject(),
@@ -136,7 +226,8 @@ export const registerBusiness = async (req: AuthRequest, res: Response): Promise
     const { 
       email, 
       password, 
-      fullName, 
+      firstName,
+      lastName, 
       businessName, 
       businessType,
       address,
@@ -148,22 +239,96 @@ export const registerBusiness = async (req: AuthRequest, res: Response): Promise
     } = req.body;
 
     // Validate required fields
-    if (!email || !password || !fullName || !businessName) {
-      console.error('Missing required fields:', { email: !!email, password: !!password, fullName: !!fullName, businessName: !!businessName });
+    if (!email || !password || !firstName || !lastName || !businessName) {
+      console.error('Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName, businessName: !!businessName });
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
+      // Check if user has a rejected business - allow reapplication
+      const existingBusiness = await Business.findOne({ 
+        where: { ownerId: existingUser.id } 
+      });
+      
+      if (existingBusiness && existingBusiness.approvalStatus === 'rejected') {
+        console.log('🔄 Reapplication from rejected business owner:', email);
+        
+        // Create fullName first
+        const fullName = `${firstName} ${lastName}`;
+        
+        // Update existing business with new information
+        await existingBusiness.update({
+          businessName,
+          businessType,
+          address,
+          city,
+          state,
+          zipCode,
+          phone,
+          website,
+          approvalStatus: ApprovalStatus.PENDING,
+          isActive: true,
+          rejectionReason: undefined,
+        });
+        
+        // Reactivate user account with new info
+        const verificationToken = EmailService.generateVerificationToken();
+        const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        
+        await existingUser.update({
+          firstName,
+          lastName,
+          fullName,
+          password, // Update password
+          isActive: true,
+          emailVerified: false,
+          verificationToken,
+          verificationTokenExpires,
+        });
+        
+        // Send verification email
+        try {
+          await EmailService.sendVerificationEmail(existingUser.email, verificationToken);
+        } catch (emailError) {
+          console.error('Failed to send verification email:', emailError);
+        }
+        
+        // Generate JWT token
+        const token = jwt.sign(
+          { id: existingUser.id, email: existingUser.email, role: existingUser.role },
+          process.env.JWT_SECRET!,
+          { expiresIn: '30d' }
+        );
+        
+        return res.json({
+          token,
+          user: {
+            id: existingUser.id,
+            email: existingUser.email,
+            fullName: existingUser.fullName,
+            role: existingUser.role,
+          },
+          business: existingBusiness,
+          approvalStatus: existingBusiness.approvalStatus,
+          message: 'Reapplication submitted successfully. Please verify your email.'
+        });
+      }
+      
       return res.status(400).json({ message: 'Email already registered' });
     }
 
     console.log('Creating business owner user...');
+    // Create fullName from firstName and lastName
+    const fullName = `${firstName} ${lastName}`;
+    
     // Create new business owner user
     const user = await User.create({
       email,
       password,
+      firstName,
+      lastName,
       fullName,
       role: UserRole.BUSINESS_OWNER,
       authProvider: AuthProvider.LOCAL,

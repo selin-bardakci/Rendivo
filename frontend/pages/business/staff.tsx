@@ -119,9 +119,21 @@ export default function StaffManagementPage() {
     setSelectedStaff(member)
   }
 
-  const handleDeleteStaff = (id: number) => {
-    setStaff(staff.filter(member => member.id !== id))
-    setDeleteConfirm(null)
+  const handleDeleteStaff = async (id: number) => {
+    try {
+      console.log('🗑️ Deleting staff member:', id)
+      // Send DELETE request to backend
+      await api.delete(`/business/staff/${id}`)
+      console.log('✅ Staff member deleted successfully')
+      
+      // Remove from local state
+      setStaff(staff.filter(member => member.id !== id))
+      setDeleteConfirm(null)
+    } catch (err: any) {
+      console.error('❌ Error deleting staff member:', err)
+      setError(err.response?.data?.message || 'Failed to delete staff member')
+      setDeleteConfirm(null)
+    }
   }
 
   const handleCopyBusinessId = async () => {

@@ -50,7 +50,8 @@ export default function BusinessSignupStep3() {
       const registrationData = {
         email: step1.email,
         password: step1.password,
-        fullName: step1.fullName,
+        firstName: step1.firstName,
+        lastName: step1.lastName,
         businessName: step2.businessName,
         businessType: step2.businessType,
         address: step2.address,

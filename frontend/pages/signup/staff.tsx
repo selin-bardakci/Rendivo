@@ -16,7 +16,8 @@ export default function StaffSignup() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     businessId: ''
@@ -81,15 +82,28 @@ export default function StaffSignup() {
                 {error}
               </div>
             )}
-            {/* Full Name */}
+            {/* First Name */}
             <div className={styles.formGroup}>
-              <label htmlFor="full-name">Full Name</label>
+              <label htmlFor="first-name">First Name</label>
               <input
                 type="text"
-                id="full-name"
-                placeholder="Enter your full name"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                id="first-name"
+                placeholder="Enter your first name"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                required
+              />
+            </div>
+
+            {/* Last Name */}
+            <div className={styles.formGroup}>
+              <label htmlFor="last-name">Last Name</label>
+              <input
+                type="text"
+                id="last-name"
+                placeholder="Enter your last name"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                 required
               />
             </div>

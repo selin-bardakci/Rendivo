@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/database';
 import routes from './routes';
+import { initializeReminderScheduler } from './services/reminderScheduler';
 
 // Load environment variables
 dotenv.config();
@@ -72,6 +73,9 @@ const startServer = async () => {
   try {
     // Connect to database
     await connectDatabase();
+    
+    // Initialize reminder scheduler
+    initializeReminderScheduler();
     
     // Start listening
     app.listen(PORT, () => {

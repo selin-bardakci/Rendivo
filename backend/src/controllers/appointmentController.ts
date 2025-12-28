@@ -78,7 +78,12 @@ export const createAppointment = async (req: AuthRequest, res: Response): Promis
         {
           model: Business,
           as: 'business',
-          attributes: ['id', 'businessName', 'address', 'city', 'state', 'phone'],
+          attributes: ['id', 'businessName', 'address', 'city', 'state', 'phone', 'ownerId'],
+          include: [{
+            model: User,
+            as: 'owner',
+            attributes: ['id', 'email', 'firstName', 'lastName']
+          }]
         },
         {
           model: StaffMember,
@@ -86,11 +91,120 @@ export const createAppointment = async (req: AuthRequest, res: Response): Promis
           include: [{
             model: User,
             as: 'user',
-            attributes: ['fullName'],
+            attributes: ['id', 'email', 'firstName', 'lastName', 'fullName'],
           }],
         },
+        {
+          model: User,
+          as: 'customer',
+          attributes: ['id', 'email', 'firstName', 'lastName']
+        }
       ],
     });
+
+    // Send notifications
+    try {
+      const appointmentData = completeAppointment?.toJSON() as any;
+      const serviceNames = appointmentData.services?.map((s: any) => s.name).join(', ') || 'services';
+      const appointmentDateTime = `${appointment.appointmentDate} at ${appointment.startTime}`;
+
+      // 1. Notify customer (confirmation)
+      await notificationService.sendNotification({
+        userId: customerId.toString(),
+        type: 'appointment_booked',
+        title: '🎉 Booking Confirmed!',
+        message: `Your appointment at ${appointmentData.business.businessName} on ${appointmentDateTime} is confirmed! See you soon! 💙`,
+        relatedId: appointment.id.toString(),
+        relatedType: 'appointment',
+        actionUrl: `/appointment/${appointment.id}`,
+        emailData: {
+          to: appointmentData.customer.email,
+          subject: '🎉 Appointment Confirmed - We Can\'t Wait!',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+              <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">🎉 You're All Set!</h2>
+              <p style="color: #555; line-height: 1.6;">Hi ${appointmentData.customer.firstName}! 👋</p>
+              <p style="color: #555; line-height: 1.6;">Great news! Your appointment has been confirmed and we're excited to see you! 🌟</p>
+              <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                <p style="margin: 5px 0;"><strong>🏢 Business:</strong> ${appointmentData.business.businessName}</p>
+                <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                <p style="margin: 5px 0;"><strong>👤 Staff:</strong> ${appointmentData.staff.user.fullName}</p>
+                <p style="margin: 5px 0;"><strong>💰 Total:</strong> $${totalPrice}</p>
+              </div>
+              <p style="color: #555; line-height: 1.6;">We'll send you a reminder before your appointment. Can't wait to see you! 💙</p>
+              <p style="color: #999; font-size: 12px; margin-top: 30px;">Need to make changes? You can reschedule or cancel anytime from your dashboard. 💬</p>
+            </div>
+          `
+        }
+      });
+
+      // 2. Notify business owner
+      await notificationService.sendNotification({
+        userId: appointmentData.business.owner.id.toString(),
+        type: 'appointment_booked',
+        title: '📅 New Appointment!',
+        message: `${appointmentData.customer.firstName} ${appointmentData.customer.lastName} just booked an appointment on ${appointmentDateTime}`,
+        relatedId: appointment.id.toString(),
+        relatedType: 'appointment',
+        actionUrl: `/business/appointments`,
+        emailData: {
+          to: appointmentData.business.owner.email,
+          subject: '📅 New Appointment Booked!',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+              <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 New Appointment!</h2>
+              <p style="color: #555; line-height: 1.6;">Hello! 👋</p>
+              <p style="color: #555; line-height: 1.6;">Great news! You have a new appointment booking! 🎉</p>
+              <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                <p style="margin: 5px 0;"><strong>👔 Staff:</strong> ${appointmentData.staff.user.fullName}</p>
+                <p style="margin: 5px 0;"><strong>💰 Total:</strong> $${totalPrice}</p>
+              </div>
+              <p style="color: #555; line-height: 1.6;">Your calendar has been updated. Keep up the amazing work! 💙</p>
+              <p style="color: #999; font-size: 12px; margin-top: 30px;">Your business is growing! 🌟</p>
+            </div>
+          `
+        }
+      });
+
+      // 3. Notify staff member
+      if (appointmentData.staff?.user) {
+        await notificationService.sendNotification({
+          userId: appointmentData.staff.user.id.toString(),
+          type: 'appointment_assigned',
+          title: '📅 New Appointment Assigned!',
+          message: `You have a new appointment with ${appointmentData.customer.firstName} ${appointmentData.customer.lastName} on ${appointmentDateTime}`,
+          relatedId: appointment.id.toString(),
+          relatedType: 'appointment',
+          actionUrl: `/staff-dashboard`,
+          emailData: {
+            to: appointmentData.staff.user.email,
+            subject: '📅 New Appointment Assigned to You!',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 New Appointment!</h2>
+                <p style="color: #555; line-height: 1.6;">Hi there! 👋</p>
+                <p style="color: #555; line-height: 1.6;">You have a new appointment coming up! Time to shine! ✨</p>
+                <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                  <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                  <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                  <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                  <p style="margin: 5px 0;"><strong>⏱️ Duration:</strong> ${totalDuration} minutes</p>
+                </div>
+                <p style="color: #555; line-height: 1.6;">Your schedule has been updated. Looking forward to a great session! 💙</p>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">You've got this! 🌟</p>
+              </div>
+            `
+          }
+        });
+      }
+    } catch (notifError) {
+      console.error('Error sending booking notification:', notifError);
+      // Don't fail the request if notification fails
+    }
 
     res.status(201).json({
       message: 'Appointment created successfully',
@@ -669,6 +783,9 @@ export const rescheduleAppointment = async (req: AuthRequest, res: Response): Pr
     if (totalDuration) updateData.totalDuration = totalDuration;
     if (totalPrice) updateData.totalPrice = totalPrice;
 
+    // Save old date/time BEFORE updating
+    const oldDateTime = `${appointment.appointmentDate} at ${appointment.startTime}`;
+
     await appointment.update(updateData);
 
     // Update services if provided
@@ -695,7 +812,12 @@ export const rescheduleAppointment = async (req: AuthRequest, res: Response): Pr
         {
           model: Business,
           as: 'business',
-          attributes: ['id', 'businessName', 'address', 'city', 'state', 'phone', 'email'],
+          attributes: ['id', 'businessName', 'address', 'city', 'state', 'phone', 'email', 'ownerId'],
+          include: [{
+            model: User,
+            as: 'owner',
+            attributes: ['id', 'email', 'firstName', 'lastName']
+          }]
         },
         {
           model: StaffMember,
@@ -703,12 +825,127 @@ export const rescheduleAppointment = async (req: AuthRequest, res: Response): Pr
           include: [{
             model: User,
             as: 'user',
-            attributes: ['fullName'],
+            attributes: ['id', 'email', 'firstName', 'lastName', 'fullName'],
           }],
           attributes: ['id', 'position'],
         },
+        {
+          model: User,
+          as: 'customer',
+          attributes: ['id', 'email', 'firstName', 'lastName']
+        }
       ],
     });
+
+    // Send reschedule notifications
+    try {
+      const appointmentData = updatedAppointment?.toJSON() as any;
+      const serviceNames = appointmentData.services?.map((s: any) => s.name).join(', ') || 'services';
+      const newDateTime = `${appointmentDate} at ${startTime}`;
+
+      // 1. Notify customer
+      await notificationService.sendNotification({
+        userId: appointmentData.customer.id.toString(),
+        type: 'appointment_booked',
+        title: '📅 Appointment Rescheduled!',
+        message: `Your appointment at ${appointmentData.business.businessName} has been rescheduled to ${newDateTime} 💙`,
+        relatedId: appointment.id.toString(),
+        relatedType: 'appointment',
+        actionUrl: `/appointment/${appointment.id}`,
+        emailData: {
+          to: appointmentData.customer.email,
+          subject: '📅 Appointment Rescheduled - Updated Details',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+              <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 Schedule Update!</h2>
+              <p style="color: #555; line-height: 1.6;">Hi ${appointmentData.customer.firstName}! 👋</p>
+              <p style="color: #555; line-height: 1.6;">Good news! Your appointment has been rescheduled. Here are your new details! ✨</p>
+              <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                <p style="margin: 5px 0; color: #856404;"><strong>⏰ Previous Time:</strong> ${oldDateTime}</p>
+              </div>
+              <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                <p style="margin: 5px 0;"><strong>🏢 Business:</strong> ${appointmentData.business.businessName}</p>
+                <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                <p style="margin: 5px 0;"><strong>📅 New Date & Time:</strong> ${newDateTime}</p>
+                <p style="margin: 5px 0;"><strong>👤 Staff:</strong> ${appointmentData.staff?.user?.fullName || 'N/A'}</p>
+              </div>
+              <p style="color: #555; line-height: 1.6;">We're looking forward to seeing you at the new time! 💙</p>
+              <p style="color: #999; font-size: 12px; margin-top: 30px;">Need to make more changes? Just let us know! 💬</p>
+            </div>
+          `
+        }
+      });
+
+      // 2. Notify business owner
+      await notificationService.sendNotification({
+        userId: appointmentData.business.owner.id.toString(),
+        type: 'appointment_booked',
+        title: '📅 Appointment Rescheduled',
+        message: `${appointmentData.customer.firstName} ${appointmentData.customer.lastName}'s appointment has been rescheduled to ${newDateTime}`,
+        relatedId: appointment.id.toString(),
+        relatedType: 'appointment',
+        actionUrl: `/business/appointments`,
+        emailData: {
+          to: appointmentData.business.owner.email,
+          subject: '📅 Appointment Rescheduled - Updated Schedule',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+              <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 Schedule Update</h2>
+              <p style="color: #555; line-height: 1.6;">Hello! 👋</p>
+              <p style="color: #555; line-height: 1.6;">An appointment has been rescheduled. Here are the updated details:</p>
+              <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                <p style="margin: 5px 0; color: #856404;"><strong>⏰ Previous Time:</strong> ${oldDateTime}</p>
+              </div>
+              <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                <p style="margin: 5px 0;"><strong>📅 New Date & Time:</strong> ${newDateTime}</p>
+                <p style="margin: 5px 0;"><strong>👔 Staff:</strong> ${appointmentData.staff?.user?.fullName || 'N/A'}</p>
+              </div>
+              <p style="color: #555; line-height: 1.6;">Your calendar has been updated accordingly. 💙</p>
+              <p style="color: #999; font-size: 12px; margin-top: 30px;">Keep up the great work! 🌟</p>
+            </div>
+          `
+        }
+      });
+
+      // 3. Notify staff member
+      if (appointmentData.staff?.user) {
+        await notificationService.sendNotification({
+          userId: appointmentData.staff.user.id.toString(),
+          type: 'appointment_assigned',
+          title: '📅 Appointment Rescheduled',
+          message: `Your appointment with ${appointmentData.customer.firstName} ${appointmentData.customer.lastName} has been rescheduled to ${newDateTime}`,
+          relatedId: appointment.id.toString(),
+          relatedType: 'appointment',
+          actionUrl: `/staff-dashboard`,
+          emailData: {
+            to: appointmentData.staff.user.email,
+            subject: '📅 Appointment Rescheduled - Schedule Update',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 Schedule Update</h2>
+                <p style="color: #555; line-height: 1.6;">Hi there! 👋</p>
+                <p style="color: #555; line-height: 1.6;">One of your appointments has been rescheduled to a new time! ✨</p>
+                <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                  <p style="margin: 5px 0; color: #856404;"><strong>⏰ Previous Time:</strong> ${oldDateTime}</p>
+                </div>
+                <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                  <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                  <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                  <p style="margin: 5px 0;"><strong>📅 New Date & Time:</strong> ${newDateTime}</p>
+                </div>
+                <p style="color: #555; line-height: 1.6;">Your schedule has been updated. Looking forward to a great session! 💙</p>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">You've got this! 🌟</p>
+              </div>
+            `
+          }
+        });
+      }
+    } catch (notifError) {
+      console.error('Error sending reschedule notification:', notifError);
+      // Don't fail the request if notification fails
+    }
 
     res.json({
       message: 'Appointment rescheduled successfully',

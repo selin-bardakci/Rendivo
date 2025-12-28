@@ -11,14 +11,16 @@ export const registerCustomerValidation = [
 export const registerStaffValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  body('fullName').trim().notEmpty().withMessage('Full name is required'),
+  body('firstName').trim().notEmpty().withMessage('First name is required'),
+  body('lastName').trim().notEmpty().withMessage('Last name is required'),
   body('businessId').trim().notEmpty().withMessage('Business ID is required'),
 ];
 
 export const registerBusinessValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  body('fullName').trim().notEmpty().withMessage('Full name is required'),
+  body('firstName').trim().notEmpty().withMessage('First name is required'),
+  body('lastName').trim().notEmpty().withMessage('Last name is required'),
   body('businessName').trim().notEmpty().withMessage('Business name is required'),
   body('businessType').optional().trim(),
 ];

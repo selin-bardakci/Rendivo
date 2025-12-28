@@ -10,7 +10,8 @@ export default function BusinessSignupStep1() {
   const [showPassword, setShowPassword] = useState(false)
   const [password, setPassword] = useState('')
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     agreedToTerms: false
@@ -60,17 +61,30 @@ export default function BusinessSignupStep1() {
             <h2 className={styles.sectionTitle}>Let's Get Started!</h2>
 
             <form onSubmit={handleNext} className={styles.form}>
-              {/* Full Name */}
-              <div className={styles.formGroup}>
-                <label htmlFor="full-name">Full Name</label>
-                <input
-                  type="text"
-                  id="full-name"
-                  placeholder="Enter your full name"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  required
-                />
+              {/* Name Fields - Side by Side */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="first-name">First Name</label>
+                  <input
+                    type="text"
+                    id="first-name"
+                    placeholder="Enter your first name"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="last-name">Last Name</label>
+                  <input
+                    type="text"
+                    id="last-name"
+                    placeholder="Enter your last name"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
 
               {/* Email */}
