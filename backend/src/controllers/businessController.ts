@@ -356,6 +356,8 @@ export const getBusinessDashboard = async (req: AuthRequest, res: Response): Pro
       business: {
         id: business.id,
         name: business.businessName,
+        businessType: business.businessType,
+        approvalStatus: business.approvalStatus,
       },
       stats: {
         todayAppointments: totalAppointments,

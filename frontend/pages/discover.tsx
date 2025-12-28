@@ -24,6 +24,7 @@ export default function DiscoverPage() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [availableServices, setAvailableServices] = useState<string[]>([])
   const [businesses, setBusinesses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,6 +32,23 @@ export default function DiscoverPage() {
   useEffect(() => {
     fetchBusinesses()
   }, [])
+
+  // Fetch available services when category changes
+  useEffect(() => {
+    fetchAvailableServices()
+  }, [selectedCategory])
+
+  const fetchAvailableServices = async () => {
+    try {
+      const params = selectedCategory ? { businessType: selectedCategory } : {}
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services/all-unique?${new URLSearchParams(params)}`)
+      const data = await response.json()
+      setAvailableServices(data)
+    } catch (error) {
+      console.error('Error fetching available services:', error)
+      setAvailableServices([])
+    }
+  }
 
   const fetchBusinesses = async () => {
     try {
@@ -258,9 +276,49 @@ export default function DiscoverPage() {
               </div>
 
               <div className={styles.modalContent}>
-                <p className={styles.modalDescription}>
-                  Service filtering coming soon!
-                </p>
+                {selectedCategory && (
+                  <p className={styles.modalDescription} style={{ marginBottom: '16px', color: '#886385', fontSize: '14px' }}>
+                    Showing services for: <strong>{selectedCategory}</strong>
+                  </p>
+                )}
+                {availableServices.length > 0 ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+                    {availableServices.map((service) => (
+                      <label 
+                        key={service} 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '8px', 
+                          padding: '10px 12px',
+                          border: '2px solid #e5dce4',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          backgroundColor: selectedServices.includes(service) ? '#fef5ff' : 'white',
+                          borderColor: selectedServices.includes(service) ? '#df84dc' : '#e5dce4'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.includes(service)}
+                          onChange={() => toggleService(service)}
+                          style={{ 
+                            accentColor: '#df84dc',
+                            width: '18px',
+                            height: '18px',
+                            cursor: 'pointer'
+                          }}
+                        />
+                        <span style={{ fontSize: '15px', color: '#181117' }}>{service}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.modalDescription}>
+                    No services available yet. Try selecting a different category.
+                  </p>
+                )}
               </div>
 
               <div className={styles.modalActions}>

@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth';
 import {
+  getAllUniqueServices,
   getBusinessServices,
   getOwnerServices,
   createService,
@@ -11,6 +12,7 @@ import {
 const router = express.Router();
 
 // Public routes
+router.get('/services/all-unique', getAllUniqueServices);
 router.get('/businesses/:businessId/services', getBusinessServices);
 
 // Protected routes (Business owner)

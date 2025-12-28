@@ -5,6 +5,7 @@ import Layout from '../../components/Layout'
 import styles from '../../styles/businessDashboard.module.css'
 import { serviceApi } from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
+import { SERVICE_TYPES_BY_CATEGORY, getServicesForCategory } from '../../constants/serviceTypes'
 
 interface Service {
   id: number
@@ -18,28 +19,15 @@ interface Service {
 export default function BusinessServices() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [business, setBusiness] = useState<any>(null)
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  // Available services from discover page
-  const availableServices = [
-    'Haircut & Styling',
-    'Massage Therapy',
-    'Nail Treatment',
-    'Facial Treatment',
-    'Waxing',
-    'Makeup',
-    'Spa Treatment',
-    'Body Treatment',
-    'Skin Care',
-    'Hair Coloring',
-    'Manicure',
-    'Pedicure'
-  ]
-  
   const [showModal, setShowModal] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)
+  const [selectedServiceType, setSelectedServiceType] = useState('')
+  const [customServiceName, setCustomServiceName] = useState('')
   const [newService, setNewService] = useState({
     name: '',
     description: '',
@@ -48,6 +36,16 @@ export default function BusinessServices() {
   })
   const [showServiceDropdown, setShowServiceDropdown] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  // Get available services based on business category
+  const availableServices = business?.businessType 
+    ? getServicesForCategory(business.businessType)
+    : ['Other']
+  
+  // Debug log
+  console.log('Business:', business)
+  console.log('Business Type:', business?.businessType)
+  console.log('Available Services:', availableServices)
 
   // Fetch user and services on mount
   useEffect(() => {
@@ -84,6 +82,9 @@ export default function BusinessServices() {
         return
       }
       
+      // Store business info for category-based services
+      setBusiness(businessCheck.data?.business)
+      
       fetchServices()
     } catch (err: any) {
       console.error('Error checking approval:', err)
@@ -105,7 +106,9 @@ export default function BusinessServices() {
   }
 
   const handleAddService = async () => {
-    if (!newService.name || !newService.duration || !newService.price) {
+    const serviceName = selectedServiceType === 'Other' ? customServiceName : selectedServiceType
+    
+    if (!serviceName || !newService.duration || !newService.price) {
       alert('Please fill in all required fields')
       return
     }
@@ -116,7 +119,7 @@ export default function BusinessServices() {
       if (editingService) {
         // Update existing service
         await serviceApi.update(editingService.id, {
-          name: newService.name,
+          name: serviceName,
           description: newService.description,
           price: parseFloat(newService.price),
           duration: parseInt(newService.duration),
@@ -124,7 +127,7 @@ export default function BusinessServices() {
       } else {
         // Add new service
         await serviceApi.create({
-          name: newService.name,
+          name: serviceName,
           description: newService.description,
           price: parseFloat(newService.price),
           duration: parseInt(newService.duration),
@@ -135,6 +138,8 @@ export default function BusinessServices() {
       await fetchServices()
       
       setNewService({ name: '', description: '', duration: '', price: '' })
+      setSelectedServiceType('')
+      setCustomServiceName('')
       setShowModal(false)
       setEditingService(null)
     } catch (err: any) {
@@ -147,6 +152,20 @@ export default function BusinessServices() {
 
   const handleEditService = (service: Service) => {
     setEditingService(service)
+    
+    // Check if service name matches predefined ones
+    const categoryServices = business?.businessType 
+      ? getServicesForCategory(business.businessType)
+      : ['Other']
+    
+    if (categoryServices.includes(service.name)) {
+      setSelectedServiceType(service.name)
+      setCustomServiceName('')
+    } else {
+      setSelectedServiceType('Other')
+      setCustomServiceName(service.name)
+    }
+    
     setNewService({
       name: service.name,
       description: service.description || '',
@@ -271,6 +290,8 @@ export default function BusinessServices() {
                   setShowModal(false)
                   setEditingService(null)
                   setNewService({ name: '', description: '', duration: '', price: '' })
+                  setSelectedServiceType('')
+                  setCustomServiceName('')
                 }}
               >
                 ✕
@@ -279,14 +300,14 @@ export default function BusinessServices() {
 
             <div className={styles.modalBody}>
               <div className={styles.formGroup}>
-                <label htmlFor="serviceName">Service Name</label>
+                <label htmlFor="serviceName">Service Type</label>
                 <div className={styles.customSelect}>
                   <button
                     type="button"
                     className={styles.selectButton}
                     onClick={() => setShowServiceDropdown(!showServiceDropdown)}
                   >
-                    <span>{newService.name || 'Select a service...'}</span>
+                    <span>{selectedServiceType || 'Select a service type...'}</span>
                     <svg width="12" height="8" fill="none" viewBox="0 0 12 8">
                       <path d="M1 1.5L6 6.5L11 1.5" stroke="#886385" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -296,10 +317,13 @@ export default function BusinessServices() {
                       {availableServices.map((service) => (
                         <div
                           key={service}
-                          className={`${styles.dropdownItem} ${newService.name === service ? styles.dropdownItemActive : ''}`}
+                          className={`${styles.dropdownItem} ${selectedServiceType === service ? styles.dropdownItemActive : ''}`}
                           onClick={() => {
-                            setNewService({ ...newService, name: service })
+                            setSelectedServiceType(service)
                             setShowServiceDropdown(false)
+                            if (service !== 'Other') {
+                              setCustomServiceName('')
+                            }
                           }}
                         >
                           {service}
@@ -309,6 +333,20 @@ export default function BusinessServices() {
                   )}
                 </div>
               </div>
+
+              {selectedServiceType === 'Other' && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="customServiceName">Custom Service Name</label>
+                  <input
+                    id="customServiceName"
+                    type="text"
+                    placeholder="Enter your custom service name..."
+                    value={customServiceName}
+                    onChange={(e) => setCustomServiceName(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label htmlFor="description">Description (Optional)</label>
