@@ -41,8 +41,13 @@ export default function CustomerSignup() {
   // Password strength calculator
   const getPasswordStrength = (pwd: string) => {
     if (pwd.length === 0) return { strength: 0, text: '', color: '' }
-    if (pwd.length < 6) return { strength: 1, text: 'Weak password', color: '#ef4444' }
-    if (pwd.length < 10) return { strength: 2, text: 'Medium password', color: '#f59e0b' }
+    
+    const hasLetter = /[a-zA-Z]/.test(pwd)
+    const hasNumber = /[0-9]/.test(pwd)
+    
+    if (pwd.length < 8) return { strength: 1, text: 'Too short (min 8 chars)', color: '#ef4444' }
+    if (!hasLetter || !hasNumber) return { strength: 1, text: 'Need letters and numbers', color: '#ef4444' }
+    if (pwd.length < 12) return { strength: 2, text: 'Good password', color: '#f59e0b' }
     return { strength: 3, text: 'Strong password', color: '#10b981' }
   }
 

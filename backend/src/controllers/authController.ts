@@ -7,6 +7,22 @@ import { AuthRequest } from '../middleware/auth';
 import firebaseAdmin from '../config/firebase';
 import EmailService from '../services/emailService';
 
+// Password validation function
+const validatePassword = (password: string): { valid: boolean; message?: string } => {
+  if (!password || password.length < 8) {
+    return { valid: false, message: 'Password must be at least 8 characters long' };
+  }
+  
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  
+  if (!hasLetter || !hasNumber) {
+    return { valid: false, message: 'Password must contain both letters and numbers' };
+  }
+  
+  return { valid: true };
+};
+
 // In-memory storage for password reset codes
 interface PasswordResetCode {
   code: string;
@@ -43,6 +59,12 @@ export const registerCustomer = async (req: AuthRequest, res: Response): Promise
     console.log('🔍 Backend - Received email:', email);
     console.log('🔍 Backend - Email type:', typeof email);
     console.log('🔍 Backend - Email length:', email?.length);
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({ message: passwordValidation.message });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -97,6 +119,12 @@ export const registerStaff = async (req: AuthRequest, res: Response): Promise<Re
     if (!email || !password || !firstName || !lastName || !businessId) {
       console.log('❌ Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName, businessId: !!businessId });
       return res.status(400).json({ message: 'All fields are required: email, password, firstName, lastName, businessId' });
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({ message: passwordValidation.message });
     }
 
     // Check if user already exists
@@ -261,6 +289,12 @@ export const registerBusiness = async (req: AuthRequest, res: Response): Promise
     if (!email || !password || !firstName || !lastName || !businessName) {
       console.error('Missing required fields:', { email: !!email, password: !!password, firstName: !!firstName, lastName: !!lastName, businessName: !!businessName });
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({ message: passwordValidation.message });
     }
 
     // Check if user already exists
@@ -783,6 +817,12 @@ export const resetPassword = async (req: AuthRequest, res: Response): Promise<Re
 
     if (decoded.purpose !== 'password_reset') {
       return res.status(400).json({ message: 'Invalid token' });
+    }
+
+    // Validate new password
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({ message: passwordValidation.message });
     }
 
     // Find user
