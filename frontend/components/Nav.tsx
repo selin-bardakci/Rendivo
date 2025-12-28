@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { getCurrentUser, logout } from '../lib/auth'
 import api from '../lib/api'
+import NotificationBell from './NotificationBell'
 
 const Nav: React.FC = () => {
   const router = useRouter()
@@ -13,6 +14,7 @@ const Nav: React.FC = () => {
 
   useEffect(() => {
     const u = getCurrentUser()
+    console.log('👤 Current user:', u)
     setUser(u)
     
     // Check approval status for business owners
@@ -200,6 +202,7 @@ const Nav: React.FC = () => {
         </nav>
         
         <div className="actions" style={{display:'flex',gap:12,alignItems:'center'}}>
+          {user && <NotificationBell userId={user.userId} />}
           {user ? (
             <div style={{position:'relative'}}>
               <button 

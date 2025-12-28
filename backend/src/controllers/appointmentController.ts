@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 import { AuthRequest } from '../middleware/auth';
 import { Appointment, Service, Business, StaffMember, User, AppointmentService } from '../models';
 import { AppointmentStatus } from '../models/Appointment';
+import { notificationService } from '../services/notificationService';
 
 // Create a new appointment
 export const createAppointment = async (req: AuthRequest, res: Response): Promise<Response | void> => {
@@ -341,7 +342,40 @@ export const cancelAppointment = async (req: AuthRequest, res: Response): Promis
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const appointment = await Appointment.findByPk(id);
+    const appointment = await Appointment.findByPk(id, {
+      include: [
+        {
+          model: Business,
+          as: 'business',
+          attributes: ['id', 'businessName', 'ownerId'],
+          include: [{
+            model: User,
+            as: 'owner',
+            attributes: ['id', 'email', 'firstName', 'lastName']
+          }]
+        },
+        {
+          model: User,
+          as: 'customer',
+          attributes: ['id', 'email', 'firstName', 'lastName']
+        },
+        {
+          model: StaffMember,
+          as: 'staff',
+          include: [{
+            model: User,
+            as: 'user',
+            attributes: ['id', 'email', 'firstName', 'lastName']
+          }]
+        },
+        {
+          model: Service,
+          as: 'services',
+          through: { attributes: [] }
+        }
+      ]
+    });
+
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
@@ -359,6 +393,196 @@ export const cancelAppointment = async (req: AuthRequest, res: Response): Promis
     await appointment.update({
       status: AppointmentStatus.CANCELLED
     });
+
+    // Send notifications
+    try {
+      const appointmentData = appointment.toJSON() as any;
+      const serviceNames = appointmentData.services?.map((s: any) => s.name).join(', ') || 'your services';
+      const appointmentDateTime = `${appointment.appointmentDate} at ${appointment.startTime}`;
+
+      if (isBusinessOwner) {
+        // Business cancelled - notify business owner (confirmation)
+        await notificationService.sendNotification({
+          userId: appointmentData.business.owner.id.toString(),
+          type: 'appointment_cancelled_by_business',
+          title: '✓ Cancellation Confirmed',
+          message: `Appointment with ${appointmentData.customer.firstName} ${appointmentData.customer.lastName} on ${appointmentDateTime} has been cancelled`,
+          relatedId: appointment.id.toString(),
+          relatedType: 'appointment',
+          actionUrl: `/business/appointments`,
+          emailData: {
+            to: appointmentData.business.owner.email,
+            subject: '✓ Appointment Cancelled - Confirmation',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">✓ Cancellation Confirmed</h2>
+                <p style="color: #555; line-height: 1.6;">Hello! 👋</p>
+                <p style="color: #555; line-height: 1.6;">Just confirming that the appointment has been cancelled as requested.</p>
+                <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                  <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                  <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                  <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                </div>
+                <p style="color: #555; line-height: 1.6;">The appointment has been successfully cancelled and the customer has been notified. 💙</p>
+                <p style="color: #555; line-height: 1.6;">This time slot is now available for new bookings. 🌟</p>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">Keep up the great work! 💬</p>
+              </div>
+            `
+          }
+        });
+
+        // Notify customer
+        await notificationService.sendNotification({
+          userId: appointment.customerId.toString(),
+          type: 'appointment_cancelled_by_business',
+          title: '😔 Appointment Cancelled',
+          message: `We're sorry! Your appointment at ${appointmentData.business.businessName} on ${appointmentDateTime} has been cancelled. We hope to see you soon! 💙`,
+          relatedId: appointment.id.toString(),
+          relatedType: 'appointment',
+          actionUrl: `/appointments`,
+          emailData: {
+            to: appointmentData.customer.email,
+            subject: "😔 Appointment Cancelled - We're Sorry!",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">😔 We're Sorry!</h2>
+                <p style="color: #555; line-height: 1.6;">Hi ${appointmentData.customer.firstName}! 👋</p>
+                <p style="color: #555; line-height: 1.6;">We're really sorry, but <strong>${appointmentData.business.businessName}</strong> had to cancel your upcoming appointment.</p>
+                <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                  <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                  <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                </div>
+                <p style="color: #555; line-height: 1.6;">We know this can be frustrating, and we apologize for any inconvenience! 💙</p>
+                <p style="color: #555; line-height: 1.6;">The good news? You can book a new appointment anytime that works for you! We'd love to have you back. 🌟</p>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">Have questions? Feel free to reach out to us anytime! 💬</p>
+              </div>
+            `
+          }
+        });
+
+        // Also notify staff member
+        if (appointmentData.staff?.user) {
+          await notificationService.sendNotification({
+            userId: appointmentData.staff.user.id.toString(),
+            type: 'appointment_assigned_cancelled',
+            title: '📅 Schedule Update',
+            message: `Heads up! The appointment with ${appointmentData.customer.firstName} ${appointmentData.customer.lastName} on ${appointmentDateTime} has been cancelled`,
+            relatedId: appointment.id.toString(),
+            relatedType: 'appointment',
+            actionUrl: `/staff-dashboard`,
+            emailData: {
+              to: appointmentData.staff.user.email,
+              subject: '📅 Schedule Update - Appointment Cancelled',
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                  <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 Schedule Update</h2>
+                  <p style="color: #555; line-height: 1.6;">Hi there! 👋</p>
+                  <p style="color: #555; line-height: 1.6;">Just a quick heads up - an appointment on your schedule has been cancelled.</p>
+                  <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                    <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                    <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                    <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                  </div>
+                  <p style="color: #555; line-height: 1.6;">Your schedule has been updated accordingly. 💙</p>
+                </div>
+              `
+            }
+          });
+        }
+      } else {
+        // Customer cancelled - notify customer (confirmation)
+        await notificationService.sendNotification({
+          userId: appointment.customerId.toString(),
+          type: 'appointment_cancelled_by_customer',
+          title: '✓ Cancellation Confirmed',
+          message: `Your appointment at ${appointmentData.business.businessName} on ${appointmentDateTime} has been cancelled`,
+          relatedId: appointment.id.toString(),
+          relatedType: 'appointment',
+          actionUrl: `/appointments`,
+          emailData: {
+            to: appointmentData.customer.email,
+            subject: '✓ Appointment Cancelled - Confirmation',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">✓ Cancellation Confirmed</h2>
+                <p style="color: #555; line-height: 1.6;">Hi ${appointmentData.customer.firstName}! 👋</p>
+                <p style="color: #555; line-height: 1.6;">Just confirming that we've cancelled your appointment as requested.</p>
+                <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                  <p style="margin: 5px 0;"><strong>🏢 Business:</strong> ${appointmentData.business.businessName}</p>
+                  <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                  <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                </div>
+                <p style="color: #555; line-height: 1.6;">Your appointment has been successfully cancelled. 💙</p>
+                <p style="color: #555; line-height: 1.6;">Need to book again? We're here whenever you're ready! 🌟</p>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">Thanks for letting us know! 💬</p>
+              </div>
+            `
+          }
+        });
+
+        // Notify business owner
+        await notificationService.sendNotification({
+          userId: appointmentData.business.owner.id.toString(),
+          type: 'appointment_cancelled_by_customer',
+          title: '📅 Appointment Cancelled',
+          message: `${appointmentData.customer.firstName} ${appointmentData.customer.lastName} has cancelled their appointment on ${appointmentDateTime}`,
+          relatedId: appointment.id.toString(),
+          relatedType: 'appointment',
+          actionUrl: `/business/appointments`,
+          emailData: {
+            to: appointmentData.business.owner.email,
+            subject: '📅 Appointment Update - Customer Cancellation',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 Appointment Update</h2>
+                <p style="color: #555; line-height: 1.6;">Hello! 👋</p>
+                <p style="color: #555; line-height: 1.6;">We wanted to let you know that <strong>${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</strong> has cancelled their upcoming appointment.</p>
+                <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                  <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                  <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                  <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                </div>
+                <p style="color: #555; line-height: 1.6;">This time slot is now available for other bookings. 🌟</p>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">Keep up the great work! 💙</p>
+              </div>
+            `
+          }
+        });
+
+        // Also notify staff member
+        if (appointmentData.staff?.user) {
+          await notificationService.sendNotification({
+            userId: appointmentData.staff.user.id.toString(),
+            type: 'appointment_assigned_cancelled',
+            title: '📅 Schedule Update',
+            message: `${appointmentData.customer.firstName} ${appointmentData.customer.lastName} cancelled their appointment on ${appointmentDateTime}`,
+            relatedId: appointment.id.toString(),
+            relatedType: 'appointment',
+            actionUrl: `/staff-dashboard`,
+            emailData: {
+              to: appointmentData.staff.user.email,
+              subject: '📅 Schedule Update - Appointment Cancelled',
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                  <h2 style="color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">📅 Schedule Update</h2>
+                  <p style="color: #555; line-height: 1.6;">Hi there! 👋</p>
+                  <p style="color: #555; line-height: 1.6;">Just wanted to give you a heads up - <strong>${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</strong> has cancelled their appointment.</p>
+                  <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                    <p style="margin: 5px 0;"><strong>👤 Customer:</strong> ${appointmentData.customer.firstName} ${appointmentData.customer.lastName}</p>
+                    <p style="margin: 5px 0;"><strong>✨ Service:</strong> ${serviceNames}</p>
+                    <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> ${appointmentDateTime}</p>
+                  </div>
+                  <p style="color: #555; line-height: 1.6;">Your schedule has been updated. You've got this! 💙</p>
+                </div>
+              `
+            }
+          });
+        }
+      }
+    } catch (notifError) {
+      console.error('Error sending cancellation notification:', notifError);
+      // Don't fail the request if notification fails
+    }
 
     res.json({
       message: 'Appointment cancelled successfully',
