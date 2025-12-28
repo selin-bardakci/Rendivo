@@ -66,25 +66,33 @@ export class EmailService {
               padding: 20px;
             }
             .header {
-              background-color: #4F46E5;
+              background-color: #df84dc;
               color: white;
               padding: 20px;
               text-align: center;
               border-radius: 5px 5px 0 0;
+            }
+            .header h1 {
+              margin: 0;
+              color: white;
             }
             .content {
               background-color: #f9f9f9;
               padding: 30px;
               border-radius: 0 0 5px 5px;
             }
+            .content h2 {
+              color: #333;
+            }
             .button {
               display: inline-block;
               padding: 12px 30px;
-              background-color: #4F46E5;
-              color: white;
+              background-color: #df84dc;
+              color: white !important;
               text-decoration: none;
               border-radius: 5px;
               margin: 20px 0;
+              font-weight: 600;
             }
             .footer {
               margin-top: 20px;
@@ -100,19 +108,19 @@ export class EmailService {
               <h1>Rendivo</h1>
             </div>
             <div class="content">
-              <h2>Email Adresinizi Doğrulayın</h2>
-              <p>Merhaba,</p>
-              <p>Rendivo hesabınızı oluşturduğunuz için teşekkür ederiz! Email adresinizi doğrulamak için aşağıdaki butona tıklayın:</p>
+              <h2>Verify Your Email Address</h2>
+              <p>Hello,</p>
+              <p>Thank you for creating your Rendivo account! Please click the button below to verify your email address:</p>
               <div style="text-align: center;">
-                <a href="${verificationUrl}" class="button">Email Adresimi Doğrula</a>
+                <a href="${verificationUrl}" class="button" style="color: white;">Verify Email Address</a>
               </div>
-              <p>Veya aşağıdaki linki tarayıcınıza kopyalayın:</p>
+              <p>Or copy and paste this link into your browser:</p>
               <p style="word-break: break-all; color: #666;">${verificationUrl}</p>
-              <p><strong>Bu link 24 saat geçerlidir.</strong></p>
-              <p>Eğer bu hesabı oluşturmadıysanız, bu emaili görmezden gelebilirsiniz.</p>
+              <p><strong>This link is valid for 24 hours.</strong></p>
+              <p>If you didn't create this account, you can safely ignore this email.</p>
             </div>
             <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Rendivo. Tüm hakları saklıdır.</p>
+              <p>&copy; ${new Date().getFullYear()} Rendivo. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -121,7 +129,7 @@ export class EmailService {
 
     await this.sendEmail({
       to: email,
-      subject: 'Rendivo - Email Adresinizi Doğrulayın',
+      subject: 'Rendivo - Verify Your Email Address',
       html,
     });
   }
@@ -130,7 +138,7 @@ export class EmailService {
    * Send welcome email after verification
    */
   static async sendWelcomeEmail(email: string, name?: string): Promise<void> {
-    const displayName = name || 'Kullanıcı';
+    const displayName = name || 'User';
     
     const html = `
       <!DOCTYPE html>
@@ -148,41 +156,49 @@ export class EmailService {
               padding: 20px;
             }
             .header {
-              background-color: #4F46E5;
+              background-color: #df84dc;
               color: white;
               padding: 20px;
               text-align: center;
               border-radius: 5px 5px 0 0;
+            }
+            .header h1 {
+              margin: 0;
+              color: white;
             }
             .content {
               background-color: #f9f9f9;
               padding: 30px;
               border-radius: 0 0 5px 5px;
             }
+            .content h2 {
+              color: #333;
+            }
             .button {
               display: inline-block;
               padding: 12px 30px;
-              background-color: #4F46E5;
-              color: white;
+              background-color: #df84dc;
+              color: white !important;
               text-decoration: none;
               border-radius: 5px;
               margin: 20px 0;
+              font-weight: 600;
             }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>Hoş Geldiniz!</h1>
+              <h1>Welcome!</h1>
             </div>
             <div class="content">
-              <h2>Merhaba ${displayName},</h2>
-              <p>Rendivo ailesine hoş geldiniz! 🎉</p>
-              <p>Email adresiniz başarıyla doğrulandı ve artık tüm özelliklerimizi kullanabilirsiniz.</p>
+              <h2>Hello ${displayName},</h2>
+              <p>Welcome to the Rendivo family!</p>
+              <p>Your email address has been successfully verified and you can now use all our features.</p>
               <div style="text-align: center;">
-                <a href="${process.env.FRONTEND_URL}/login" class="button">Giriş Yap</a>
+                <a href="${process.env.FRONTEND_URL}/login" class="button" style="color: white;">Log In</a>
               </div>
-              <p>İyi günler dileriz!</p>
+              <p>Have a great day!</p>
             </div>
           </div>
         </body>
@@ -191,7 +207,98 @@ export class EmailService {
 
     await this.sendEmail({
       to: email,
-      subject: 'Rendivo - Hoş Geldiniz!',
+      subject: 'Rendivo - Welcome!',
+      html,
+    });
+  }
+
+  /**
+   * Send password reset code email
+   */
+  static async sendPasswordResetEmail(email: string, code: string): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              background-color: #df84dc;
+              color: white;
+              padding: 20px;
+              text-align: center;
+              border-radius: 5px 5px 0 0;
+            }
+            .header h1 {
+              margin: 0;
+              color: white;
+            }
+            .content {
+              background-color: #f9f9f9;
+              padding: 30px;
+              border-radius: 0 0 5px 5px;
+            }
+            .content h2 {
+              color: #333;
+            }
+            .code-box {
+              background: white;
+              border: 2px solid #df84dc;
+              border-radius: 8px;
+              padding: 20px;
+              text-align: center;
+              margin: 24px 0;
+            }
+            .code {
+              font-size: 36px;
+              font-weight: 700;
+              letter-spacing: 0.5em;
+              color: #df84dc;
+              font-family: monospace;
+            }
+            .footer {
+              margin-top: 20px;
+              text-align: center;
+              color: #666;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Rendivo</h1>
+            </div>
+            <div class="content">
+              <h2>Password Reset Request</h2>
+              <p>Hello,</p>
+              <p>We received a request to reset your password. Use the code below to reset your password:</p>
+              <div class="code-box">
+                <div class="code">${code}</div>
+              </div>
+              <p><strong>This code will expire in 10 minutes.</strong></p>
+              <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} Rendivo. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: email,
+      subject: 'Rendivo - Password Reset Code',
       html,
     });
   }

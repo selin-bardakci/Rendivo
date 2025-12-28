@@ -9,6 +9,9 @@ import {
   logout,
   verifyEmail,
   resendVerification,
+  forgotPassword,
+  verifyResetCode,
+  resetPassword,
 } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validation';
@@ -31,6 +34,11 @@ router.post('/login', validate(loginValidation), login);
 // Email Verification Routes
 router.get('/verify-email/:token', verifyEmail);
 router.post('/resend-verification', resendVerification);
+
+// Password Reset Routes
+router.post('/forgot-password', forgotPassword);
+router.post('/verify-reset-code', verifyResetCode);
+router.post('/reset-password', resetPassword);
 
 // Firebase Authentication Route
 router.post('/firebase', validate(firebaseAuthValidation), firebaseAuth);

@@ -207,6 +207,21 @@ export default function LoginPage() {
           <div className={styles.loginFooter}>
             <p>Don't have an account? <Link href="/signup">Sign up</Link></p>
           </div>
+
+          <div style={{ 
+            borderTop: '1px solid #f4f0f4', 
+            marginTop: '24px', 
+            paddingTop: '24px' 
+          }}>
+            <p style={{ 
+              textAlign: 'center', 
+              fontSize: '14px', 
+              color: '#886385', 
+              margin: 0 
+            }}>
+              Forgot your password? <Link href="/forgot-password" style={{ color: '#df84dc', textDecoration: 'none', fontWeight: 700 }}>Reset password</Link>
+            </p>
+          </div>
         </div>
       </div>
     </Layout>

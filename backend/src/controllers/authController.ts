@@ -7,6 +7,25 @@ import { AuthRequest } from '../middleware/auth';
 import firebaseAdmin from '../config/firebase';
 import EmailService from '../services/emailService';
 
+// In-memory storage for password reset codes
+interface PasswordResetCode {
+  code: string;
+  email: string;
+  expires: Date;
+}
+
+const passwordResetCodes = new Map<string, PasswordResetCode>();
+
+// Clean up expired codes every 5 minutes
+setInterval(() => {
+  const now = new Date();
+  for (const [key, value] of passwordResetCodes.entries()) {
+    if (value.expires < now) {
+      passwordResetCodes.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
 // Generate JWT token
 const generateToken = (userId: number, email: string, role: string, firstName?: string, lastName?: string, fullName?: string): string => {
   return jwt.sign(
@@ -671,5 +690,121 @@ export const resendVerification = async (req: AuthRequest, res: Response): Promi
   } catch (error: any) {
     console.error('Resend verification error:', error);
     res.status(500).json({ message: 'Error sending verification email', error: error.message });
+  }
+};
+
+// Forgot Password - Send reset code
+export const forgotPassword = async (req: AuthRequest, res: Response): Promise<Response | void> => {
+  try {
+    const { email } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // Don't reveal if email exists
+      return res.status(200).json({ 
+        message: 'If that email exists, a reset code has been sent.' 
+      });
+    }
+
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Store code in memory
+    passwordResetCodes.set(email, { code, email, expires });
+
+    // Send email with code
+    await EmailService.sendPasswordResetEmail(email, code);
+
+    res.status(200).json({
+      message: 'Reset code sent to your email',
+      codeSent: true,
+    });
+  } catch (error: any) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Error sending reset code', error: error.message });
+  }
+};
+
+// Verify Reset Code
+export const verifyResetCode = async (req: AuthRequest, res: Response): Promise<Response | void> => {
+  try {
+    const { email, code } = req.body;
+
+    // Get stored code
+    const storedData = passwordResetCodes.get(email);
+
+    if (!storedData) {
+      return res.status(400).json({ message: 'Invalid or expired code' });
+    }
+
+    // Check if expired
+    if (storedData.expires < new Date()) {
+      passwordResetCodes.delete(email);
+      return res.status(400).json({ message: 'Code has expired. Please request a new one.' });
+    }
+
+    // Verify code
+    if (storedData.code !== code) {
+      return res.status(400).json({ message: 'Invalid code. Please try again.' });
+    }
+
+    // Generate temporary token for password reset
+    const tempToken = jwt.sign(
+      { email, purpose: 'password_reset' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '15m' }
+    );
+
+    res.status(200).json({
+      message: 'Code verified successfully',
+      tempToken,
+    });
+  } catch (error: any) {
+    console.error('Verify reset code error:', error);
+    res.status(500).json({ message: 'Error verifying code', error: error.message });
+  }
+};
+
+// Reset Password
+export const resetPassword = async (req: AuthRequest, res: Response): Promise<Response | void> => {
+  try {
+    const { token, newPassword } = req.body;
+
+    // Verify temp token
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    if (decoded.purpose !== 'password_reset') {
+      return res.status(400).json({ message: 'Invalid token' });
+    }
+
+    // Find user
+    const user = await User.findOne({ where: { email: decoded.email } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update password (will be hashed by User model hook)
+    user.password = newPassword;
+    await user.save();
+
+    // Remove code from memory
+    passwordResetCodes.delete(decoded.email);
+
+    res.status(200).json({
+      message: 'Password reset successfully',
+      success: true,
+    });
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Error resetting password', error: error.message });
   }
 };
