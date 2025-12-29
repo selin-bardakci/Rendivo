@@ -604,3 +604,85 @@
     display: none;
   }
 }
+
+/* Delete Confirmation Modal */
+.deleteModal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(24, 17, 23, 0.2);
+  animation: modalSlideUp 0.3s ease-out;
+  text-align: center;
+}
+
+.deleteModalIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  background: #fef2f2;
+  border-radius: 50%;
+}
+
+.deleteModalTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #181117;
+  margin-bottom: 12px;
+}
+
+.deleteModalText {
+  font-size: 1rem;
+  color: #6e6576;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.deleteCancelBtn {
+  flex: 1;
+  padding: 14px 24px;
+  background: #f5f2f4;
+  color: #181117;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+}
+
+.deleteCancelBtn:hover {
+  background: #e9e4e8;
+  transform: translateY(-1px);
+}
+
+.deleteConfirmBtn {
+  flex: 1;
+  padding: 14px 24px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+}
+
+.deleteConfirmBtn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}

@@ -36,6 +36,8 @@ export default function BusinessServices() {
   const [showServiceDropdown, setShowServiceDropdown] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [availableServices, setAvailableServices] = useState<string[]>(['Other'])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [serviceToDelete, setServiceToDelete] = useState<number | null>(null)
 
   // Fetch user and services on mount
   useEffect(() => {
@@ -177,11 +179,18 @@ export default function BusinessServices() {
   }
 
   const handleDeleteService = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this service?')) return
+    setServiceToDelete(id)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!serviceToDelete) return
     
     try {
-      await serviceApi.delete(id)
+      await serviceApi.delete(serviceToDelete)
       await fetchServices()
+      setShowDeleteModal(false)
+      setServiceToDelete(null)
     } catch (err: any) {
       console.error('Error deleting service:', err)
       alert(err.response?.data?.message || 'Failed to delete service')
@@ -403,6 +412,40 @@ export default function BusinessServices() {
                 disabled={submitting}
               >
                 {submitting ? 'Saving...' : (editingService ? 'Update Service' : 'Add Service')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowDeleteModal(false)}>
+          <div className={styles.deleteModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.deleteModalIcon}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className={styles.deleteModalTitle}>Delete Service</h3>
+            <p className={styles.deleteModalText}>
+              Are you sure you want to delete this service? This action cannot be undone.
+            </p>
+            <div className={styles.deleteModalActions}>
+              <button 
+                className={styles.deleteCancelBtn}
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setServiceToDelete(null)
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                className={styles.deleteConfirmBtn}
+                onClick={confirmDelete}
+              >
+                Delete Service
               </button>
             </div>
           </div>
