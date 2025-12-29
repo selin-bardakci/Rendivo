@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
+import LoadingSpinner from '../components/LoadingSpinner'
 import { getCurrentUser, logout } from '../lib/auth'
 import styles from '../styles/appointments.module.css'
 import Link from 'next/link'

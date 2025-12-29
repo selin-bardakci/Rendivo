@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
+import LoadingSpinner from '../components/LoadingSpinner'
 import styles from '../styles/discover.module.css'
 import Link from 'next/link'
 import { businessApi } from '../lib/api'
@@ -96,9 +97,7 @@ export default function DiscoverPage() {
       <Layout>
         <div className={styles.container}>
           <div className={styles.content}>
-            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <p>Loading businesses...</p>
-            </div>
+            <LoadingSpinner text="Loading businesses" />
           </div>
         </div>
       </Layout>

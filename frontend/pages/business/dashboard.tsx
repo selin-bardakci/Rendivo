@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import Image from 'next/image'
 import styles from '../../styles/businessDashboardMain.module.css'
 import api from '../../lib/api'
@@ -58,7 +59,7 @@ export default function DashboardPage() {
       <Layout>
         <div className={styles.pageContainer}>
           <div className={styles.contentWrapper}>
-            <p>Loading dashboard...</p>
+            <LoadingSpinner text="Loading dashboard" />
           </div>
         </div>
       </Layout>

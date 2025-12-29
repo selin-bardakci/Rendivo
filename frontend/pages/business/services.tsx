@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Layout from '../../components/Layout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import styles from '../../styles/businessDashboard.module.css'
 import { serviceApi } from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
@@ -224,9 +225,7 @@ export default function BusinessServices() {
 
           {/* Loading State */}
           {loading && (
-            <div className={styles.loading}>
-              <p>Loading services...</p>
-            </div>
+            <LoadingSpinner text="Loading services" />
           )}
 
           {/* Error State */}

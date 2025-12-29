@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import styles from '../../styles/businessAppointments.module.css'
 import api from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
@@ -178,8 +179,10 @@ export default function BusinessAppointmentsPage() {
   if (loading) {
     return (
       <Layout>
-        <div className={styles.container}>
-          <div className={styles.loading}>Loading appointments...</div>
+        <div className={styles.pageContainer}>
+          <div className={styles.contentWrapper}>
+            <LoadingSpinner text="Loading appointments" />
+          </div>
         </div>
       </Layout>
     )
@@ -188,8 +191,10 @@ export default function BusinessAppointmentsPage() {
   if (error) {
     return (
       <Layout>
-        <div className={styles.container}>
-          <div className={styles.error}>{error}</div>
+        <div className={styles.pageContainer}>
+          <div className={styles.contentWrapper}>
+            <div className={styles.error}>{error}</div>
+          </div>
         </div>
       </Layout>
     )
@@ -197,144 +202,220 @@ export default function BusinessAppointmentsPage() {
 
   return (
     <Layout>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Appointments</h1>
-          <p className={styles.subtitle}>Manage all your business appointments</p>
-        </div>
-
-        <div className={styles.filters}>
-          <div className={styles.filterGroup}>
-            <label>Status:</label>
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className={styles.select}
-            >
-              <option value="all">All</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Sort by date:</label>
-            <button 
-              onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-              className={styles.sortButton}
-            >
-              {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.appointmentsList}>
-          {filteredAppointments.length === 0 ? (
-            <div className={styles.empty}>
-              <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p>No appointments found</p>
+      <div className={styles.pageContainer}>
+        <div className={styles.contentWrapper}>
+          {/* Page Header */}
+          <header className={styles.pageHeader}>
+            <div className={styles.headerContent}>
+              <div className={styles.headerText}>
+                <h1 className={styles.pageTitle}>Appointments</h1>
+                <p className={styles.pageSubtitle}>Manage and track all your business appointments</p>
+              </div>
+              <div className={styles.statsCards}>
+                <div className={styles.statCard}>
+                  <span className={styles.statValue}>{appointments.length}</span>
+                  <span className={styles.statLabel}>Total</span>
+                </div>
+                <div className={styles.statCard}>
+                  <span className={styles.statValue}>{appointments.filter(a => a.status === 'confirmed').length}</span>
+                  <span className={styles.statLabel}>Confirmed</span>
+                </div>
+              </div>
             </div>
-          ) : (
-            filteredAppointments.map(appointment => (
-              <div key={appointment.id} className={styles.appointmentCard}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.dateInfo}>
-                    <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>{formatDate(appointment.appointmentDate)}</span>
+          </header>
+
+          {/* Filters */}
+          <div className={styles.filtersCard}>
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel}>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Status
+              </label>
+              <select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className={styles.filterSelect}
+              >
+                <option value="all">All Appointments</option>
+                <option value="confirmed">Confirmed Only</option>
+                <option value="cancelled">Cancelled Only</option>
+              </select>
+            </div>
+
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel}>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Sort
+              </label>
+              <button 
+                onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                className={styles.sortButton}
+              >
+                {sortOrder === 'desc' ? '↓ Newest First' : '↑ Oldest First'}
+              </button>
+            </div>
+          </div>
+
+          {/* Appointments List */}
+          <div className={styles.appointmentsList}>
+            {filteredAppointments.length === 0 ? (
+              <div className={styles.emptyState}>
+                <svg width="80" height="80" fill="none" stroke="#c5a8c3" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3>No appointments found</h3>
+                <p>Appointments will appear here once customers book your services</p>
+              </div>
+            ) : (
+              filteredAppointments.map(appointment => (
+                <div key={appointment.id} className={styles.appointmentCard}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.headerLeft}>
+                      <div className={styles.dateBox}>
+                        <span className={styles.dateDay}>{new Date(appointment.appointmentDate).getDate()}</span>
+                        <span className={styles.dateMonth}>{new Date(appointment.appointmentDate).toLocaleDateString('en-US', { month: 'short' })}</span>
+                      </div>
+                      <div className={styles.timeInfo}>
+                        <div className={styles.dateText}>{formatDate(appointment.appointmentDate)}</div>
+                        <div className={styles.timeText}>
+                          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {formatTime(appointment.startTime)} - {formatTime(appointment.endTime)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`${styles.statusBadge} ${styles[appointment.status]}`}>
+                      {appointment.status === 'confirmed' && (
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                      {appointment.status === 'cancelled' && (
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                      {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                    </div>
                   </div>
-                  <div className={`${styles.statusBadge} ${styles[appointment.status]}`}>
-                    {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+
+                  <div className={styles.cardBody}>
+                    <div className={styles.detailRow}>
+                      <div className={styles.detailIcon}>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div className={styles.detailContent}>
+                        <span className={styles.detailLabel}>Customer</span>
+                        <span className={styles.detailValue}>{getCustomerName(appointment.customer)}</span>
+                        {appointment.customer.phone && (
+                          <span className={styles.detailSubtext}>{appointment.customer.phone}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.detailRow}>
+                      <div className={styles.detailIcon}>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      <div className={styles.detailContent}>
+                        <span className={styles.detailLabel}>Staff Member</span>
+                        <span className={styles.detailValue}>{getStaffName(appointment.staff)}</span>
+                        {appointment.staff.position && (
+                          <span className={styles.detailSubtext}>{appointment.staff.position}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.detailRow}>
+                      <div className={styles.detailIcon}>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <div className={styles.detailContent}>
+                        <span className={styles.detailLabel}>Services</span>
+                        <div className={styles.servicesList}>
+                          {appointment.services.map((s, idx) => (
+                            <span key={idx} className={styles.serviceTag}>{s.name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.priceDuration}>
+                      <div className={styles.priceBox}>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className={styles.priceAmount}>${appointment.totalPrice}</span>
+                      </div>
+                      <div className={styles.durationBox}>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{appointment.totalDuration} min</span>
+                      </div>
+                    </div>
                   </div>
+
+                  {appointment.status !== 'cancelled' && (
+                    <div className={styles.cardFooter}>
+                      <button
+                        onClick={() => handleCancelClick(appointment.id)}
+                        className={styles.cancelButton}
+                      >
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Cancel Appointment
+                      </button>
+                    </div>
+                  )}
                 </div>
+              ))
+            )}
+          </div>
 
-                <div className={styles.cardBody}>
-                  <div className={styles.infoRow}>
-                    <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className={styles.label}>Time:</span>
-                    <span className={styles.value}>{formatTime(appointment.startTime)} - {formatTime(appointment.endTime)}</span>
-                  </div>
-
-                  <div className={styles.infoRow}>
-                    <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className={styles.label}>Customer:</span>
-                    <span className={styles.value}>{getCustomerName(appointment.customer)}</span>
-                  </div>
-
-                  <div className={styles.infoRow}>
-                    <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <span className={styles.label}>Staff:</span>
-                    <span className={styles.value}>{getStaffName(appointment.staff)}</span>
-                  </div>
-
-                  <div className={styles.infoRow}>
-                    <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span className={styles.label}>Services:</span>
-                    <span className={styles.value}>
-                      {appointment.services.map(s => s.name).join(', ')}
-                    </span>
-                  </div>
-
-                  <div className={styles.infoRow}>
-                    <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className={styles.label}>Price:</span>
-                    <span className={styles.value}>${appointment.totalPrice}</span>
-                  </div>
+          {/* Cancel Confirmation Modal */}
+          {showCancelModal && (
+            <div className={styles.modalOverlay} onClick={() => setShowCancelModal(false)}>
+              <div className={styles.deleteModal} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.deleteModalIcon}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
                 </div>
-
-                <div className={styles.cardFooter}>
-                  <button
-                    onClick={() => handleCancelClick(appointment.id)}
-                    disabled={appointment.status === 'cancelled'}
-                    className={styles.cancelButton}
+                <h3 className={styles.deleteModalTitle}>Cancel Appointment</h3>
+                <p className={styles.deleteModalText}>
+                  Are you sure you want to cancel this appointment? This action cannot be undone and the customer will be notified.
+                </p>
+                <div className={styles.deleteModalActions}>
+                  <button 
+                    className={styles.deleteCancelBtn}
+                    onClick={() => setShowCancelModal(false)}
                   >
-                    {appointment.status === 'cancelled' ? 'Cancelled' : 'Cancel Appointment'}
+                    Keep Appointment
+                  </button>
+                  <button 
+                    className={styles.deleteConfirmBtn}
+                    onClick={handleCancelConfirm}
+                  >
+                    Yes, Cancel It
                   </button>
                 </div>
               </div>
-            ))
+            </div>
           )}
         </div>
-
-        {/* Cancel Confirmation Modal */}
-        {showCancelModal && (
-          <div className={styles.modalOverlay} onClick={() => setShowCancelModal(false)}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h2>Cancel Appointment</h2>
-                <button onClick={() => setShowCancelModal(false)} className={styles.closeButton}>
-                  <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className={styles.modalBody}>
-                <p>Are you sure you want to cancel this appointment? This action cannot be undone.</p>
-              </div>
-              <div className={styles.modalFooter}>
-                <button onClick={() => setShowCancelModal(false)} className={styles.secondaryButton}>
-                  No, Keep It
-                </button>
-                <button onClick={handleCancelConfirm} className={styles.dangerButton}>
-                  Yes, Cancel Appointment
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   )

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import styles from '../../styles/adminDashboard.module.css'
 import api from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
@@ -106,7 +107,7 @@ export default function AdminDashboard() {
     return (
       <Layout>
         <div className={styles.container}>
-          <p>Loading...</p>
+          <LoadingSpinner text=\"Loading dashboard\" />
         </div>
       </Layout>
     )

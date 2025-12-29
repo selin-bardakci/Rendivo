@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import styles from '../../styles/businessSchedule.module.css'
 import api from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
@@ -375,7 +376,7 @@ export default function StaffSchedulePage() {
       <Layout>
         <div className={styles.pageContainer}>
           <div className={styles.contentWrapper}>
-            <p>Loading schedule...</p>
+            <LoadingSpinner text="Loading schedule" />
           </div>
         </div>
       </Layout>

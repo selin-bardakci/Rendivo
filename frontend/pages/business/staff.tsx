@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import styles from '../../styles/businessStaff.module.css'
 import api, { businessApi } from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
@@ -267,7 +268,7 @@ export default function StaffManagementPage() {
 
           {/* Staff Table */}
           {loading && (
-            <div className={styles.loading}>Loading staff...</div>
+            <LoadingSpinner text="Loading staff" />
           )}
 
           {error && !loading && (

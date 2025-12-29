@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
+import LoadingSpinner from '../components/LoadingSpinner'
 import { getCurrentUser, logout } from '../lib/auth'
 import styles from '../styles/staffDashboard.module.css'
 import { appointmentApi } from '../lib/api'
@@ -185,7 +186,7 @@ export default function StaffDashboardPage() {
             </div>
 
             {loading && (
-              <div className={styles.loading}>Loading appointments...</div>
+              <LoadingSpinner text=\"Loading appointments\" />
             )}
 
             {error && !loading && (
