@@ -186,7 +186,7 @@ export default function StaffDashboardPage() {
             </div>
 
             {loading && (
-              <LoadingSpinner text=\"Loading appointments\" />
+              <LoadingSpinner text="Loading appointments" />
             )}
 
             {error && !loading && (
