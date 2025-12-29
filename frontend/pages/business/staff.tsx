@@ -284,7 +284,7 @@ export default function StaffManagementPage() {
                     </svg>
                   </div>
                   <h3 className={styles.emptyTitle}>No Staff Members Yet</h3>
-                  <p className={styles.emptyText}>Start building your team by sharing your Business ID with staff members. They'll be able to join your business and manage their schedules.</p>
+                  <p className={styles.emptyText}>Start building your team by sharing your Business ID with staff members. They'll be able to join your business and view their schedules.</p>
                 </div>
               ) : (
                 <table className={styles.table}>

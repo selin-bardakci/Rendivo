@@ -17,6 +17,8 @@ export default function AppointmentsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null)
+  const [showDayAppointments, setShowDayAppointments] = useState(false)
+  const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null)
 
   // Fetch appointments from API
   useEffect(() => {
@@ -124,6 +126,26 @@ export default function AppointmentsPage() {
     return appointment?.id
   }
 
+  const getAppointmentsForDate = (date: Date) => {
+    const filtered = appointments.filter(app => {
+      if (app.status === 'cancelled') return false
+      const appDate = new Date(app.appointmentDate)
+      return appDate.getDate() === date.getDate() &&
+             appDate.getMonth() === date.getMonth() &&
+             appDate.getFullYear() === date.getFullYear()
+    })
+    console.log('Appointments for date:', filtered)
+    return filtered
+  }
+
+  const handleDateClick = (date: Date) => {
+    const dayAppointments = getAppointmentsForDate(date)
+    if (dayAppointments.length > 0) {
+      setSelectedDayDate(date)
+      setShowDayAppointments(true)
+    }
+  }
+
   const isAppointmentDate = (date: Date) => {
     return appointmentDates.some(
       (appDate) =>
@@ -164,11 +186,7 @@ export default function AppointmentsPage() {
           className={`${styles.calendarDay} ${styles.calendarDayNumber} ${
             hasAppointment ? styles.appointmentDay : ''
           } ${isTodayDate ? styles.today : ''}`}
-          onClick={() => {
-            if (hasAppointment && appointmentId) {
-              router.push(`/appointment/${appointmentId}`)
-            }
-          }}
+          onClick={() => handleDateClick(date)}
           style={{ cursor: hasAppointment ? 'pointer' : 'default' }}
         >
           {day}
@@ -407,6 +425,98 @@ export default function AppointmentsPage() {
               >
                 Yes, Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Day Appointments Modal */}
+      {showDayAppointments && selectedDayDate && (
+        <div className={styles.modalOverlay} onClick={() => setShowDayAppointments(false)}>
+          <div className={styles.dayAppointmentsModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                Appointments on {selectedDayDate.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </h3>
+              <button 
+                className={styles.modalClose}
+                onClick={() => setShowDayAppointments(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.dayAppointmentsList}>
+              {getAppointmentsForDate(selectedDayDate).map((appointment) => (
+                <div 
+                  key={appointment.id} 
+                  className={styles.dayAppointmentCard}
+                  onClick={() => router.push(`/appointment/${appointment.id}`)}
+                >
+                  <div className={styles.appointmentCardTime}>
+                    <div className={styles.timeIcon}>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
+                      </svg>
+                    </div>
+                    <span className={styles.timeText}>{appointment.startTime}</span>
+                  </div>
+                  
+                  <div className={styles.appointmentCardContent}>
+                    <h4 className={styles.businessName}>
+                      {appointment.business?.businessName || 'Business'}
+                    </h4>
+                    
+                    <div className={styles.appointmentMeta}>
+                      {appointment.staff?.user && (
+                        <span className={styles.metaItem}>
+                          <svg className={styles.metaIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
+                          {appointment.staff.user.firstName} {appointment.staff.user.lastName}
+                        </span>
+                      )}
+                      
+                      {appointment.services && appointment.services.length > 0 && (
+                        <span className={styles.metaItem}>
+                          <svg className={styles.metaIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                          </svg>
+                          ${(() => {
+                            const total = appointment.services.reduce((sum: number, service: any) => 
+                              sum + parseFloat(service.price || 0), 0
+                            );
+                            return total.toFixed(2);
+                          })()}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {appointment.services && appointment.services.length > 0 && (
+                      <div className={styles.servicesList}>
+                        {appointment.services.map((service: any, idx: number) => (
+                          <span key={idx} className={styles.serviceItem}>
+                            {service.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.appointmentCardStatus}>
+                    <span className={`${styles.statusBadge} ${styles[appointment.status]}`}>
+                      {appointment.status}
+                    </span>
+                    <svg className={styles.arrowIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                    </svg>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
