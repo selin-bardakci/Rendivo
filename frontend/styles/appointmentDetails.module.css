@@ -4,6 +4,56 @@
   background: var(--bg-light);
 }
 
+/* Notification Toast */
+.notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1100;
+  animation: slideInRight 0.3s ease-out;
+  max-width: 400px;
+}
+
+.notification.success {
+  background: #10b981;
+  color: white;
+}
+
+.notification.error {
+  background: #ef4444;
+  color: white;
+}
+
+.notificationIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  font-size: 16px;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .content {
   max-width: 1200px;
   margin: 0 auto;
@@ -407,7 +457,7 @@
 .modalButtonSecondary,
 .modalButtonDanger {
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -439,13 +489,18 @@
 .modalButtonPrimary {
   background: var(--color-primary);
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .modalButtonPrimary:hover:not(:disabled) {
-  background: #a5579c;
+  background: #d66dd9;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(136, 99, 133, 0.3);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.4);
 }
 
 .modalButtonPrimary:disabled {
@@ -453,16 +508,108 @@
   cursor: not-allowed;
 }
 
+.dateSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dateSectionHeader h4 {
+  margin: 0;
+}
+
+.calendarNav {
+  display: flex;
+  gap: 8px;
+}
+
+.navButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid #e5dce4;
+  background: white;
+  color: var(--color-primary);
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* Reschedule Modal */
 .rescheduleModal {
   background: white;
-  border-radius: 16px;
+  border-radius: 24px;
   padding: 32px;
   max-width: 600px;
   width: 90%;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 20px 60px rgba(24, 17, 23, 0.2);
+  position: relative;
+}
+
+/* Custom Scrollbar */
+.rescheduleModal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rescheduleModal::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 24px 0;
+}
+
+.rescheduleModal::-webkit-scrollbar-thumb {
+  background: rgba(223, 132, 220, 0.4);
+  border-radius: 10px;
+}
+
+.rescheduleModal::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+.modalClose {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #9ca3af;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  line-height: 1;
+  padding: 0;
+  z-index: 10;
+}
+
+.modalClose:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+  transform: rotate(90deg);
 }
 
 .rescheduleContent {
@@ -495,32 +642,60 @@
 .staffButton {
   background: white;
   border: 2px solid #e5dce4;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.staffButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(223, 132, 220, 0.08);
+  transform: scale(0);
+  transition: transform 0.3s ease;
+  border-radius: 16px;
 }
 
 .staffButton:hover {
   border-color: var(--color-primary);
   background: rgba(223, 132, 220, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.2);
+}
+
+.staffButton:hover::before {
+  transform: scale(1);
 }
 
 .staffButton.selected {
-  background: var(--color-primary);
+  background: rgba(223, 132, 220, 0.1);
   border-color: var(--color-primary);
-  color: white;
+  color: #181117;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.2);
+  position: relative;
+}
+
+.staffButton.selected::before {
+  transform: scale(1);
+  background: rgba(223, 132, 220, 0.1);
 }
 
 .staffName {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   margin-bottom: 4px;
 }
 
 .staffPosition {
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.8;
 }
 
@@ -533,26 +708,54 @@
 .serviceButton {
   background: white;
   border: 2px solid #e5dce4;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.serviceButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(223, 132, 220, 0.08);
+  transform: scale(0);
+  transition: transform 0.3s ease;
+  border-radius: 16px;
 }
 
 .serviceButton:hover {
   border-color: var(--color-primary);
   background: rgba(223, 132, 220, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(223, 132, 220, 0.2);
+}
+
+.serviceButton:hover::before {
+  transform: scale(1);
 }
 
 .serviceButton.selected {
-  background: var(--color-primary);
+  background: rgba(223, 132, 220, 0.1);
   border-color: var(--color-primary);
-  color: white;
+  color: #181117;
+  box-shadow: 0 0 0 3px rgba(223, 132, 220, 0.2);
+  position: relative;
+}
+
+.serviceButton.selected::before {
+  transform: scale(1);
+  background: rgba(223, 132, 220, 0.1);
 }
 
 .serviceName {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   margin-bottom: 8px;
 }
@@ -560,7 +763,7 @@
 .serviceDetails {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.8;
 }
 

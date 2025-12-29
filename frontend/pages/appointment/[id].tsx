@@ -15,6 +15,8 @@ export default function AppointmentDetails() {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showNotification, setShowNotification] = useState(false)
+  const [notification, setNotification] = useState({ type: '', message: '' })
   
   // Reschedule state
   const [businessStaff, setBusinessStaff] = useState<any[]>([])
@@ -26,6 +28,14 @@ export default function AppointmentDetails() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<any>(null)
   const [rescheduleLoading, setRescheduleLoading] = useState(false)
+  const [calendarStartIndex, setCalendarStartIndex] = useState(0)
+  const datesPerPage = 7
+
+  const showNotificationMessage = (type: string, message: string) => {
+    setNotification({ type, message })
+    setShowNotification(true)
+    setTimeout(() => setShowNotification(false), 4000)
+  }
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -166,7 +176,7 @@ export default function AppointmentDetails() {
       
       // Calculate total duration and price
       const totalDuration = selectedServices.reduce((sum, s) => sum + s.duration, 0)
-      const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0)
+      const totalPrice = selectedServices.reduce((sum, s) => sum + parseFloat(s.price || 0), 0)
       const endTime = calculateEndTime(selectedTimeSlot.startTime, totalDuration)
       
       const response = await appointmentApi.reschedule(Number(id), {
@@ -185,14 +195,14 @@ export default function AppointmentDetails() {
       setSelectedServices([])
       setSelectedDate(null)
       setSelectedTimeSlot(null)
-      alert('Appointment rescheduled successfully!')
+      showNotificationMessage('success', 'Appointment rescheduled successfully!')
       
       // Refresh appointment data
       const refreshedData = await appointmentApi.getById(Number(id))
       setAppointment(refreshedData.data)
     } catch (err: any) {
       console.error('Error rescheduling:', err)
-      alert(err.response?.data?.message || 'Failed to reschedule appointment')
+      showNotificationMessage('error', err.response?.data?.message || 'Failed to reschedule appointment')
     } finally {
       setRescheduleLoading(false)
     }
@@ -210,10 +220,11 @@ export default function AppointmentDetails() {
     try {
       await appointmentApi.cancel(Number(id))
       setShowCancelModal(false)
-      router.push('/appointments')
+      showNotificationMessage('success', 'Appointment cancelled successfully')
+      setTimeout(() => router.push('/appointments'), 1000)
     } catch (err: any) {
       console.error('Error canceling appointment:', err)
-      alert(err.response?.data?.message || 'Failed to cancel appointment')
+      showNotificationMessage('error', err.response?.data?.message || 'Failed to cancel appointment')
     }
   }
 
@@ -240,7 +251,7 @@ export default function AppointmentDetails() {
     const staffName = appointment.staff?.user?.fullName || 'Staff Member'
     const businessName = appointment.business?.businessName || 'Business'
     const location = `${appointment.business?.address || ''}, ${appointment.business?.city || ''} ${appointment.business?.state || ''}`
-    const totalPrice = appointment.services?.reduce((sum: number, s: any) => sum + (s.price || 0), 0) || 0
+    const totalPrice = appointment.services?.reduce((sum: number, s: any) => sum + parseFloat(s.price || 0), 0) || 0
     const status = String(appointment.status || 'pending').toLowerCase()
 
     return {
@@ -310,6 +321,16 @@ export default function AppointmentDetails() {
   return (
     <Layout>
       <div className={styles.container}>
+        {/* Notification Toast */}
+        {showNotification && (
+          <div className={`${styles.notification} ${styles[notification.type]}`}>
+            <span className={styles.notificationIcon}>
+              {notification.type === 'success' ? '✓' : '✕'}
+            </span>
+            <span>{notification.message}</span>
+          </div>
+        )}
+
         <div className={styles.content}>
           {/* Header with back button */}
           <div className={styles.header}>
@@ -478,6 +499,13 @@ export default function AppointmentDetails() {
         {showRescheduleModal && (
           <div className={styles.modalOverlay} onClick={() => setShowRescheduleModal(false)}>
             <div className={styles.rescheduleModal} onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={styles.modalClose}
+                onClick={() => setShowRescheduleModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
               <h3 className={styles.modalTitle}>Reschedule Appointment</h3>
               
               <div className={styles.rescheduleContent}>
@@ -529,7 +557,7 @@ export default function AppointmentDetails() {
                   {selectedServices.length > 0 && (
                     <div className={styles.selectedSummary}>
                       <span>Total Duration: {selectedServices.reduce((sum, s) => sum + s.duration, 0)} min</span>
-                      <span>Total Price: ${selectedServices.reduce((sum, s) => sum + s.price, 0)}</span>
+                      <span>Total Price: ${selectedServices.reduce((sum, s) => sum + parseFloat(s.price || 0), 0).toFixed(2)}</span>
                     </div>
                   )}
                 </div>
@@ -537,10 +565,30 @@ export default function AppointmentDetails() {
                 {/* Date Selection */}
                 {selectedStaff && (
                   <div className={styles.dateSection}>
-                    <h4>Select a Date</h4>
+                    <div className={styles.dateSectionHeader}>
+                      <h4>Select a Date</h4>
+                      {availableDates.length > datesPerPage && (
+                        <div className={styles.calendarNav}>
+                          <button
+                            className={styles.navButton}
+                            onClick={() => setCalendarStartIndex(Math.max(0, calendarStartIndex - datesPerPage))}
+                            disabled={calendarStartIndex === 0}
+                          >
+                            ‹
+                          </button>
+                          <button
+                            className={styles.navButton}
+                            onClick={() => setCalendarStartIndex(Math.min(availableDates.length - datesPerPage, calendarStartIndex + datesPerPage))}
+                            disabled={calendarStartIndex + datesPerPage >= availableDates.length}
+                          >
+                            ›
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     {availableDates.length > 0 ? (
                       <div className={styles.dateGrid}>
-                        {availableDates.map((dateStr) => {
+                        {availableDates.slice(calendarStartIndex, calendarStartIndex + datesPerPage).map((dateStr) => {
                           const date = new Date(dateStr + 'T00:00:00')
                           const isSelected = selectedDate?.toDateString() === date.toDateString()
                           return (

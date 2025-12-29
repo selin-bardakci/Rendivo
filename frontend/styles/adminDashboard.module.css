@@ -219,6 +219,45 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
+/* Notification Toast */
+.notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1100;
+  animation: slideInRight 0.3s ease-out;
+  max-width: 400px;
+}
+
+.notification.success {
+  background: #10b981;
+  color: white;
+}
+
+.notification.error {
+  background: #ef4444;
+  color: white;
+}
+
+.notificationIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  font-size: 16px;
+}
+
 /* Modal Styles */
 .modalOverlay {
   position: fixed;
@@ -243,6 +282,60 @@
   max-height: 90vh;
   overflow-y: auto;
   animation: slideUp 0.3s ease-out;
+  position: relative;
+}
+
+.modalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #9ca3af;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  line-height: 1;
+  padding: 0;
+}
+
+.modalClose:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.modalIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.approveIcon, .rejectIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.approveIcon {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.rejectIcon {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .modalTitle {
@@ -250,6 +343,7 @@
   font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 16px;
+  text-align: center;
 }
 
 .modalText {
@@ -257,6 +351,7 @@
   color: #666;
   line-height: 1.6;
   margin-bottom: 24px;
+  text-align: center;
 }
 
 .textarea {
@@ -290,6 +385,25 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.confirmApproveButton {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #10b981;
+  color: white;
+}
+
+.confirmApproveButton:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .cancelButton {
@@ -332,6 +446,17 @@
   }
 }
 
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 20px 16px;
@@ -355,5 +480,12 @@
 
   .modal {
     padding: 24px;
+  }
+
+  .notification {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
   }
 }

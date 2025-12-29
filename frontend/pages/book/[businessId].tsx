@@ -159,9 +159,10 @@ export default function BookingPage() {
   }
 
   const getTotalPrice = () => {
-    return services
+    const total = services
       .filter(s => selectedServices.includes(s.id))
-      .reduce((sum, s) => sum + s.price, 0)
+      .reduce((sum, s) => sum + parseFloat(s.price || 0), 0)
+    return Number(total).toFixed(2)
   }
 
   const getTotalDuration = () => {

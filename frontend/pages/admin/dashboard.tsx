@@ -15,6 +15,9 @@ export default function AdminDashboard() {
   const [selectedBusiness, setSelectedBusiness] = useState<any>(null)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
+  const [showApproveModal, setShowApproveModal] = useState(false)
+  const [showNotification, setShowNotification] = useState(false)
+  const [notification, setNotification] = useState({ type: '', message: '' })
 
   useEffect(() => {
     const user = getCurrentUser()
@@ -48,16 +51,27 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleApprove = async (businessId: number) => {
-    if (!confirm('Are you sure you want to approve this business?')) return
+  const showNotificationMessage = (type: string, message: string) => {
+    setNotification({ type, message })
+    setShowNotification(true)
+    setTimeout(() => setShowNotification(false), 4000)
+  }
 
+  const handleApprove = (business: any) => {
+    setSelectedBusiness(business)
+    setShowApproveModal(true)
+  }
+
+  const confirmApprove = async () => {
     try {
-      await api.patch(`/admin/businesses/${businessId}/approve`)
-      alert('Business approved successfully!')
+      await api.patch(`/admin/businesses/${selectedBusiness.id}/approve`)
+      showNotificationMessage('success', 'Business approved successfully!')
+      setShowApproveModal(false)
+      setSelectedBusiness(null)
       fetchData()
     } catch (err: any) {
       console.error('Error approving business:', err)
-      alert(err?.response?.data?.message || 'Failed to approve business')
+      showNotificationMessage('error', err?.response?.data?.message || 'Failed to approve business')
     }
   }
 
@@ -69,7 +83,7 @@ export default function AdminDashboard() {
 
   const confirmReject = async () => {
     if (!rejectionReason.trim()) {
-      alert('Please provide a rejection reason')
+      showNotificationMessage('error', 'Please provide a rejection reason')
       return
     }
 
@@ -77,14 +91,14 @@ export default function AdminDashboard() {
       await api.patch(`/admin/businesses/${selectedBusiness.id}/reject`, {
         reason: rejectionReason
       })
-      alert('Business rejected successfully!')
+      showNotificationMessage('success', 'Business rejected successfully')
       setShowRejectModal(false)
       setSelectedBusiness(null)
       setRejectionReason('')
       fetchData()
     } catch (err: any) {
       console.error('Error rejecting business:', err)
-      alert(err?.response?.data?.message || 'Failed to reject business')
+      showNotificationMessage('error', err?.response?.data?.message || 'Failed to reject business')
     }
   }
 
@@ -111,6 +125,16 @@ export default function AdminDashboard() {
   return (
     <Layout>
       <div className={styles.container}>
+        {/* Notification Toast */}
+        {showNotification && (
+          <div className={`${styles.notification} ${styles[notification.type]}`}>
+            <span className={styles.notificationIcon}>
+              {notification.type === 'success' ? '✓' : '✕'}
+            </span>
+            <span>{notification.message}</span>
+          </div>
+        )}
+
         <header className={styles.header}>
           <h1 className={styles.title}>Admin Dashboard</h1>
           <p className={styles.subtitle}>Manage business approvals and system users</p>
@@ -220,7 +244,7 @@ export default function AdminDashboard() {
                   <div className={styles.actionButtons}>
                     <button
                       className={styles.approveButton}
-                      onClick={() => handleApprove(business.id)}
+                      onClick={() => handleApprove(business)}
                     >
                       ✓ Approve
                     </button>
@@ -237,10 +261,56 @@ export default function AdminDashboard() {
           )}
         </div>
 
+        {/* Approve Modal */}
+        {showApproveModal && (
+          <div className={styles.modalOverlay} onClick={() => setShowApproveModal(false)}>
+            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={styles.modalClose}
+                onClick={() => setShowApproveModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className={styles.modalIcon}>
+                <span className={styles.approveIcon}>✓</span>
+              </div>
+              <h2 className={styles.modalTitle}>Approve Business</h2>
+              <p className={styles.modalText}>
+                Are you sure you want to approve <strong>{selectedBusiness?.businessName}</strong>?
+              </p>
+              <div className={styles.modalActions}>
+                <button
+                  className={styles.cancelButton}
+                  onClick={() => setShowApproveModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className={styles.confirmApproveButton}
+                  onClick={confirmApprove}
+                >
+                  Approve
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Reject Modal */}
         {showRejectModal && (
           <div className={styles.modalOverlay} onClick={() => setShowRejectModal(false)}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={styles.modalClose}
+                onClick={() => setShowRejectModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className={styles.modalIcon}>
+                <span className={styles.rejectIcon}>✕</span>
+              </div>
               <h2 className={styles.modalTitle}>Reject Business</h2>
               <p className={styles.modalText}>
                 You are about to reject <strong>{selectedBusiness?.businessName}</strong>.
