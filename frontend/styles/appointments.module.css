@@ -718,7 +718,8 @@
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-dayAppointmentsModal {
+/* Day Appointments Modal */
+.dayAppointmentsModal {
   background: white;
   border-radius: 20px;
   padding: 0;
