@@ -179,7 +179,8 @@ export default function DashboardPage() {
                     <div key={appointment.id} className={styles.appointmentItem}>
                       <div className={styles.appointmentLeft}>
                         <div className={styles.clientAvatar}>
-                          {appointment.client[0]?.toUpperCase() || 'C'}
+                          {appointment.client?.split(' ')[0]?.[0]?.toUpperCase() || ''}
+                          {appointment.client?.split(' ')[1]?.[0]?.toUpperCase() || appointment.client?.[1]?.toUpperCase() || ''}
                         </div>
                         <div className={styles.appointmentInfo}>
                           <p className={styles.serviceName}>{appointment.service} - {appointment.staff}</p>
@@ -206,7 +207,8 @@ export default function DashboardPage() {
                       <div key={member.id} className={styles.staffItem}>
                         <div className={styles.staffLeft}>
                           <div className={styles.staffAvatar}>
-                            {member.name[0]?.toUpperCase() || 'S'}
+                            {member.name?.split(' ')[0]?.[0]?.toUpperCase() || ''}
+                            {member.name?.split(' ')[1]?.[0]?.toUpperCase() || member.name?.[1]?.toUpperCase() || ''}
                           </div>
                           <p className={styles.staffName}>{member.name}</p>
                         </div>

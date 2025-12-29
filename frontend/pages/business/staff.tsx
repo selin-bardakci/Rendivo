@@ -458,31 +458,37 @@ export default function StaffManagementPage() {
             <div className={styles.modalBody}>
               <div className={styles.staffDetailHeader}>
                 <div className={styles.modalAvatar}>
-                  {selectedStaff.user?.firstName?.[0]}{selectedStaff.user?.lastName?.[0]}
+                  {selectedStaff.user?.firstName?.[0]?.toUpperCase() || ''}
+                  {selectedStaff.user?.lastName?.[0]?.toUpperCase() || ''}
                 </div>
                 <div>
-                  <h3 className={styles.staffName}>{selectedStaff.user?.fullName || 'Unknown'}</h3>
+                  <h3 className={styles.staffName}>
+                    {selectedStaff.user?.fullName || 
+                     (selectedStaff.user?.firstName && selectedStaff.user?.lastName 
+                       ? `${selectedStaff.user.firstName} ${selectedStaff.user.lastName}` 
+                       : 'Unknown Staff Member')}
+                  </h3>
                   <p className={styles.staffRole}>{selectedStaff.position || 'Staff Member'}</p>
                 </div>
               </div>
               <div className={styles.staffDetails}>
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Email:</span>
-                  <span className={styles.detailValue}>{selectedStaff.user?.email || 'N/A'}</span>
+                  <span className={styles.detailLabel}>Email Address</span>
+                  <span className={styles.detailValue}>{selectedStaff.user?.email || 'Not provided'}</span>
                 </div>
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Phone:</span>
-                  <span className={styles.detailValue}>{selectedStaff.user?.phone || 'N/A'}</span>
+                  <span className={styles.detailLabel}>Phone Number</span>
+                  <span className={styles.detailValue}>{selectedStaff.user?.phone || 'Not provided'}</span>
                 </div>
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Status:</span>
+                  <span className={styles.detailLabel}>Employment Status</span>
                   <span className={`${styles.statusBadge} ${selectedStaff.isActive ? styles.statusActive : styles.statusInactive}`}>
                     <span className={styles.statusDot}></span>
                     {selectedStaff.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Joined:</span>
+                  <span className={styles.detailLabel}>Member Since</span>
                   <span className={styles.detailValue}>
                     {new Date(selectedStaff.joinedAt).toLocaleDateString('en-US', { 
                       year: 'numeric', 
