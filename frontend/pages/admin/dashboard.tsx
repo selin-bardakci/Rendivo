@@ -107,7 +107,7 @@ export default function AdminDashboard() {
     return (
       <Layout>
         <div className={styles.container}>
-          <LoadingSpinner text=\"Loading dashboard\" />
+          <LoadingSpinner text="Loading dashboard" />
         </div>
       </Layout>
     )
