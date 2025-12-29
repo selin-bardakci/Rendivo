@@ -44,7 +44,16 @@ export default function AppointmentsPage() {
     fetchAppointments()
   }, [user, router.query])
 
-  const upcomingBookings = appointments.filter(a => a.status === 'pending' || a.status === 'confirmed').length
+  // Check if appointment is in the past
+  const isAppointmentPast = (appointment: any) => {
+    const now = new Date()
+    const appointmentDateTime = new Date(`${appointment.appointmentDate}T${appointment.startTime}`)
+    return appointmentDateTime < now
+  }
+
+  const upcomingBookings = appointments.filter(a => 
+    (a.status === 'pending' || a.status === 'confirmed') && !isAppointmentPast(a)
+  ).length
   const totalBookings = appointments.length
 
   const appointmentDates = appointments
@@ -335,25 +344,34 @@ export default function AppointmentsPage() {
                             <span>{timeRange}</span>
                           </div>
                         </div>
-                        <div className={styles.statusBadge} data-status={appointment.status}>
-                          {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                        <div className={styles.statusBadge} data-status={
+                          isAppointmentPast(appointment) && appointment.status === 'confirmed' 
+                            ? 'completed' 
+                            : appointment.status
+                        }>
+                          {isAppointmentPast(appointment) && appointment.status === 'confirmed'
+                            ? 'Completed'
+                            : appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)
+                          }
                         </div>
                       </div>
                       <div className={styles.appointmentActions}>
-                        <button 
-                          className={`${styles.actionButton} ${styles.rescheduleButton}`}
-                          onClick={() => handleReschedule(appointment.id)}
-                          disabled={appointment.status === 'cancelled'}
-                        >
-                          Reschedule
-                        </button>
-                        <button 
-                          className={`${styles.actionButton} ${styles.cancelButton}`}
-                          onClick={() => handleCancel(appointment.id)}
-                          disabled={appointment.status === 'cancelled'}
-                        >
-                          Cancel
-                        </button>
+                        {!isAppointmentPast(appointment) && appointment.status !== 'cancelled' && (
+                          <>
+                            <button 
+                              className={`${styles.actionButton} ${styles.rescheduleButton}`}
+                              onClick={() => handleReschedule(appointment.id)}
+                            >
+                              Reschedule
+                            </button>
+                            <button 
+                              className={`${styles.actionButton} ${styles.cancelButton}`}
+                              onClick={() => handleCancel(appointment.id)}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   )})}
