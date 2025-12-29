@@ -270,6 +270,44 @@
   padding: 16px 24px;
 }
 
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(223, 132, 220, 0.1), rgba(214, 109, 217, 0.15));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  color: var(--color-primary);
+}
+
+.emptyTitle {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #181117;
+  margin: 0 0 12px 0;
+}
+
+.emptyText {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #886385;
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0;
+}
+
 .nameCell {
   display: flex;
   align-items: center;
