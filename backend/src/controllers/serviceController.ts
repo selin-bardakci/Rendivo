@@ -4,7 +4,7 @@ import { Service, Business } from '../models';
 import { getAllPredefinedServices, getServicesForCategory } from '../constants/serviceTypes';
 import { Op } from 'sequelize';
 
-// Get all unique service names (predefined + custom "Other" services)
+// Get all unique service names (predefined + custom "Other" services) - Public
 export const getAllUniqueServices = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const { businessType } = req.query;
@@ -55,6 +55,75 @@ export const getAllUniqueServices = async (req: AuthRequest, res: Response): Pro
   } catch (error: any) {
     console.error('Get all unique services error:', error);
     res.status(500).json({ message: 'Error fetching services', error: error.message });
+  }
+};
+
+// Get available service types for business owner's category (predefined + custom) - Protected
+export const getAvailableServiceTypes = async (req: AuthRequest, res: Response): Promise<Response | void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Find business owned by this user
+    const business = await Business.findOne({ 
+      where: { ownerId: userId, isActive: true },
+      attributes: ['id', 'businessType']
+    });
+
+    if (!business) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    const businessType = business.businessType;
+    
+    if (!businessType) {
+      return res.status(400).json({ message: 'Business type not set' });
+    }
+    
+    // Get predefined services for this category (excluding "Other")
+    const predefinedServices = getServicesForCategory(businessType).filter(s => s !== 'Other');
+    
+    // Get unique custom service names from other businesses in same category
+    const customServices = await Service.findAll({
+      attributes: ['name'],
+      where: {
+        isActive: true,
+        name: {
+          [Op.notIn]: [...predefinedServices, 'Other']
+        }
+      },
+      include: [{
+        model: Business,
+        as: 'business',
+        attributes: [],
+        where: { 
+          businessType: businessType,
+          isActive: true,
+          approvalStatus: 'approved'
+        },
+        required: true
+      }],
+      group: ['Service.name'],
+      raw: true
+    });
+
+    const customServiceNames = customServices.map((s: any) => s.name);
+    
+    // Combine predefined, custom, and "Other" at the end
+    const allServices = [...predefinedServices, ...customServiceNames, 'Other'].sort((a, b) => {
+      // Keep "Other" at the end
+      if (a === 'Other') return 1;
+      if (b === 'Other') return -1;
+      return a.localeCompare(b);
+    });
+    
+    res.json(allServices);
+  } catch (error: any) {
+    console.error('Get available service types error:', error);
+    res.status(500).json({ message: 'Error fetching service types', error: error.message });
   }
 };
 

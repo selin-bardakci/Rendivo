@@ -2,6 +2,7 @@ import express from 'express';
 import { authenticate } from '../middleware/auth';
 import {
   getAllUniqueServices,
+  getAvailableServiceTypes,
   getBusinessServices,
   getOwnerServices,
   createService,
@@ -16,6 +17,7 @@ router.get('/services/all-unique', getAllUniqueServices);
 router.get('/businesses/:businessId/services', getBusinessServices);
 
 // Protected routes (Business owner)
+router.get('/services/available-types', authenticate, getAvailableServiceTypes);
 router.get('/services', authenticate, getOwnerServices);
 router.post('/services', authenticate, createService);
 router.put('/services/:id', authenticate, updateService);

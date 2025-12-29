@@ -5,7 +5,6 @@ import Layout from '../../components/Layout'
 import styles from '../../styles/businessDashboard.module.css'
 import { serviceApi } from '../../lib/api'
 import { getCurrentUser } from '../../lib/auth'
-import { SERVICE_TYPES_BY_CATEGORY, getServicesForCategory } from '../../constants/serviceTypes'
 
 interface Service {
   id: number
@@ -36,16 +35,7 @@ export default function BusinessServices() {
   })
   const [showServiceDropdown, setShowServiceDropdown] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-
-  // Get available services based on business category
-  const availableServices = business?.businessType 
-    ? getServicesForCategory(business.businessType)
-    : ['Other']
-  
-  // Debug log
-  console.log('Business:', business)
-  console.log('Business Type:', business?.businessType)
-  console.log('Available Services:', availableServices)
+  const [availableServices, setAvailableServices] = useState<string[]>(['Other'])
 
   // Fetch user and services on mount
   useEffect(() => {
@@ -85,10 +75,25 @@ export default function BusinessServices() {
       // Store business info for category-based services
       setBusiness(businessCheck.data?.business)
       
+      // Fetch available service types
+      fetchAvailableServiceTypes()
+      
       fetchServices()
     } catch (err: any) {
       console.error('Error checking approval:', err)
       fetchServices() // Try anyway if check fails
+    }
+  }
+
+  const fetchAvailableServiceTypes = async () => {
+    try {
+      const apiModule = await import('../../lib/api')
+      const response = await apiModule.default.get('/services/available-types')
+      setAvailableServices(response.data)
+    } catch (err: any) {
+      console.error('Error fetching available service types:', err)
+      // Fallback to predefined services only
+      setAvailableServices(['Other'])
     }
   }
 
@@ -153,12 +158,8 @@ export default function BusinessServices() {
   const handleEditService = (service: Service) => {
     setEditingService(service)
     
-    // Check if service name matches predefined ones
-    const categoryServices = business?.businessType 
-      ? getServicesForCategory(business.businessType)
-      : ['Other']
-    
-    if (categoryServices.includes(service.name)) {
+    // Check if service name is in available services list
+    if (availableServices.includes(service.name)) {
       setSelectedServiceType(service.name)
       setCustomServiceName('')
     } else {
