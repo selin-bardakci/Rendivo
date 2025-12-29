@@ -175,6 +175,9 @@ export const getBusinessDashboard = async (req: AuthRequest, res: Response): Pro
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    const next7Days = new Date(today);
+    next7Days.setDate(today.getDate() + 7);
+
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
@@ -185,11 +188,14 @@ export const getBusinessDashboard = async (req: AuthRequest, res: Response): Pro
     lastWeekStart.setDate(lastWeekStart.getDate() - 7);
     const lastWeekEnd = new Date(startOfWeek);
 
-    // Get upcoming appointments (today and future)
+    // Get upcoming appointments (next 7 days only)
     const upcomingAppointments = await Appointment.findAll({
       where: {
         businessId,
-        appointmentDate: { [Op.gte]: today },
+        appointmentDate: { 
+          [Op.gte]: today,
+          [Op.lt]: next7Days
+        },
         status: { [Op.in]: ['pending', 'confirmed'] },
       },
       include: [
@@ -218,14 +224,6 @@ export const getBusinessDashboard = async (req: AuthRequest, res: Response): Pro
         },
       ],
       order: [['appointmentDate', 'ASC'], ['startTime', 'ASC']],
-    });
-
-    // Count total appointments (all time)
-    const totalAppointments = await Appointment.count({
-      where: {
-        businessId,
-        status: { [Op.in]: ['pending', 'confirmed', 'completed'] },
-      },
     });
 
     // Count today's appointments
@@ -347,10 +345,27 @@ export const getBusinessDashboard = async (req: AuthRequest, res: Response): Pro
       type: QueryTypes.SELECT,
     });
 
-    // Calculate percentage changes
-    const appointmentChange = yesterdayCount > 0 ? ((todayCount - yesterdayCount) / yesterdayCount * 100).toFixed(1) : '0';
-    const clientChange = lastWeekClients > 0 ? ((thisWeekClients - lastWeekClients) / lastWeekClients * 100).toFixed(1) : '0';
-    const revenueChange = yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(1) : '0';
+    // Calculate percentage changes with better handling for zero values
+    let appointmentChange = '0';
+    if (yesterdayCount === 0 && todayCount > 0) {
+      appointmentChange = '+100'; // New appointments from zero
+    } else if (yesterdayCount > 0) {
+      appointmentChange = ((todayCount - yesterdayCount) / yesterdayCount * 100).toFixed(1);
+    }
+
+    let clientChange = '0';
+    if (lastWeekClients === 0 && thisWeekClients > 0) {
+      clientChange = '+100';
+    } else if (lastWeekClients > 0) {
+      clientChange = ((thisWeekClients - lastWeekClients) / lastWeekClients * 100).toFixed(1);
+    }
+
+    let revenueChange = '0';
+    if (yesterdayRevenue === 0 && todayRevenue > 0) {
+      revenueChange = '+100';
+    } else if (yesterdayRevenue > 0) {
+      revenueChange = ((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(1);
+    }
 
     res.json({
       business: {
@@ -360,7 +375,7 @@ export const getBusinessDashboard = async (req: AuthRequest, res: Response): Pro
         approvalStatus: business.approvalStatus,
       },
       stats: {
-        todayAppointments: totalAppointments,
+        todayAppointments: todayCount, // Fixed: should be today's count, not all time
         appointmentChange: `${parseFloat(appointmentChange) > 0 ? '+' : ''}${appointmentChange}`,
         newClientsThisWeek: thisWeekClients,
         clientChange: `${parseFloat(clientChange) > 0 ? '+' : ''}${clientChange}`,

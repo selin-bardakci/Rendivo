@@ -301,7 +301,22 @@ export const getBusinessAppointments = async (req: AuthRequest, res: Response): 
       order: [['appointmentDate', 'DESC'], ['startTime', 'DESC']],
     });
 
-    res.json(appointments);
+    // Update status to 'completed' for past appointments that are still 'confirmed'
+    const now = new Date();
+
+    const updatedAppointments = appointments.map(apt => {
+      // Combine appointment date and end time to check if it's truly past
+      const appointmentDateTime = new Date(`${apt.appointmentDate}T${apt.endTime}`);
+      
+      // If appointment end time has passed and status is confirmed, mark as completed
+      if (appointmentDateTime < now && apt.status === 'confirmed') {
+        return { ...apt.toJSON(), status: 'completed' };
+      }
+      
+      return apt.toJSON();
+    });
+
+    res.json(updatedAppointments);
   } catch (error: any) {
     console.error('Get business appointments error:', error);
     res.status(500).json({ message: 'Error fetching appointments', error: error.message });

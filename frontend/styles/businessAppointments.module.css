@@ -302,6 +302,11 @@
   color: #0d7d43;
 }
 
+.statusBadge.completed {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
 .statusBadge.cancelled {
   background: #ffd6d6;
   color: #c41e3a;
