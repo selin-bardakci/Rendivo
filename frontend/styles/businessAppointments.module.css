@@ -542,6 +542,12 @@
   transform: translateY(-1px);
 }
 
+.deleteCancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .deleteConfirmBtn {
   flex: 1;
   padding: 14px 24px;
@@ -560,6 +566,13 @@
   background: #b91c1c;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.deleteConfirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Error State */

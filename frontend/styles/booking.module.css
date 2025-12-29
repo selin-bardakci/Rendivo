@@ -599,6 +599,14 @@
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
 }
 
+.confirmButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {

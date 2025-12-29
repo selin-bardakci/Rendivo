@@ -54,6 +54,7 @@ export default function BusinessAppointmentsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [cancellingId, setCancellingId] = useState<number | null>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
 
   useEffect(() => {
     const user = getCurrentUser()
@@ -132,9 +133,10 @@ export default function BusinessAppointmentsPage() {
   }
 
   const handleCancelConfirm = async () => {
-    if (!cancellingId) return
+    if (!cancellingId || cancelling) return
 
     try {
+      setCancelling(true)
       await api.delete(`/appointments/${cancellingId}`)
       setAppointments(appointments.map(apt => 
         apt.id === cancellingId ? { ...apt, status: 'cancelled' } : apt
@@ -144,6 +146,8 @@ export default function BusinessAppointmentsPage() {
     } catch (err: any) {
       console.error('Error cancelling appointment:', err)
       alert(err?.response?.data?.message || 'Failed to cancel appointment')
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -402,14 +406,16 @@ export default function BusinessAppointmentsPage() {
                   <button 
                     className={styles.deleteCancelBtn}
                     onClick={() => setShowCancelModal(false)}
+                    disabled={cancelling}
                   >
                     Keep Appointment
                   </button>
                   <button 
                     className={styles.deleteConfirmBtn}
                     onClick={handleCancelConfirm}
+                    disabled={cancelling}
                   >
-                    Yes, Cancel It
+                    {cancelling ? 'Cancelling...' : 'Yes, Cancel It'}
                   </button>
                 </div>
               </div>

@@ -17,6 +17,7 @@ export default function AppointmentsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null)
+  const [cancelling, setCancelling] = useState(false)
   const [showDayAppointments, setShowDayAppointments] = useState(false)
   const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null)
 
@@ -72,9 +73,10 @@ export default function AppointmentsPage() {
   }
 
   const handleCancelConfirm = async () => {
-    if (!appointmentToCancel) return
+    if (!appointmentToCancel || cancelling) return
     
     try {
+      setCancelling(true)
       await appointmentApi.cancel(appointmentToCancel)
       // Refresh appointments
       const response = await appointmentApi.getAll()
@@ -84,6 +86,8 @@ export default function AppointmentsPage() {
     } catch (err) {
       console.error('Error cancelling appointment:', err)
       alert('Failed to cancel appointment')
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -416,14 +420,16 @@ export default function AppointmentsPage() {
               <button 
                 className={styles.modalButtonSecondary}
                 onClick={() => setShowCancelModal(false)}
+                disabled={cancelling}
               >
                 Keep Appointment
               </button>
               <button 
                 className={styles.modalButtonDanger}
                 onClick={handleCancelConfirm}
+                disabled={cancelling}
               >
-                Yes, Cancel
+                {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
               </button>
             </div>
           </div>
